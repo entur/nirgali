@@ -1,0 +1,49 @@
+{
+  "name": "3psx",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@entur/component-library": "^0.21.1",
+    "apollo-boost": "^0.4.3",
+    "apollo-cache-inmemory": "^1.6.2",
+    "apollo-client": "^2.6.3",
+    "apollo-fetch": "^0.7.0",
+    "apollo-link-http": "^1.5.15",
+    "bootstrap": "^4.3.1",
+    "firebase": "^6.2.4",
+    "firebase-admin": "^8.2.0",
+    "graphql": "^14.3.1",
+    "graphql-tag": "^2.10.1",
+    "jquery": "^3.4.1",
+    "keycloak-js": "3.4.3",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-flatpickr": "3.9.0",
+    "react-router-dom": "^5.0.1",
+    "react-scripts": "3.0.1",
+    "react-select": "3.0.4",
+    "react-super-responsive-table": "^5.0.0",
+    "xml-js": "1.6.10"
+  },
+  "scripts": {
+    "start": "PORT=3001 react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
