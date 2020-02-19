@@ -61,7 +61,7 @@ exports.xml = functions.https.onRequest((request, response) => {
 
             var situations = {PtSituationElement: []};
             for (var i = 0; i < doc.data().PtSituationElement.length; i++) {
-                if(Date.parse(doc.data().PtSituationElement[i].ValidityPeriod.EndTime) < Date.parse(dateTime) || doc.data().PtSituationElement[i].Progress === 'closed'){
+                if(Date.parse(doc.data().PtSituationElement[i].ValidityPeriod.EndTime) < Date.parse(dateTime)){
                     console.log('ignore');
                 }else{
                     var swapPlaces = doc.data().PtSituationElement[i];
