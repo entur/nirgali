@@ -20,9 +20,9 @@ const getAuthorities = () => {
 const getLines = (authorities) => {
     const apolloFetch = createApolloFetch({ uri: URI, headers: { 'ET-client-Name': 'entur - deviation-messages' } });
     const query = `
-      { 
-        lines(authorities: "${authorities}") { 
-          name 
+      {
+        lines(authorities: "${authorities}") {
+          name
           id
           quays {
             id
@@ -31,7 +31,7 @@ const getLines = (authorities) => {
               id
             }
           }
-        } 
+        }
       } `;
 
     return apolloFetch({ query })
@@ -39,11 +39,11 @@ const getLines = (authorities) => {
       .then(response => response);
 };
 
-const getDepartures = (authorities, line, date) => {
+const getDepartures = (line, date) => {
     const apolloFetch = createApolloFetch({ uri: URI, headers: { 'ET-client-Name': 'entur - deviation-messages' } });
     const query = `
-      { 
-        serviceJourneys(authorities: "${authorities}", lines: "${line}", activeDates: "${date}") { 
+      {
+        serviceJourneys(lines: "${line}", activeDates: "${date}") {
           id
           estimatedCalls(date:"${date}") {
             aimedDepartureTime

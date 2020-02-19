@@ -282,7 +282,7 @@ class Register extends React.Component {
         const date = document.getElementById("date").value;
         const line = this.state.chosenLine;
 
-        api.getDepartures(this.props.orgID, line, date)
+        api.getDepartures(line, date)
             .then(response => {
                 this.setState({
                     departures: response.data.serviceJourneys,
