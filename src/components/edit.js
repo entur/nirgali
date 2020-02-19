@@ -1,6 +1,8 @@
 import React from "react";
 import Flatpickr from "react-flatpickr";
 import { Button } from '@entur/component-library';
+import format from 'date-fns/format';
+import addHours from 'date-fns/addHours';
 
 class Edit extends React.Component {
 
@@ -11,16 +13,10 @@ class Edit extends React.Component {
     };
 
     componentDidMount() {
-        let date = new Date().getDate(); if(date < 10){ date = "0"+date }
-        let month = new Date().getMonth() + 1; if(month < 10){ month = "0"+month }
-        let year = new Date().getFullYear();
-        let hours = new Date().getHours(); if(hours < 10){ hours = "0"+hours }
-        let min = new Date().getMinutes(); if(min < 10){ min = "0"+min }
-        let sec = new Date().getSeconds(); if(sec < 10){ sec = "0"+sec }
-
+        const now = new Date();
         this.setState({
-            date: year + '-' + month + '-' + date +'T' + hours + ':' + min + ':' + sec+"+02:00",
-            dateShort: year + '-' + month + '-' + date +'T' + hours + ':' + min,
+            date: format(now, `yyyy-MM-dd'T'HH:mm:ss+02:00`),
+            dateShort: format(now, `yyyy-MM-dd'T'HH:mm`)
         });
     }
 
@@ -64,6 +60,7 @@ class Edit extends React.Component {
 
     setProgressToClosed = () => {
         this.props.data.PtSituationElement[(parseInt(this.state.id))].Progress = 'closed';
+        this.props.data.PtSituationElement[(parseInt(this.state.id))].ValidityPeriod.EndTime = format(addHours(new Date(), 5), `yyyy-MM-dd'T'HH:mm:ss+02:00`);
         this.props.firebase.collection(this.props.organization).doc(this.props.docID).set( this.props.data );
         this.props.history.push('/');
     };
