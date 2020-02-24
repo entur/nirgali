@@ -6,9 +6,10 @@ import renderIndex from '../index'
 const minValiditySeconds = 60;
 
 // How often should lib check for valid token
-const refreshRateMs = 10000;
+const refreshRateMs = 60 * 1000;
 
-const initAuth = () => {
+const initAuth = (onSuccessfulAuth) => {
+
     const kc = new Keycloak('/key.json');
     const options = { checkLoginIframe: false };
     kc.init(options).success(authenticated => {
@@ -17,6 +18,7 @@ const initAuth = () => {
             setInterval(() => {
                 kc.updateToken(minValiditySeconds).error(() => kc.logout());
                 token.save(kc.token);
+                onSuccessfulAuth(kc.token);
             }, refreshRateMs);
             const userInfo = {
                 logoutUrl: kc.createLogoutUrl(options),
@@ -26,7 +28,10 @@ const initAuth = () => {
                 username: kc.idTokenParsed.preferred_username,
                 roles: kc.tokenParsed.roles,
             };
-            renderIndex(userInfo);
+
+            onSuccessfulAuth(kc.token).then(() => {
+                renderIndex(userInfo);
+            });
         } else {
             kc.login();
         }

@@ -23,6 +23,7 @@ var config = {
 
 const firebase = require("firebase/app");
 require("firebase/firestore");
+require("firebase/auth");
 
 firebase.initializeApp(config);
 var db = firebase.firestore();
@@ -57,10 +58,13 @@ class App extends React.Component {
             window.location.href = this.props.userInfo.logoutUrl;
         }
         for (let i = 0; i < roles.length; i++) {
-            if(roles[i].includes('editSX')) {
-                setRoles.push(roles[i].split("\"")[7]);
+            const {r: role, o: org} = JSON.parse(roles[i]);
+            if (role === 'editSX') {
+                setRoles.push(org);
             }
         }
+
+        // TODO: the following logic does not account for several authorities per codespace
         api.getAuthorities()
           .then(response => {
               const authorities = response.data.authorities;
@@ -80,6 +84,7 @@ class App extends React.Component {
 
     setDeviationsAndLines(selectedOrganization) {
 
+        // TODO add error handling
         db.collection(selectedOrganization).get().then((querySnapshot) => {
             for (let i = 0; i < querySnapshot.docs.length; i++) {
                 if(querySnapshot.docs[i].id === 'Issues'){
@@ -108,7 +113,7 @@ class App extends React.Component {
               }else{
                   console.log("Could not find any lines for this organization");
               }
-          })
+          });
     }
 
     render() {
@@ -153,6 +158,14 @@ const renderIndex = (userInfo) => {
     );
 };
 
-auth.initAuth();
+auth.initAuth(token => {
+    return fetch('https://us-central1-deviation-messages.cloudfunctions.net/auth/firebase', {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    .then(resp => resp.json())
+    .then(({ firebaseToken }) => firebase.auth().signInWithCustomToken(firebaseToken));
+});
 
 export default renderIndex;

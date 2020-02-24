@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function hasCorrectRole(authority) {
+      return request.auth.token.editSX != null && request.auth.token.editSX[authority] == true;
+    }
+
+    match /GOA:Authority:GOA/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if hasCorrectRole('GOA');
+    }
+    match /SOF:Authority:1/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if hasCorrectRole('SOF');
+    }
+  }
+}
