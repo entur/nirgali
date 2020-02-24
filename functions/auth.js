@@ -11,6 +11,14 @@ const AUTH_DOMAIN = 'kc-dev.devstage.entur.io';
 const AUTH_REALM = 'rutebanken';
 const AUTH_ALGORITHM = 'RS256';
 
+const transformRoles = (roles, claim) => roles
+  .map(JSON.parse)
+  .filter(({r: role}) => role === claim)
+  .reduce((acc, {o: org}) => {
+    acc[org] = true;
+    return acc;
+  }, {});
+
 exports.auth = function(firebaseAdmin) {
   const app = express();
   app.use(bodyParser.json());
@@ -24,7 +32,7 @@ exports.auth = function(firebaseAdmin) {
       jwksRequestsPerMinute: 5,
       jwksUri: `https://${AUTH_DOMAIN}/auth/realms/${AUTH_REALM}/protocol/openid-connect/certs`
     }),
-    issuer: `https://${AUTH_DOMAIN}/auth/realms/rutebanken`,
+    issuer: `https://${AUTH_DOMAIN}/auth/realms/${AUTH_REALM}`,
     algorithm: AUTH_ALGORITHM
   });
 
@@ -36,10 +44,7 @@ exports.auth = function(firebaseAdmin) {
     } = req.user;
 
     const additionalClaims = {
-      editSX: roles.map(JSON.parse).filter(({r}) => r === 'editSX').reduce((a, {o}) => {
-        a[o] = true;
-        return a;
-      }, {})
+      editSX: transformRoles(roles, 'editSX')
     };
 
     firebaseAdmin.auth().createCustomToken(uid, additionalClaims)
