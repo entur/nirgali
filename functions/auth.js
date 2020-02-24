@@ -35,7 +35,14 @@ exports.auth = function(firebaseAdmin) {
       roles
     } = req.user;
 
-    firebaseAdmin.auth().createCustomToken(uid, { roles })
+    const additionalClaims = {
+      editSX: roles.map(JSON.parse).filter(({r}) => r === 'editSX').reduce((a, {o}) => {
+        a[o] = true;
+        return a;
+      }, {})
+    };
+
+    firebaseAdmin.auth().createCustomToken(uid, additionalClaims)
       .then(customToken =>
         res.json({firebaseToken: customToken})
       )
