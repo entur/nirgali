@@ -64,9 +64,6 @@ class App extends React.Component {
         const organizations = response.data.authorities
             .filter(authority => allowedCodespaces.includes(authority.id.split(':')[0]));
 
-
-        console.log({organizations});
-
         this.setState({
             organizations: organizations.map(({ id }) => id),
             organizationsName: organizations.map(({ name }) => name),
