@@ -46,46 +46,38 @@ class App extends React.Component {
         this.setState({
             selectedOrganization: selectedOrg,
         },
-          () => this.setDeviationsAndLines(selectedOrg));
+          () => this.setDeviationsAndLines());
     };
 
-    setOrganizations() {
-        let roles = this.props.userInfo.roles;
-        let setRoles = [];
-        let orgName = [];
-        if(!roles){
+    async setOrganizations() {
+        if(!this.props.userInfo.roles){
             window.alert("You are not assigned to a company");
             window.location.href = this.props.userInfo.logoutUrl;
         }
-        for (let i = 0; i < roles.length; i++) {
-            const {r: role, o: org} = JSON.parse(roles[i]);
-            if (role === 'editSX') {
-                setRoles.push(org);
-            }
-        }
 
-        // TODO: the following logic does not account for several authorities per codespace
-        api.getAuthorities()
-          .then(response => {
-              const authorities = response.data.authorities;
-              for (let i = 0; i < setRoles.length; i++) {
-                  for (let j = 0; j < authorities.length; j++) {
-                      if(authorities[j].id.includes(setRoles[i])){
-                          setRoles[i] = authorities[j].id;
-                          orgName[i] = authorities[j].name;
-                      }
-                  }
-              }
-              this.setState(
-                { organizations: setRoles, organizationsName: orgName, selectedOrganization: setRoles[0] },
-                ()  => this.setDeviationsAndLines(this.state.organizations[0]));
-          });
+        const allowedCodespaces = this.props.userInfo.roles
+            .map(JSON.parse)
+            .filter(({ r: role }) => role === 'editSX')
+            .map(({ o: org }) => org);
+
+        const response = await api.getAuthorities();
+        const organizations = response.data.authorities
+            .filter(authority => allowedCodespaces.includes(authority.id.split(':')[0]));
+
+
+        console.log({organizations});
+
+        this.setState({
+            organizations: organizations.map(({ id }) => id),
+            organizationsName: organizations.map(({ name }) => name),
+            selectedOrganization: organizations[0].id
+        }, ()  => this.setDeviationsAndLines());
     }
 
-    setDeviationsAndLines(selectedOrganization) {
+    setDeviationsAndLines() {
 
         // TODO add error handling
-        db.collection(selectedOrganization).get().then((querySnapshot) => {
+        db.collection(this.state.selectedOrganization).get().then((querySnapshot) => {
             for (let i = 0; i < querySnapshot.docs.length; i++) {
                 if(querySnapshot.docs[i].id === 'Issues'){
                     if(querySnapshot.docs[i].data().PtSituationElement){
@@ -103,7 +95,7 @@ class App extends React.Component {
             };
         });
 
-        api.getLines(selectedOrganization)
+        api.getLines(this.state.selectedOrganization)
           .then(response => {
               console.log(response.data);
               if(response.data){
