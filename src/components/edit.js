@@ -56,7 +56,7 @@ class Edit extends React.Component {
         const authority = this.props.organization;
         const id = this.props.issue.id;
 
-        await this.props.firebase
+        this.props.firebase
             .doc(`codespaces/${codespace}/authorities/${authority}/messages/${id}`)
             .set(this.props.issue.data)
             .then(() => this.props.onSubmit())
