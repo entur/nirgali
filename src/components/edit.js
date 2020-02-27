@@ -59,7 +59,6 @@ class Edit extends React.Component {
         this.props.firebase
             .doc(`codespaces/${codespace}/authorities/${authority}/messages/${id}`)
             .set(this.props.issue.data)
-            .then(() => this.props.onSubmit())
             .then(() => this.props.history.push('/'));
     };
 
@@ -85,7 +84,6 @@ class Edit extends React.Component {
                     'ValidityPeriod.EndTime'
                 ]
             })
-            .then(() => this.props.onSubmit())
             .then(() => this.props.history.push('/'));
     };
 

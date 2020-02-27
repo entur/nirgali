@@ -148,7 +148,6 @@ class Register extends React.Component {
         }
 
         this.props.firebase.collection(`codespaces/${this.props.organization.split(':')[0]}/authorities/${this.props.organization}/messages`).doc().set(newIssue);
-        this.props.onSubmit();
         this.props.history.push('/');
     };
 

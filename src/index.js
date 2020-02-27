@@ -76,14 +76,19 @@ class App extends React.Component {
     }
 
     getMessages = async () => {
-        const querySnapshot = await db.collection(`codespaces/${this.state.selectedOrganization.split(':')[0]}/authorities/${this.state.selectedOrganization}/messages`).get();
+        const codespace = this.state.selectedOrganization.split(':')[0];
+        const authority = this.state.selectedOrganization;
+        db.collection(`codespaces/${codespace}/authorities/${authority}/messages`)
+            .onSnapshot(this.onMessagesUpdate);
+    }
 
+    onMessagesUpdate = (querySnapshot) => {
         this.setState({
             messages: querySnapshot.size > 0 ? querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 data: doc.data()
-            })) : [],
-        })
+            })) : []
+        });
     }
 
     getLines = async () => {
@@ -114,13 +119,11 @@ class App extends React.Component {
                                                       messages={this.state.messages} />} />
                     <Route path="/edit/:id?"
                            render={props => <Edit {...props}
-                                                  onSubmit={this.getMessagesAndLines}
                                                   issue={this.state.messages.find(({id}) => id === props.match.params.id)}
                                                   firebase={db}
                                                   organization={this.state.selectedOrganization} />} />
                     <Route path="/register"
                            render={props => <Register {...props}
-                                                      onSubmit={this.getMessagesAndLines}
                                                       firebase={db}
                                                       lines={this.state.lines}
                                                       organization={this.state.selectedOrganization} />} />
