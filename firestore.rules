@@ -10,16 +10,6 @@ service cloud.firestore {
       allow write: if hasCorrectRole(col.split(':')[0]);
     }
 
-    match /messages/all/{col}/{document=**} {
-      allow read: if request.auth != null;
-      allow write: if hasCorrectRole(col.split(':')[0]);
-    }
-
-    match /authorities/{col}/{document=**} {
-      allow read: if request.auth != null;
-      allow write: if hasCorrectRole(col.split(':')[0]);
-    }
-
     match /codespaces/{codespace}/{document=**} {
       allow read: if request.auth != null;
       allow write: if hasCorrectRole(codespace);
