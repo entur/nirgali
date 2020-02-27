@@ -29,60 +29,18 @@ class Register extends React.Component {
         };
 
     componentDidMount() {
-        var that = this;
         var date = new Date().getDate(); if(date < 10){ date = "0"+date }
         var month = new Date().getMonth() + 1; if(month < 10){ month = "0"+month }
         var year = new Date().getFullYear();
         var hours = new Date().getHours(); if(hours < 10){ hours = "0"+hours }
         var min = new Date().getMinutes(); if(min < 10){ min = "0"+min }
         var sec = new Date().getSeconds(); if(sec < 10){ sec = "0"+sec }
-        this.props.firebase.collection(this.props.organization).get().then((querySnapshot) => {
-            that.setState({
-                date: `${year}-${month}-${date}T${hours}:${min}:${sec}.000+02:00`,
-                dateShort: `${year}-${month}-${date}T${hours}:${min}`,
-                counter: parseInt(querySnapshot.docs[1].data().counter) + 1
-            });
-        })
+
+        this.setState({
+            date: `${year}-${month}-${date}T${hours}:${min}:${sec}.000+02:00`,
+            dateShort: `${year}-${month}-${date}T${hours}:${min}`
+        });
     }
-
-    getIssuesCount = () => {
-        this.props.firebase.collection(this.props.organization).doc("SituationNumber").set({counter: this.state.counter});
-        return this.state.counter;
-    };
-
-    createNewIssue = event => {
-        return {
-            CreationTime: this.state.date,
-            ParticipantRef: this.props.organization.split(":")[0],
-            SituationNumber: this.props.organization.split(":")[0] + ":SituationNumber:" + this.getIssuesCount(),
-            Source: {
-                SourceType: "directReport",
-            },
-            Progress: "open",
-            ValidityPeriod: null,
-            Severity: 'normal',
-            ReportType: event.target.ReportType.value,
-            Summary: {
-                _attributes: {
-                    'xml:lang': 'NO'
-                },
-                _text: event.target.oppsummering.value,
-            },
-            Description: {
-                _attributes: {
-                    'xml:lang': 'NO'
-                },
-                _text: event.target.beskrivelse.value,
-            },
-            Advice: {
-                _attributes: {
-                    'xml:lang': 'NO'
-                },
-                _text: event.target.forslag.value,
-            },
-            Affects: [],
-        };
-    };
 
     createStops = () => {
         let stop = [];
@@ -138,28 +96,31 @@ class Register extends React.Component {
         this.props.history.push('/');
     };
 
-    handleSubmit = (event) => {
+    handleSubmit = async (event) => {
+        event.preventDefault();
 
-        const newIssue = this.createNewIssue(event);
-        if(event.target.beskrivelse.value === ''){
+        const target = event.target;
+
+        const newIssue = await this.createNewIssue(target);
+        if(target.beskrivelse.value === ''){
             delete newIssue.Description;
         }
 
         if(this.state.type === "departure"){
             newIssue.ValidityPeriod = {
-                StartTime: event.target.date.value+"T00:00:00+02:00",
-                EndTime: event.target.date.value+"T23:59:59+02:00"
+                StartTime: target.date.value+"T00:00:00+02:00",
+                EndTime: target.date.value+"T23:59:59+02:00"
             }
         }else{
-            if(event.target.to.value){
+            if(target.to.value){
                 newIssue.ValidityPeriod = {
-                    StartTime: event.target.from.value.replace(" ", "T")+":00+02:00",
-                    EndTime: event.target.to.value.replace(" ", "T")+":00+02:00"
+                    StartTime: target.from.value.replace(" ", "T")+":00+02:00",
+                    EndTime: target.to.value.replace(" ", "T")+":00+02:00"
                 }
             }
             else{
                 newIssue.ValidityPeriod = {
-                    StartTime: event.target.from.value.replace(" ", "T")+":00+02:00"}
+                    StartTime: target.from.value.replace(" ", "T")+":00+02:00"}
             }
         }
 
@@ -185,11 +146,69 @@ class Register extends React.Component {
                 newIssue.Affects = newAffect;
             }
         }
-        const tmp = this.props.data;
-        tmp.PtSituationElement.push(newIssue);
-        this.props.firebase.collection(this.props.organization).doc('Issues').set( tmp );
+
+        this.props.firebase.collection(`codespaces/${this.props.organization.split(':')[0]}/authorities/${this.props.organization}/messages`).doc().set(newIssue);
+        this.props.onSubmit();
         this.props.history.push('/');
     };
+
+    createNewIssue = async (target) => {
+        const count = await this.getNextSituationNumber();
+        return {
+            CreationTime: this.state.date,
+            ParticipantRef: this.props.organization.split(":")[0],
+            SituationNumber: this.props.organization.split(":")[0] + ":SituationNumber:" + count,
+            Source: {
+                SourceType: "directReport",
+            },
+            Progress: "open",
+            ValidityPeriod: null,
+            Severity: 'normal',
+            ReportType: target.ReportType.value,
+            Summary: {
+                _attributes: {
+                    'xml:lang': 'NO'
+                },
+                _text: target.oppsummering.value,
+            },
+            Description: {
+                _attributes: {
+                    'xml:lang': 'NO'
+                },
+                _text: target.beskrivelse.value,
+            },
+            Advice: {
+                _attributes: {
+                    'xml:lang': 'NO'
+                },
+                _text: target.forslag.value,
+            },
+            Affects: [],
+        };
+    };
+
+    getNextSituationNumber = () => {
+        const codespace = this.props.organization.split(':')[0];
+        const codespaceDocRef = this.props.firebase.doc(`codespaces/${codespace}`);
+        return this.props.firebase.runTransaction(this.getNextSituationNumberTransaction(codespaceDocRef));
+    };
+
+    getNextSituationNumberTransaction = codespaceDocRef => async transaction => {
+        const codespaceDoc = await transaction.get(codespaceDocRef);
+
+        if (!codespaceDoc.exists) {
+            await transaction.set(codespaceDocRef, {
+                nextSituationNumber: 2
+            });
+            return 1;
+        } else {
+            let nextSituationNumber = codespaceDoc.data().nextSituationNumber;
+            await transaction.update(codespaceDocRef, {
+                nextSituationNumber: nextSituationNumber + 1
+            });
+            return nextSituationNumber;
+        }
+    }
 
     handleChangeType = (event) =>{
         this.createStops();

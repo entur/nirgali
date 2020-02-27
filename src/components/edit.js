@@ -7,7 +7,7 @@ import addHours from 'date-fns/addHours';
 class Edit extends React.Component {
 
     state = {
-        id: this.props.match.params.deviationId,
+        id: this.props.match.params.id,
         date: '',
         dateShort: '',
     };
@@ -21,37 +21,46 @@ class Edit extends React.Component {
     }
 
     handleSubmit = (event) => {
-        this.props.data.PtSituationElement[(parseInt(this.state.id))].Progress = 'open';
-        this.props.data.PtSituationElement[(parseInt(this.state.id))].Summary['_text'] = event.target.oppsummering.value;
+        event.preventDefault();
+        this.props.issue.data.Progress = 'open';
+        this.props.issue.data.Summary['_text'] = event.target.oppsummering.value;
         if(event.target.beskrivelse.value !== ''){
-            this.props.data.PtSituationElement[(parseInt(this.state.id))]['Description'] = {
+            this.props.issue.data['Description'] = {
                 _attributes: { 'xml:lang': 'NO' },
                 _text: event.target.beskrivelse.value,
             }
         }else{
-            if(this.props.data.PtSituationElement[(parseInt(this.state.id))].Description){
-                delete this.props.data.PtSituationElement[(parseInt(this.state.id))].Description;
+            if(this.props.issue.data.Description){
+                delete this.props.issue.data.Description;
             }
         }
         if(event.target.forslag.value !== ''){
-            this.props.data.PtSituationElement[(parseInt(this.state.id))]['Advice'] = {
+            this.props.issue.data['Advice'] = {
                 _attributes: { 'xml:lang': 'NO' },
                 _text: event.target.forslag.value,
             }
         }else{
-            if(this.props.data.PtSituationElement[(parseInt(this.state.id))].Advice){
-                delete this.props.data.PtSituationElement[(parseInt(this.state.id))].Advice;
+            if(this.props.issue.data.Advice){
+                delete this.props.issue.data.Advice;
             }
         }
         if(event.target.from.value){
-            this.props.data.PtSituationElement[(parseInt(this.state.id))].ValidityPeriod.StartTime = event.target.from.value.replace(" ", "T")+":00+02:00";
+            this.props.issue.data.ValidityPeriod.StartTime = event.target.from.value.replace(" ", "T")+":00+02:00";
         }
         if(event.target.to.value){
-            this.props.data.PtSituationElement[(parseInt(this.state.id))].ValidityPeriod.EndTime = event.target.to.value.replace(" ", "T")+":00+02:00";
+            this.props.issue.data.ValidityPeriod.EndTime = event.target.to.value.replace(" ", "T")+":00+02:00";
         }
-        this.props.data.PtSituationElement[(parseInt(this.state.id))].ReportType = event.target.reportType.value;
-        this.props.firebase.collection(this.props.organization).doc('Issues').set( this.props.data );
-        this.props.history.push('/');
+        this.props.issue.data.ReportType = event.target.reportType.value;
+
+        const codespace = this.props.organization.split(':')[0];
+        const authority = this.props.organization;
+        const id = this.props.issue.id;
+
+        await this.props.firebase
+            .doc(`codespaces/${codespace}/authorities/${authority}/messages/${id}`)
+            .set(this.props.issue.data)
+            .then(() => this.props.onSubmit())
+            .then(() => this.props.history.push('/'));
     };
 
     handleClick = () => {
@@ -59,17 +68,32 @@ class Edit extends React.Component {
     };
 
     setProgressToClosed = () => {
-        this.props.data.PtSituationElement[(parseInt(this.state.id))].Progress = 'closed';
-        this.props.data.PtSituationElement[(parseInt(this.state.id))].ValidityPeriod.EndTime = format(addHours(new Date(), 5), `yyyy-MM-dd'T'HH:mm:ss+02:00`);
-        this.props.firebase.collection(this.props.organization).doc(this.props.docID).set( this.props.data );
-        this.props.history.push('/');
+        const update = {
+            Progress: 'closed',
+            ValidityPeriod: {
+                EndTime: format(addHours(new Date(), 5), `yyyy-MM-dd'T'HH:mm:ss+02:00`)
+            }
+        };
+        const codespace = this.props.organization.split(':')[0];
+        const authority = this.props.organization;
+        const id = this.props.issue.id;
+        this.props.firebase
+            .doc(`codespaces/${codespace}/authorities/${authority}/messages/${id}`)
+            .set(update, {
+                mergeFields: [
+                    'Progress',
+                    'ValidityPeriod.EndTime'
+                ]
+            })
+            .then(() => this.props.onSubmit())
+            .then(() => this.props.history.push('/'));
     };
 
     checkStatus = (param) => {
         if(param === 'open'){
             return <div className="submit justify-content-center">
                 <div className="form-group d-flex">
-                    <Button variant="negative" width="fluid" onClick={this.setProgressToClosed} className="p-2 btn ">Deaktiver</Button>
+                    <Button variant="negative" width="fluid" type="button" onClick={this.setProgressToClosed} className="p-2 btn ">Deaktiver</Button>
                     <Button variant="secondary" width="fluid" type="submit" className="p-2 btn ">Endre</Button>
                 </div>
                 <Button variant="secondary" onClick={this.handleClick} type="submit" className="btn btn-warning btn-lg btn-block">Tilbake</Button></div>
@@ -81,7 +105,7 @@ class Edit extends React.Component {
     };
 
     returnValue = (type) => {
-        let issue = this.props.data.PtSituationElement[(parseInt(this.state.id))];
+        let issue = this.props.issue.data;
 
         if(type === 'ReportType'){ return issue.ReportType }
         if(type === 'summary'){ return issue.Summary['_text'] }
@@ -148,7 +172,7 @@ class Edit extends React.Component {
                             />
                         </div>
                         <br></br>
-                        {this.checkStatus(this.props.data.PtSituationElement[(parseInt(this.state.id))].Progress)}
+                        {this.checkStatus(this.props.issue.data.Progress)}
                     </form>
                 </div>
             </div>

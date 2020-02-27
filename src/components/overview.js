@@ -54,8 +54,8 @@ class Overview extends React.Component {
         }
     };
 
-    edit = (event) => {
-        this.props.history.push(`/edit/${event.target.value}`);
+    edit = (id) => {
+        this.props.history.push(`/edit/${id}`);
     };
 
     render() {
@@ -68,7 +68,7 @@ class Overview extends React.Component {
                         <Button variant="secondary" onClick={this.handleClick} type="button" className="btn btn-warning btn-lg btn-block">Ny melding</Button>
                     </div>
                     <br></br>
-                    {(this.props.data.PtSituationElement) &&
+                    {(this.props.messages) &&
                     <div className="table-responsive-md">
                         <Table id="dtOrderExample"
                                className="table table-striped table-light table-borderless table-hover"
@@ -86,7 +86,7 @@ class Overview extends React.Component {
                             </Tr>
                             </Thead>
                             <Tbody>
-                            {this.props.data.PtSituationElement.map((item, index) => (
+                            {this.props.messages.map(({id, data: item}, index) => (
                                 <Tr key={item.SituationNumber}>
                                     <Td className='Status'>{this.returnRedOrGreenIcon(item)}</Td>
                                     <Td className='#'>{item.SituationNumber.split(":").pop()}</Td>
@@ -97,7 +97,7 @@ class Overview extends React.Component {
                                     <Td className='Type'>{this.getType(item.Affects)}</Td>
                                     <Td>
                                         <Button variant="secondary" value={index}
-                                                onClick={this.edit}>Endre
+                                                onClick={() => this.edit(id)}>Endre
                                         </Button>
                                     </Td>
                                 </Tr>

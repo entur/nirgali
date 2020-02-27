@@ -30,27 +30,19 @@ var db = firebase.firestore();
 
 class App extends React.Component {
     state = {
-        data: '',
         organizations: [],
         organizationsName: [],
         selectedOrganization: '',
-        lines: '',
-        id: '',
+        messages: [],
+        lines: []
     };
 
     componentDidMount() {
         this.setOrganizations();
     }
 
-    updateOrganization = (selectedOrg) => {
-        this.setState({
-            selectedOrganization: selectedOrg,
-        },
-          () => this.setDeviationsAndLines());
-    };
-
-    async setOrganizations() {
-        if(!this.props.userInfo.roles){
+    setOrganizations = async () => {
+        if (!this.props.userInfo.roles) {
             window.alert("You are not assigned to a company");
             window.location.href = this.props.userInfo.logoutUrl;
         }
@@ -68,41 +60,41 @@ class App extends React.Component {
             organizations: organizations.map(({ id }) => id),
             organizationsName: organizations.map(({ name }) => name),
             selectedOrganization: organizations[0].id
-        }, ()  => this.setDeviationsAndLines());
+        }, ()  => this.getMessagesAndLines());
+    };
+
+    updateOrganization = (selectedOrg) => {
+        this.setState({
+            selectedOrganization: selectedOrg,
+        },
+          () => this.getMessagesAndLines());
+    };
+
+    getMessagesAndLines = async () => {
+        await this.getMessages();
+        await this.getLines();
     }
 
-    setDeviationsAndLines() {
+    getMessages = async () => {
+        const querySnapshot = await db.collection(`codespaces/${this.state.selectedOrganization.split(':')[0]}/authorities/${this.state.selectedOrganization}/messages`).get();
 
-        // TODO add error handling
-        db.collection(this.state.selectedOrganization).get().then((querySnapshot) => {
-            for (let i = 0; i < querySnapshot.docs.length; i++) {
-                if(querySnapshot.docs[i].id === 'Issues'){
-                    if(querySnapshot.docs[i].data().PtSituationElement){
-                        this.setState({
-                            data: querySnapshot.docs[i].data(),
-                            id: querySnapshot.docs[i].id,
-                        });
-                    }else{
-                        this.setState({
-                            data: {PtSituationElement: []},
-                            id: querySnapshot.docs[i].id,
-                        })
-                    }
-                }
-            };
-        });
+        this.setState({
+            messages: querySnapshot.size > 0 ? querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data()
+            })) : [],
+        })
+    }
 
-        api.getLines(this.state.selectedOrganization)
-          .then(response => {
-              console.log(response.data);
-              if(response.data){
-                  this.setState({
-                      lines: response.data.lines
-                  })
-              }else{
-                  console.log("Could not find any lines for this organization");
-              }
-          });
+    getLines = async () => {
+        const response = await api.getLines(this.state.selectedOrganization);
+        if (response.data){
+            this.setState({
+                lines: response.data.lines
+            });
+        } else {
+            console.log("Could not find any lines for this organization");
+        }
     }
 
     render() {
@@ -119,19 +111,17 @@ class App extends React.Component {
                                                     logout={this.props.userInfo.logoutUrl} />} />
                     <Route exact path="/"
                            render={props => <Overview {...props}
-                                                      firebase={db}
-                                                      data={this.state.data} />} />
-                    <Route path="/edit/:deviationId?"
+                                                      messages={this.state.messages} />} />
+                    <Route path="/edit/:id?"
                            render={props => <Edit {...props}
-                                                  data={this.state.data}
+                                                  onSubmit={this.getMessagesAndLines}
+                                                  issue={this.state.messages.find(({id}) => id === props.match.params.id)}
                                                   firebase={db}
-                                                  docID={this.state.id}
                                                   organization={this.state.selectedOrganization} />} />
                     <Route path="/register"
                            render={props => <Register {...props}
-                                                      data={this.state.data}
+                                                      onSubmit={this.getMessagesAndLines}
                                                       firebase={db}
-                                                      docID={this.state.id}
                                                       lines={this.state.lines}
                                                       organization={this.state.selectedOrganization} />} />
                 </div>
