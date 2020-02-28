@@ -81,11 +81,13 @@ class Overview extends React.Component {
                     </div>
                     <br></br>
                     <Contrast>
-                        <Switch
-                            checked={this.state.showExpiredMessages}
-                            onChange={() => this.setState({ showExpiredMessages: !this.state.showExpiredMessages})}>
-                            Vis utløpte meldinger
-                        </Switch>
+                        <div style={{ padding: '0 .5em' }}>
+                            <Switch
+                                checked={this.state.showExpiredMessages}
+                                onChange={() => this.setState({ showExpiredMessages: !this.state.showExpiredMessages})}>
+                                    Vis utløpte meldinger
+                            </Switch>
+                        </div>
                     </Contrast>
                     <br></br>
                     {(messages) &&
