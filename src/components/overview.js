@@ -6,6 +6,7 @@ import { Table, Thead, Tbody, Tr, Th, Td } from "react-super-responsive-table"
 import "react-super-responsive-table/dist/SuperResponsiveTableStyle.css"
 import { Switch } from '@entur/form';
 import { Contrast } from '@entur/layout';
+import { sortBySituationNumber } from '../util/sort';
 
 class Overview extends React.Component {
 
@@ -70,6 +71,7 @@ class Overview extends React.Component {
                   message.ValidityPeriod.EndTime > this.state.date;
             });
 
+        messages = messages.sort(sortBySituationNumber);
 
         return (
             <div>
