@@ -4,11 +4,15 @@ import green from "../img/green.png"
 import { Button } from '@entur/component-library';
 import { Table, Thead, Tbody, Tr, Th, Td } from "react-super-responsive-table"
 import "react-super-responsive-table/dist/SuperResponsiveTableStyle.css"
-
+import { Switch } from '@entur/form';
+import { Contrast } from '@entur/layout';
 
 class Overview extends React.Component {
 
-    state = { date: '' };
+    state = {
+        date: '',
+        showExpiredMessages: false
+    };
 
     componentDidMount() {
         let date = new Date().getDate(); if(date < 10){ date = "0"+date }
@@ -59,6 +63,14 @@ class Overview extends React.Component {
     };
 
     render() {
+        let messages = this.state.showExpiredMessages ?
+            this.props.messages :
+            this.props.messages.filter(({data: message}) => {
+                return message.Progress === 'open' ||
+                  message.ValidityPeriod.EndTime > this.state.date;
+            });
+
+
         return (
             <div>
                 <div className="register_box" id="overview" >
@@ -68,7 +80,15 @@ class Overview extends React.Component {
                         <Button variant="secondary" onClick={this.handleClick} type="button" className="btn btn-warning btn-lg btn-block">Ny melding</Button>
                     </div>
                     <br></br>
-                    {(this.props.messages) &&
+                    <Contrast>
+                        <Switch
+                            checked={this.state.showExpiredMessages}
+                            onChange={() => this.setState({ showExpiredMessages: !this.state.showExpiredMessages})}>
+                            Vis utløpte meldinger
+                        </Switch>
+                    </Contrast>
+                    <br></br>
+                    {(messages) &&
                     <div className="table-responsive-md">
                         <Table id="dtOrderExample"
                                className="table table-striped table-light table-borderless table-hover"
@@ -86,7 +106,7 @@ class Overview extends React.Component {
                             </Tr>
                             </Thead>
                             <Tbody>
-                            {this.props.messages.map(({id, data: item}, index) => (
+                            {messages.map(({id, data: item}, index) => (
                                 <Tr key={item.SituationNumber}>
                                     <Td className='Status'>{this.returnRedOrGreenIcon(item)}</Td>
                                     <Td className='#'>{item.SituationNumber.split(":").pop()}</Td>

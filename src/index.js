@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import 'bootstrap/dist/css/bootstrap.css';
 import './style/index.css';
+import '@entur/layout/dist/styles.css';
+import '@entur/form/dist/styles.css';
 import { Route, BrowserRouter as Router } from 'react-router-dom'
 import Overview from "./components/overview";
 import Register from './components/register';
