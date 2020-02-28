@@ -123,7 +123,7 @@ class Edit extends React.Component {
     render() {
         return (
             <div>
-                <div className="register_box" id="overview" >
+                <div className="register_box">
                     <form className="register" onSubmit={this.handleSubmit} autoComplete="off">
                         <br></br>
                         <h2 className="text-center text-white">Endre avvik</h2>
@@ -136,7 +136,7 @@ class Edit extends React.Component {
                             </select>
                             <br></br>
                         </div>
-                        <p id="message" className="text-center text-white" >Melding</p>
+                        <p className="text-center text-white" >Melding</p>
                         <input type="String" name="oppsummering" className="form-control"
                                defaultValue={this.returnValue('summary')} maxLength="160"
                                 required/>

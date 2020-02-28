@@ -73,7 +73,7 @@ class Overview extends React.Component {
 
         return (
             <div>
-                <div className="register_box" id="overview" >
+                <div className="register_box">
                     <h2 className="text-center text-white">Oversikt</h2>
                     <br></br>
                     <div>

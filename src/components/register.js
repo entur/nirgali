@@ -364,7 +364,7 @@ class Register extends React.Component {
     render() {
         return (
             <div>
-                <div className="register_box" id="small">
+                <div className="register_box">
                     <form className="register" onSubmit={this.handleSubmit} autoComplete="off">
                         <h2 className="text-center text-white">Registrer ny melding</h2>
                         <br></br>

@@ -109,7 +109,7 @@ class App extends React.Component {
         return (
             <Router>
                 <div>
-                    <img id="background" src={ Background } alt="" />
+                    <img className="background-image" src={ Background } alt="" />
 
                     <Route path="/"
                            render={props => <NavBar {...props}
