@@ -99,10 +99,10 @@ class Overview extends React.Component {
                             <Tr bgcolor="#babbcf">
                                 <Th scope="col"><b>Status</b></Th>
                                 <Th scope="col"><b>#</b></Th>
-                                <Th scope="col"><b>Oppsommering</b></Th>
+                                <Th scope="col"><b>Oppsummering</b></Th>
                                 <Th scope="col"><b>Rapporttype</b></Th>
-                                <Th scope="col"><b>Fra-dato</b></Th>
-                                <Th scope="col"><b>Til-dato</b></Th>
+                                <Th scope="col"><b>Fra dato</b></Th>
+                                <Th scope="col"><b>Til dato</b></Th>
                                 <Th scope="col"><b>Type</b></Th>
                                 <Th scope="col"></Th>
                             </Tr>

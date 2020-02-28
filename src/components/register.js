@@ -420,7 +420,7 @@ class Register extends React.Component {
                         {(this.state.departure) && (this.state.chosenLine) &&
                         <div>
                             <br></br>
-                            <p className="text-center text-white">Gyldighetsdato</p>
+                            <p className="text-center text-white">Gyldighetsperiode</p>
                             <Flatpickr id='date'
                                        name='to'
                                        className="form-control"

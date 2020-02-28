@@ -145,7 +145,7 @@ class Edit extends React.Component {
                         <input type="String" name="forslag" className="form-control"
                                defaultValue={this.returnValue('advice')}/>
                         <br></br>
-                        <p className="text-center text-white">Gyldighetsdato</p>
+                        <p className="text-center text-white">Gyldighetsperiode</p>
                         <div className="form-group d-flex">
                             <Flatpickr data-enable-time
                                        value={this.returnValue('from')}
