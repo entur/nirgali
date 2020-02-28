@@ -24,9 +24,9 @@ exports.xml = function(admin) {
         const dateTime = year + '-' + month + '-' + date +'T' + hours + ':' + min + ':' + sec+"+02:00";
 
 
-        var db = admin.firestore();
+        const db = admin.firestore();
 
-        var siri = {
+        const siri = {
             Siri: {
                 _attributes: {
                     version: "2.0" ,
@@ -38,7 +38,7 @@ exports.xml = function(admin) {
             }
         };
 
-        var array = {
+        const array = {
             ResponseTimestamp: dateTime,
             ProducerRef: "ENT",
             SituationExchangeDelivery: {
@@ -48,54 +48,50 @@ exports.xml = function(admin) {
         };
 
 
-        db.collection('GOA:Authority:GOA').get().then((querySnapshot) => {
+        db.collectionGroup('messages').get().then(querySnapshot => {
+            const situations = {PtSituationElement: []};
             querySnapshot.forEach((doc) => {
-                if ('PtSituationElement' in doc.data()) {
-                    var situations = {PtSituationElement: []};
-                    for (var i = 0; i < doc.data().PtSituationElement.length; i++) {
-                        if (Date.parse(doc.data().PtSituationElement[i].ValidityPeriod.EndTime) < Date.parse(dateTime)) {
-                            // ignore validity period end time before current time
-                        } else {
-                            var swapPlaces = doc.data().PtSituationElement[i];
-                            var tmp = {};
-                            tmp['CreationTime'] = swapPlaces.CreationTime;
-                            tmp['ParticipantRef'] = swapPlaces.ParticipantRef;
-                            tmp['SituationNumber'] = swapPlaces.SituationNumber;
-                            tmp['Source'] = swapPlaces.Source;
-                            tmp['Progress'] = swapPlaces.Progress;
-                            tmp['ValidityPeriod'] = swapPlaces.ValidityPeriod;
-                            if(tmp.ValidityPeriod.EndTime){
-                                var endTime = tmp.ValidityPeriod.EndTime;
-                                delete tmp.ValidityPeriod.EndTime;
-                                tmp.ValidityPeriod['EndTime'] = endTime;
-                            }
-                            tmp['UndefinedReason'] = {};
-                            tmp['Severity'] = swapPlaces.Severity;
-                            tmp['ReportType'] = swapPlaces.ReportType;
-                            tmp['Summary'] = swapPlaces.Summary;
-                            if(swapPlaces.Description){ tmp['Description'] = swapPlaces.Description; }
-                            tmp['Affects'] = swapPlaces.Affects;
-                            if(tmp.Affects.Networks) {
-                                if(tmp.Affects.Networks.AffectedNetwork.AffectedLine.Routes){
-                                    var routes = tmp.Affects.Networks.AffectedNetwork.AffectedLine.Routes;
-                                    delete tmp.Affects.Networks.AffectedNetwork.AffectedLine.Routes;
-                                    tmp.Affects.Networks.AffectedNetwork.AffectedLine['Routes'] = routes;
-                                }
-                            }
-                            situations.PtSituationElement.push(tmp)
+                if (Date.parse(doc.data().ValidityPeriod.EndTime) < Date.parse(dateTime)) {
+                    // ignore validity period end time before current time
+                } else {
+                    const swapPlaces = doc.data();
+                    const tmp = {};
+                    tmp['CreationTime'] = swapPlaces.CreationTime;
+                    tmp['ParticipantRef'] = swapPlaces.ParticipantRef;
+                    tmp['SituationNumber'] = swapPlaces.SituationNumber;
+                    tmp['Source'] = swapPlaces.Source;
+                    tmp['Progress'] = swapPlaces.Progress;
+                    tmp['ValidityPeriod'] = swapPlaces.ValidityPeriod;
+                    if(tmp.ValidityPeriod.EndTime){
+                        const endTime = tmp.ValidityPeriod.EndTime;
+                        delete tmp.ValidityPeriod.EndTime;
+                        tmp.ValidityPeriod['EndTime'] = endTime;
+                    }
+                    tmp['UndefinedReason'] = {};
+                    tmp['Severity'] = swapPlaces.Severity;
+                    tmp['ReportType'] = swapPlaces.ReportType;
+                    tmp['Summary'] = swapPlaces.Summary;
+                    if(swapPlaces.Description){ tmp['Description'] = swapPlaces.Description; }
+                    tmp['Affects'] = swapPlaces.Affects;
+                    if(tmp.Affects.Networks) {
+                        if(tmp.Affects.Networks.AffectedNetwork.AffectedLine.Routes){
+                            const routes = tmp.Affects.Networks.AffectedNetwork.AffectedLine.Routes;
+                            delete tmp.Affects.Networks.AffectedNetwork.AffectedLine.Routes;
+                            tmp.Affects.Networks.AffectedNetwork.AffectedLine['Routes'] = routes;
                         }
                     }
-                    array.SituationExchangeDelivery.Situations.push(situations);
-                    siri.Siri.ServiceDelivery = array;
-
-                    var result = convert.js2xml(siri, {compact: true, spaces: 4});
-                    response
-                        .set("Content-Type", "text/xml")
-                        .status(200)
-                        .send(result);
+                    situations.PtSituationElement.push(tmp)
                 }
             });
-        });
-     });
 
+            array.SituationExchangeDelivery.Situations.push(situations);
+            siri.Siri.ServiceDelivery = array;
+
+            const result = convert.js2xml(siri, {compact: true, spaces: 4});
+            response
+                .set("Content-Type", "text/xml")
+                .status(200)
+                .send(result);
+        });
+    });
 }
