@@ -76,9 +76,12 @@ class App extends React.Component {
     }
 
     getMessages = async () => {
+        if (this.unsubscribeSnapshotListener) {
+            this.unsubscribeSnapshotListener();
+        }
         const codespace = this.state.selectedOrganization.split(':')[0];
         const authority = this.state.selectedOrganization;
-        db.collection(`codespaces/${codespace}/authorities/${authority}/messages`)
+        this.unsubscribeSnapshotListener = db.collection(`codespaces/${codespace}/authorities/${authority}/messages`)
             .onSnapshot(this.onMessagesUpdate);
     }
 
