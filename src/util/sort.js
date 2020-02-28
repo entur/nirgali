@@ -1,8 +1,12 @@
 export const sortBySituationNumber = (a, b) => {
-  const aN = parseInt(a.data.SituationNumber.split(":").pop());
-  const bN = parseInt(b.data.SituationNumber.split(":").pop());
+  return sortAsc(
+    getSituationNumberSequence(a.data.SituationNumber),
+    getSituationNumberSequence(b.data.SituationNumber)
+  );
+}
 
-  if (aN > bN) return 1;
-  if (aN < bN) return -1;
-  return 0;
+const sortAsc = (a, b) => a - b;
+
+const getSituationNumberSequence = SituationNumber => {
+  return parseInt(SituationNumber.split(':').pop());
 }
