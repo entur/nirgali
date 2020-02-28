@@ -18,7 +18,7 @@ var config = {
     projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
     storageBucket: process.env.REACT_APP_FIREBASE_STORAGEBUCKET,
     messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.REACT_APP_TMDB_API_KEY
+    appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
 const firebase = require("firebase/app");
