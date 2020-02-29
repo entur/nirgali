@@ -1,5 +1,3 @@
-
-
 const functions = require('firebase-functions');
 const jwt = require('express-jwt');
 const jwks = require('jwks-rsa');
@@ -11,13 +9,14 @@ const AUTH_DOMAIN = 'kc-dev.devstage.entur.io';
 const AUTH_REALM = 'rutebanken';
 const AUTH_ALGORITHM = 'RS256';
 
-const transformRoles = (roles, claim) => roles
-  .map(JSON.parse)
-  .filter(({r: role}) => role === claim)
-  .reduce((acc, {o: org}) => {
-    acc[org] = true;
-    return acc;
-  }, {});
+const transformRoles = (roles, claim) =>
+  roles
+    .map(JSON.parse)
+    .filter(({ r: role }) => role === claim)
+    .reduce((acc, { o: org }) => {
+      acc[org] = true;
+      return acc;
+    }, {});
 
 exports.auth = function(firebaseAdmin) {
   const app = express();
@@ -37,20 +36,16 @@ exports.auth = function(firebaseAdmin) {
   });
 
   app.get('/firebase', jwtCheck, (req, res) => {
-
-    const {
-      sub: uid,
-      roles
-    } = req.user;
+    const { sub: uid, roles } = req.user;
 
     const additionalClaims = {
       editSX: transformRoles(roles, 'editSX')
     };
 
-    firebaseAdmin.auth().createCustomToken(uid, additionalClaims)
-      .then(customToken =>
-        res.json({firebaseToken: customToken})
-      )
+    firebaseAdmin
+      .auth()
+      .createCustomToken(uid, additionalClaims)
+      .then(customToken => res.json({ firebaseToken: customToken }))
       .catch(err => {
         console.warn(err);
         res.status(500).send({
@@ -61,4 +56,4 @@ exports.auth = function(firebaseAdmin) {
   });
 
   return functions.https.onRequest(app);
-}
+};

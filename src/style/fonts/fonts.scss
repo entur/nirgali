@@ -41,8 +41,8 @@
 
   @font-face {
     font-family: 'Nationale';
-    src: url($path + 'Nationale-MediumItalic.woff2') format('woff2'),
-      url($path + 'Nationale-MediumItalic.woff') format('woff');
+    src: url($path+'Nationale-MediumItalic.woff2') format('woff2'),
+      url($path+'Nationale-MediumItalic.woff') format('woff');
     font-weight: 500;
     font-style: italic;
   }
