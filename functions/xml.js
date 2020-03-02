@@ -70,6 +70,9 @@ exports.xml = function(admin) {
         if (swapPlaces.Description) {
           tmp['Description'] = swapPlaces.Description;
         }
+        if (swapPlaces.Advice) {
+          tmp['Advice'] = swapPlaces.Advice;
+        }
         tmp['Affects'] = swapPlaces.Affects;
         situations.PtSituationElement.push(tmp);
       });
