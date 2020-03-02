@@ -63,11 +63,6 @@ exports.xml = function(admin) {
         tmp['Source'] = swapPlaces.Source;
         tmp['Progress'] = swapPlaces.Progress;
         tmp['ValidityPeriod'] = swapPlaces.ValidityPeriod;
-        if (tmp.ValidityPeriod.EndTime) {
-          const endTime = tmp.ValidityPeriod.EndTime;
-          delete tmp.ValidityPeriod.EndTime;
-          tmp.ValidityPeriod['EndTime'] = endTime;
-        }
         tmp['UndefinedReason'] = {};
         tmp['Severity'] = swapPlaces.Severity;
         tmp['ReportType'] = swapPlaces.ReportType;
@@ -76,16 +71,6 @@ exports.xml = function(admin) {
           tmp['Description'] = swapPlaces.Description;
         }
         tmp['Affects'] = swapPlaces.Affects;
-        if (tmp.Affects.Networks) {
-          if (tmp.Affects.Networks.AffectedNetwork.AffectedLine.Routes) {
-            const routes =
-              tmp.Affects.Networks.AffectedNetwork.AffectedLine.Routes;
-            delete tmp.Affects.Networks.AffectedNetwork.AffectedLine.Routes;
-            tmp.Affects.Networks.AffectedNetwork.AffectedLine[
-              'Routes'
-            ] = routes;
-          }
-        }
         situations.PtSituationElement.push(tmp);
       });
 
