@@ -123,8 +123,13 @@ class Register extends React.Component {
     const target = event.target;
 
     const newIssue = await this.createNewIssue(target);
+
     if (target.beskrivelse.value === '') {
       delete newIssue.Description;
+    }
+
+    if (target.forslag.value === '') {
+      delete newIssue.Advice;
     }
 
     if (this.state.type === 'departure') {

@@ -1,6 +1,48 @@
 const functions = require('firebase-functions');
 const convert = require('xml-js');
 
+const transformSituationData = data => {
+    const {
+      CreationTime,
+      ParticipantRef,
+      SituationNumber,
+      Source,
+      Progress,
+      ValidityPeriod,
+      Severity,
+      ReportType,
+      Summary,
+      Description,
+      Advice,
+      Affects
+    } = data;
+
+    const transformedData = {
+      CreationTime,
+      ParticipantRef,
+      SituationNumber,
+      Source,
+      Progress,
+      ValidityPeriod,
+      UndefinedReason: {},
+      Severity,
+      ReportType,
+      Summary
+    };
+
+    if (Description) {
+      transformedData.Description = Description;
+    }
+
+    if (Advice) {
+      transformedData.Advice = Advice;
+    }
+
+    transformedData.Affects = Affects;
+
+    return transformedData;
+}
+
 exports.xml = function(admin) {
   return functions.https.onRequest((request, response) => {
     if (request.method !== 'POST') {
@@ -55,26 +97,7 @@ exports.xml = function(admin) {
       const situations = { PtSituationElement: [] };
 
       allDocs.forEach(doc => {
-        const swapPlaces = doc.data();
-        const tmp = {};
-        tmp['CreationTime'] = swapPlaces.CreationTime;
-        tmp['ParticipantRef'] = swapPlaces.ParticipantRef;
-        tmp['SituationNumber'] = swapPlaces.SituationNumber;
-        tmp['Source'] = swapPlaces.Source;
-        tmp['Progress'] = swapPlaces.Progress;
-        tmp['ValidityPeriod'] = swapPlaces.ValidityPeriod;
-        tmp['UndefinedReason'] = {};
-        tmp['Severity'] = swapPlaces.Severity;
-        tmp['ReportType'] = swapPlaces.ReportType;
-        tmp['Summary'] = swapPlaces.Summary;
-        if (swapPlaces.Description) {
-          tmp['Description'] = swapPlaces.Description;
-        }
-        if (swapPlaces.Advice) {
-          tmp['Advice'] = swapPlaces.Advice;
-        }
-        tmp['Affects'] = swapPlaces.Affects;
-        situations.PtSituationElement.push(tmp);
+        situations.PtSituationElement.push(transformSituationData(doc.data()));
       });
 
       array.SituationExchangeDelivery.Situations.push(situations);
