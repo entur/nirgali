@@ -12,41 +12,7 @@ exports.xml = function(admin) {
         .send(xmlString);
     }
 
-    let date = new Date().getDate();
-    if (date < 10) {
-      date = '0' + date;
-    }
-    let month = new Date().getMonth() + 1;
-    if (month < 10) {
-      month = '0' + month;
-    }
-    let year = new Date().getFullYear();
-    let hours = new Date().getHours();
-    if (hours < 10) {
-      hours = '0' + hours;
-    }
-    let min = new Date().getMinutes();
-    if (min < 10) {
-      min = '0' + min;
-    }
-    let sec = new Date().getSeconds();
-    if (sec < 10) {
-      sec = '0' + sec;
-    }
-
-    const dateTime =
-      year +
-      '-' +
-      month +
-      '-' +
-      date +
-      'T' +
-      hours +
-      ':' +
-      min +
-      ':' +
-      sec +
-      '+02:00';
+    const dateTime = new Date().toISOString();
 
     console.info('XML request received - dateTime=' + dateTime);
 

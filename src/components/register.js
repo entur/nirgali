@@ -7,8 +7,6 @@ import { Button } from '@entur/component-library';
 
 class Register extends React.Component {
   state = {
-    date: '',
-    dateShort: '',
     newAffect: '',
     searchBar: '',
     stops: '',
@@ -24,35 +22,18 @@ class Register extends React.Component {
     submit: undefined,
     departureSok: undefined,
     counter: 0,
-    from: undefined
+    date: undefined,
+    departureDate: undefined,
+    from: undefined,
+    to: undefined
   };
 
   componentDidMount() {
-    var date = new Date().getDate();
-    if (date < 10) {
-      date = '0' + date;
-    }
-    var month = new Date().getMonth() + 1;
-    if (month < 10) {
-      month = '0' + month;
-    }
-    var year = new Date().getFullYear();
-    var hours = new Date().getHours();
-    if (hours < 10) {
-      hours = '0' + hours;
-    }
-    var min = new Date().getMinutes();
-    if (min < 10) {
-      min = '0' + min;
-    }
-    var sec = new Date().getSeconds();
-    if (sec < 10) {
-      sec = '0' + sec;
-    }
-
+    const now = new Date();
     this.setState({
-      date: `${year}-${month}-${date}T${hours}:${min}:${sec}.000+02:00`,
-      dateShort: `${year}-${month}-${date}T${hours}:${min}`
+      date: now,
+      from: now,
+      departureDate: now
     });
   }
 
@@ -147,19 +128,29 @@ class Register extends React.Component {
     }
 
     if (this.state.type === 'departure') {
+      const from = new Date(this.state.departureDate);
+      const to = new Date(this.state.departureDate);
+      from.setHours(0);
+      from.setMinutes(0);
+      from.setSeconds(0);
+      from.setMilliseconds(0);
+      to.setHours(23);
+      to.setMinutes(59);
+      to.setSeconds(59);
+      to.setMilliseconds(999);
       newIssue.ValidityPeriod = {
-        StartTime: target.date.value + 'T00:00:00+02:00',
-        EndTime: target.date.value + 'T23:59:59+02:00'
+        StartTime: from.toISOString(),
+        EndTime: to.toISOString()
       };
     } else {
       if (target.to.value) {
         newIssue.ValidityPeriod = {
-          StartTime: target.from.value.replace(' ', 'T') + ':00+02:00',
-          EndTime: target.to.value.replace(' ', 'T') + ':00+02:00'
+          StartTime: this.state.from.toISOString(),
+          EndTime: this.state.to.toISOString()
         };
       } else {
         newIssue.ValidityPeriod = {
-          StartTime: target.from.value.replace(' ', 'T') + ':00+02:00'
+          StartTime: this.state.from.toISOString()
         };
       }
     }
@@ -201,7 +192,7 @@ class Register extends React.Component {
   createNewIssue = async target => {
     const count = await this.getNextSituationNumber();
     return {
-      CreationTime: this.state.date,
+      CreationTime: this.state.date.toISOString(),
       ParticipantRef: this.props.organization.split(':')[0],
       SituationNumber:
         this.props.organization.split(':')[0] + ':SituationNumber:' + count,
@@ -358,12 +349,6 @@ class Register extends React.Component {
     });
   };
 
-  updateFromDate = () => {
-    this.setState({
-      from: document.getElementById('from').value.replace(' ', 'T')
-    });
-  };
-
   returnMappedObjects = list => {
     if (list[0].stopPlace) {
       return list.map(item => ({
@@ -514,9 +499,11 @@ class Register extends React.Component {
                   className="form-control"
                   options={{
                     enableTime: false,
-                    minDate: this.state.dateShort,
+                    minDate: this.state.date,
                     dateFormat: 'Y-m-d'
                   }}
+                  value={this.state.departureDate}
+                  onValueUpdate={dObj => this.setState({ departureDate: dObj })}
                 />
                 <button
                   onClick={this.callApiDeparture}
@@ -578,16 +565,16 @@ class Register extends React.Component {
                   <Flatpickr
                     data-enable-time
                     id="from"
-                    value={this.state.dateShort}
+                    value={this.state.from}
                     name="from"
-                    onClose={this.updateFromDate}
                     className="date-form form-control"
                     options={{
                       enableTime: true,
                       dateFormat: 'Y-m-d H:i',
-                      minDate: this.state.dateShort,
+                      minDate: this.state.date,
                       time_24hr: true
                     }}
+                    onValueUpdate={dObj => this.setState({ from: dObj })}
                   />
                   <Flatpickr
                     id="date-to"
@@ -600,9 +587,10 @@ class Register extends React.Component {
                       dateFormat: 'Y-m-d H:i',
                       minDate: this.state.from
                         ? this.state.from
-                        : this.state.dateShort,
+                        : this.state.date,
                       time_24hr: true
                     }}
+                    onValueUpdate={dObj => this.setState({ to: dObj })}
                   />
                 </div>
               </div>
