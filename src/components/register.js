@@ -148,7 +148,7 @@ class Register extends React.Component {
         EndTime: to.toISOString()
       };
     } else {
-      if (target.to.value) {
+      if (this.state.to) {
         newIssue.ValidityPeriod = {
           StartTime: this.state.from.toISOString(),
           EndTime: this.state.to.toISOString()
@@ -508,7 +508,7 @@ class Register extends React.Component {
                     dateFormat: 'Y-m-d'
                   }}
                   value={this.state.departureDate}
-                  onValueUpdate={dObj => this.setState({ departureDate: dObj })}
+                  onChange={([dObj]) => this.setState({ departureDate: dObj })}
                 />
                 <button
                   onClick={this.callApiDeparture}
@@ -579,11 +579,12 @@ class Register extends React.Component {
                       minDate: this.state.date,
                       time_24hr: true
                     }}
-                    onValueUpdate={dObj => this.setState({ from: dObj })}
+                    onChange={([dObj]) => this.setState({ from: dObj })}
                   />
                   <Flatpickr
                     id="date-to"
                     data-enable-time
+                    value={this.state.to}
                     name="to"
                     placeholder="Til-dato"
                     className="date-form form-control"
@@ -595,7 +596,7 @@ class Register extends React.Component {
                         : this.state.date,
                       time_24hr: true
                     }}
-                    onValueUpdate={dObj => this.setState({ to: dObj })}
+                    onChange={([dObj]) => this.setState({ to: dObj })}
                   />
                 </div>
               </div>
