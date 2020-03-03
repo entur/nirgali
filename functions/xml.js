@@ -56,9 +56,7 @@ exports.xml = function(admin) {
       const situations = { PtSituationElement: [] };
 
       allDocs.forEach(doc => {
-        console.log('raw: ', JSON.stringify(doc.data()));
         const transformedData = transformSituationData(doc.data());
-        console.log('transformed: ', JSON.stringify(transformedData));
         situations.PtSituationElement.push(transformedData);
       });
 
