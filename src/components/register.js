@@ -65,9 +65,11 @@ class Register extends React.Component {
   };
 
   createAffectedRouteLine = () => {
-    return this.state.multipleStops.map(item => ({
-      AffectedStopPoint: { StopPointRef: item.value }
-    }));
+    return {
+      AffectedStopPoint: this.state.multipleStops.map(item => ({
+        StopPointRef: item.value
+      }))
+    };
   };
 
   createNewSpecifiedStops = () => {
