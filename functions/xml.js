@@ -1,47 +1,6 @@
 const functions = require('firebase-functions');
 const convert = require('xml-js');
-
-const transformSituationData = data => {
-    const {
-      CreationTime,
-      ParticipantRef,
-      SituationNumber,
-      Source,
-      Progress,
-      ValidityPeriod,
-      Severity,
-      ReportType,
-      Summary,
-      Description,
-      Advice,
-      Affects
-    } = data;
-
-    const transformedData = {
-      CreationTime,
-      ParticipantRef,
-      SituationNumber,
-      Source,
-      Progress,
-      ValidityPeriod,
-      UndefinedReason: {},
-      Severity,
-      ReportType,
-      Summary
-    };
-
-    if (Description) {
-      transformedData.Description = Description;
-    }
-
-    if (Advice) {
-      transformedData.Advice = Advice;
-    }
-
-    transformedData.Affects = Affects;
-
-    return transformedData;
-}
+const transformSituationData = require('./utils').transformSituationData;
 
 exports.xml = function(admin) {
   return functions.https.onRequest((request, response) => {
@@ -97,7 +56,10 @@ exports.xml = function(admin) {
       const situations = { PtSituationElement: [] };
 
       allDocs.forEach(doc => {
-        situations.PtSituationElement.push(transformSituationData(doc.data()));
+        console.log('raw: ', JSON.stringify(doc.data()));
+        const transformedData = transformSituationData(doc.data());
+        console.log('transformed: ', JSON.stringify(transformedData));
+        situations.PtSituationElement.push(transformedData);
       });
 
       array.SituationExchangeDelivery.Situations.push(situations);

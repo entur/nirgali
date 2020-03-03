@@ -37,7 +37,8 @@
     "start": "PORT=3001 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test:functions": "jest functions"
   },
   "eslintConfig": {
     "extends": "react-app"
