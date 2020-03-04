@@ -4,12 +4,14 @@ import { Button } from '@entur/component-library';
 import format from 'date-fns/format';
 import addHours from 'date-fns/addHours';
 import Select from 'react-select';
+import api from '../api/api';
 
 class Edit extends React.Component {
   state = {
     id: this.props.match.params.id,
     date: '',
-    dateShort: ''
+    dateShort: '',
+    serviceJourney: undefined
   };
 
   componentDidMount() {
@@ -18,6 +20,15 @@ class Edit extends React.Component {
       date: format(now, `yyyy-MM-dd'T'HH:mm:ss+02:00`),
       dateShort: format(now, `yyyy-MM-dd'T'HH:mm`)
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+      prevProps?.issue?.id !== this.props?.issue?.id ||
+      !this.state.serviceJourney
+    ) {
+      this.getDepartureLine();
+    }
   }
 
   handleSubmit = event => {
@@ -183,6 +194,11 @@ class Edit extends React.Component {
         ?.LineRef
     ) {
       return 'line';
+    } else if (
+      this.props.issue.data.Affects?.VehicleJourneys?.AffectedVehicleJourney
+        ?.FramedVehicleJourneyRef
+    ) {
+      return 'departure';
     }
 
     return '';
@@ -192,10 +208,29 @@ class Edit extends React.Component {
     const Affects = this.props.issue.data.Affects;
     const AffectedLine = Affects?.Networks?.AffectedNetwork?.AffectedLine;
     const LineRef = AffectedLine?.LineRef;
-    const line = this.props.lines.find(l => l.id === LineRef);
+    return this.getLineOption(LineRef);
+  };
+
+  getLineOption = id => {
+    const line = this.props.lines.find(l => l.id === id);
     return {
       value: line.id,
       label: line.name + ' - ' + line.id
+    };
+  };
+
+  getLineDepartureOption = () => {
+    const serviceJourney = this.state.serviceJourney;
+    const estimatedCall = serviceJourney.estimatedCalls[0];
+    const quayName = estimatedCall.quay.name;
+    const aimedDepartureTime = estimatedCall.aimedDepartureTime
+      .split('T')
+      .pop()
+      .split(':00+')[0];
+
+    return {
+      value: quayName,
+      label: `${aimedDepartureTime} fra ${quayName} (${serviceJourney.id})`
     };
   };
 
@@ -213,6 +248,23 @@ class Edit extends React.Component {
       value: id,
       label: `${name} - ${id}`
     }));
+  };
+
+  getDepartureLine = () => {
+    const Affects = this.props.issue?.data?.Affects;
+    const FramedVehicleJourneyRef =
+      Affects?.VehicleJourneys?.AffectedVehicleJourney?.FramedVehicleJourneyRef;
+    const DatedVehicleJourneyRef =
+      FramedVehicleJourneyRef?.DatedVehicleJourneyRef;
+    const DataFrameRef = FramedVehicleJourneyRef?.DataFrameRef;
+
+    if (DatedVehicleJourneyRef) {
+      api
+        .getServiceJourney(DatedVehicleJourneyRef, DataFrameRef)
+        .then(({ data }) => {
+          this.setState({ serviceJourney: data.serviceJourney });
+        });
+    }
   };
 
   render() {
@@ -235,11 +287,7 @@ class Edit extends React.Component {
               <>
                 <p className="text-center text-white">Linje</p>
                 <div className="choose_type">
-                  <Select
-                    isDisabled
-                    value={this.getLine()}
-                    options={[this.getLine()]}
-                  />
+                  <Select value={this.getLine()} options={[this.getLine()]} />
                 </div>
                 {this.getLineQuays() && (
                   <>
@@ -247,7 +295,6 @@ class Edit extends React.Component {
                     <div>
                       <Select
                         isMulti
-                        isDisabled
                         value={this.getLineQuays()}
                         options={this.getLineQuays()}
                       />
@@ -257,6 +304,34 @@ class Edit extends React.Component {
                 )}
               </>
             )}
+
+            {this.getType() === 'departure' && (
+              <>
+                <p className="text-center text-white">Avgang</p>
+
+                {this.state.serviceJourney && (
+                  <>
+                    <div className="choose_type">
+                      <Select
+                        value={this.getLineOption(
+                          this.state.serviceJourney.line.id
+                        )}
+                        options={[
+                          this.getLineOption(this.state.serviceJourney.line.id)
+                        ]}
+                      />
+                    </div>
+                    <div className="choose_type">
+                      <Select
+                        value={this.getLineDepartureOption()}
+                        options={[this.getLineDepartureOption()]}
+                      />
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+
             <br></br>
 
             <p className="text-center text-white">Gyldighetsperiode</p>
