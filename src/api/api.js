@@ -71,6 +71,30 @@ const getDepartures = (line, date) => {
     .then(response => response);
 };
 
+const getServiceJourney = (id, date) => {
+  const apolloFetch = createApolloFetch({
+    uri: URI,
+    headers: { 'ET-client-Name': 'entur - deviation-messages' }
+  });
+  const query = `
+    {
+      serviceJourney(id: "${id}") {
+        id
+        line {id}
+        estimatedCalls(date:"${date}") {
+          aimedDepartureTime
+          quay {
+            name
+          }
+        }
+      }
+    }`;
+
+  return apolloFetch({ query })
+    .catch(error => error)
+    .then(response => response);
+};
+
 const fetchGet = {
   method: 'GET',
   headers: {
@@ -89,4 +113,10 @@ const organisationID = id => {
     .then(response => response);
 };
 
-export default { getAuthorities, organisationID, getLines, getDepartures };
+export default {
+  getAuthorities,
+  organisationID,
+  getLines,
+  getDepartures,
+  getServiceJourney
+};
