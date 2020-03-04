@@ -240,14 +240,7 @@ class Edit extends React.Component {
     const LineRef = AffectedLine?.LineRef;
     const line = this.props.lines.find(l => l.id === LineRef);
     const StopPoints = AffectedLine?.Routes?.AffectedRoute?.StopPoints;
-    return StopPoints?.AffectedStopPoint?.map(AffectedStopPoint => {
-      return line.quays.find(
-        q => q.stopPlace.id === AffectedStopPoint.StopPointRef
-      );
-    })?.map(({ id, name }) => ({
-      value: id,
-      label: `${name} - ${id}`
-    }));
+    return this.getQuayOptions(StopPoints, line);
   };
 
   getDepartureLine = () => {
@@ -265,6 +258,26 @@ class Edit extends React.Component {
           this.setState({ serviceJourney: data.serviceJourney });
         });
     }
+  };
+
+  getDepartureQuays = () => {
+    const Affects = this.props.issue.data.Affects;
+    const Route = Affects?.VehicleJourneys?.AffectedVehicleJourney?.Route;
+    const StopPoints = Route?.StopPoints;
+    const lineId = this.state.serviceJourney.line.id;
+    const line = this.props.lines.find(l => l.id === lineId);
+    return this.getQuayOptions(StopPoints, line);
+  };
+
+  getQuayOptions = (StopPoints, line) => {
+    return StopPoints?.AffectedStopPoint?.map(AffectedStopPoint => {
+      return line.quays.find(
+        q => q.stopPlace.id === AffectedStopPoint.StopPointRef
+      );
+    })?.map(({ id, name }) => ({
+      value: id,
+      label: `${name} - ${id}`
+    }));
   };
 
   render() {
@@ -327,6 +340,13 @@ class Edit extends React.Component {
                         options={[this.getLineDepartureOption()]}
                       />
                     </div>
+                    {this.getDepartureQuays() && (
+                      <Select
+                        isMulti
+                        value={this.getDepartureQuays()}
+                        options={[this.getDepartureQuays()]}
+                      />
+                    )}
                   </>
                 )}
               </>
