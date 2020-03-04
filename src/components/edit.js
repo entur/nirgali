@@ -241,16 +241,20 @@ class Edit extends React.Component {
                     options={[this.getLine()]}
                   />
                 </div>
-                <br></br>
-                <div>
-                  <Select
-                    isMulti
-                    isDisabled
-                    value={this.getLineQuays()}
-                    options={this.getLineQuays()}
-                  />
-                  <br></br>
-                </div>
+                {this.getLineQuays() && (
+                  <>
+                    <br></br>
+                    <div>
+                      <Select
+                        isMulti
+                        isDisabled
+                        value={this.getLineQuays()}
+                        options={this.getLineQuays()}
+                      />
+                      <br></br>
+                    </div>
+                  </>
+                )}
               </>
             )}
             <br></br>
