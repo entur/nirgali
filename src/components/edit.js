@@ -3,6 +3,7 @@ import Flatpickr from 'react-flatpickr';
 import { Button } from '@entur/component-library';
 import format from 'date-fns/format';
 import addHours from 'date-fns/addHours';
+import Select from 'react-select';
 
 class Edit extends React.Component {
   state = {
@@ -176,7 +177,49 @@ class Edit extends React.Component {
     return 'error';
   };
 
+  getType = () => {
+    if (
+      this.props.issue.data.Affects?.Networks?.AffectedNetwork?.AffectedLine
+        ?.LineRef
+    ) {
+      return 'line';
+    }
+
+    return '';
+  };
+
+  getLine = () => {
+    const Affects = this.props.issue.data.Affects;
+    const AffectedLine = Affects?.Networks?.AffectedNetwork?.AffectedLine;
+    const LineRef = AffectedLine?.LineRef;
+    const line = this.props.lines.find(l => l.id === LineRef);
+    return {
+      value: line.id,
+      label: line.name + ' - ' + line.id
+    };
+  };
+
+  getLineQuays = () => {
+    const Affects = this.props.issue.data.Affects;
+    const AffectedLine = Affects?.Networks?.AffectedNetwork?.AffectedLine;
+    const LineRef = AffectedLine?.LineRef;
+    const line = this.props.lines.find(l => l.id === LineRef);
+    const StopPoints = AffectedLine?.Routes?.AffectedRoute?.StopPoints;
+    return StopPoints?.AffectedStopPoint?.map(AffectedStopPoint => {
+      return line.quays.find(
+        q => q.stopPlace.id === AffectedStopPoint.StopPointRef
+      );
+    })?.map(({ id, name }) => ({
+      value: id,
+      label: `${name} - ${id}`
+    }));
+  };
+
   render() {
+    if (!this.props.issue || !this.props.lines?.length) {
+      return null;
+    }
+
     return (
       <div>
         <div className="register_box">
@@ -187,6 +230,60 @@ class Edit extends React.Component {
           >
             <br></br>
             <h2 className="text-center text-white">Endre avvik</h2>
+            <br></br>
+            {this.getType() === 'line' && (
+              <>
+                <p className="text-center text-white">Linje</p>
+                <div className="choose_type">
+                  <Select
+                    isDisabled
+                    value={this.getLine()}
+                    options={[this.getLine()]}
+                  />
+                </div>
+                <br></br>
+                <div>
+                  <Select
+                    isMulti
+                    isDisabled
+                    value={this.getLineQuays()}
+                    options={this.getLineQuays()}
+                  />
+                  <br></br>
+                </div>
+              </>
+            )}
+            <br></br>
+
+            <p className="text-center text-white">Gyldighetsperiode</p>
+            <div className="form-group d-flex">
+              <Flatpickr
+                data-enable-time
+                value={this.returnValue('from')}
+                name="from"
+                className="date-form form-control"
+                options={{
+                  enableTime: true,
+                  dateFormat: 'Y-m-d H:i',
+                  time_24hr: true
+                }}
+              />
+              <Flatpickr
+                onChange={this.handleChangeDate}
+                id="date-to"
+                data-enable-time
+                placeholder="Til-dato"
+                value={this.returnValue('to')}
+                name="to"
+                className="date-form form-control"
+                options={{
+                  enableTime: true,
+                  minDate: this.state.dateShort,
+                  dateFormat: 'Y-m-d H:i',
+                  time_24hr: true
+                }}
+              />
+            </div>
             <br></br>
             <div className="severity">
               <p className="text-center text-white">Rapporttype</p>
@@ -222,36 +319,6 @@ class Edit extends React.Component {
               className="form-control"
               defaultValue={this.returnValue('advice')}
             />
-            <br></br>
-            <p className="text-center text-white">Gyldighetsperiode</p>
-            <div className="form-group d-flex">
-              <Flatpickr
-                data-enable-time
-                value={this.returnValue('from')}
-                name="from"
-                className="date-form form-control"
-                options={{
-                  enableTime: true,
-                  dateFormat: 'Y-m-d H:i',
-                  time_24hr: true
-                }}
-              />
-              <Flatpickr
-                onChange={this.handleChangeDate}
-                id="date-to"
-                data-enable-time
-                placeholder="Til-dato"
-                value={this.returnValue('to')}
-                name="to"
-                className="date-form form-control"
-                options={{
-                  enableTime: true,
-                  minDate: this.state.dateShort,
-                  dateFormat: 'Y-m-d H:i',
-                  time_24hr: true
-                }}
-              />
-            </div>
             <br></br>
             {this.checkStatus(this.props.issue.data.Progress)}
           </form>

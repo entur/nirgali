@@ -149,6 +149,7 @@ class App extends React.Component {
                 issue={this.state.messages.find(
                   ({ id }) => id === props.match.params.id
                 )}
+                lines={this.state.lines}
                 firebase={db}
                 organization={this.state.selectedOrganization}
               />

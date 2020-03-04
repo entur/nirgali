@@ -567,7 +567,7 @@ class Register extends React.Component {
 
             {this.state.dateFromTo && (
               <div className="bd-highlight justify-content-center">
-                <p className="text-center text-white">Gyldighetsdato</p>
+                <p className="text-center text-white">Gyldighetsperiode</p>
                 <div className="form-group d-flex">
                   <Flatpickr
                     data-enable-time
