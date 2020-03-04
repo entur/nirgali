@@ -77,11 +77,33 @@ const transformAffects = ({
   }
 
   if (VehicleJourneys) {
-    transformedAffects.VehicleJourneys = VehicleJourneys;
+    transformedAffects.VehicleJourneys = transformVehicleJourneys(VehicleJourneys);
   }
 
   return transformedAffects;
 };
+
+const transformVehicleJourneys = VehicleJourneys => {
+  const {
+    AffectedVehicleJourney: {
+      FramedVehicleJourneyRef: {
+        DataFrameRef,
+        DatedVehicleJourneyRef
+      },
+      Route
+    }
+  } = VehicleJourneys;
+
+  return {
+    AffectedVehicleJourney: {
+      FramedVehicleJourneyRef: {
+        DataFrameRef,
+        DatedVehicleJourneyRef
+      },
+      Route
+    }
+  }
+}
 
 const transformNetworks = Networks => {
   const {

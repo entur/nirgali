@@ -3,6 +3,9 @@ const transformSituationData = require('./utils').transformSituationData;
 const assertKeyOrder = (expected, actual) => {
   Object.keys(expected).forEach((key, i) => {
     expect(Object.keys(actual)[i]).toEqual(key);
+    if (expected[key] === Object(expected[key])) {
+      assertKeyOrder(expected[key], actual[key]);
+    }
   });
 }
 
