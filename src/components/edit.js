@@ -199,6 +199,8 @@ class Edit extends React.Component {
         ?.FramedVehicleJourneyRef
     ) {
       return 'departure';
+    } else if (this.props.issue.data.Affects?.StopPoints) {
+      return 'stop';
     }
 
     return '';
@@ -240,7 +242,7 @@ class Edit extends React.Component {
     const LineRef = AffectedLine?.LineRef;
     const line = this.props.lines.find(l => l.id === LineRef);
     const StopPoints = AffectedLine?.Routes?.AffectedRoute?.StopPoints;
-    return this.getQuayOptions(StopPoints, line);
+    return this.getQuayOptions(StopPoints, line.quays);
   };
 
   getDepartureLine = () => {
@@ -266,14 +268,22 @@ class Edit extends React.Component {
     const StopPoints = Route?.StopPoints;
     const lineId = this.state.serviceJourney.line.id;
     const line = this.props.lines.find(l => l.id === lineId);
-    return this.getQuayOptions(StopPoints, line);
+    return this.getQuayOptions(StopPoints, line.quays);
   };
 
-  getQuayOptions = (StopPoints, line) => {
+  getStopQuays = () => {
+    const Affects = this.props.issue.data.Affects;
+    const StopPoints = Affects?.StopPoints;
+    const quays = this.props.lines.reduce(
+      (acc, line) => (acc = acc.concat(line.quays)),
+      []
+    );
+    return this.getQuayOptions(StopPoints, quays);
+  };
+
+  getQuayOptions = (StopPoints, quays) => {
     return StopPoints?.AffectedStopPoint?.map(AffectedStopPoint => {
-      return line.quays.find(
-        q => q.stopPlace.id === AffectedStopPoint.StopPointRef
-      );
+      return quays.find(q => q.stopPlace.id === AffectedStopPoint.StopPointRef);
     })?.map(({ id, name }) => ({
       value: id,
       label: `${name} - ${id}`
@@ -348,6 +358,19 @@ class Edit extends React.Component {
                       />
                     )}
                   </>
+                )}
+              </>
+            )}
+
+            {this.getType() === 'stop' && (
+              <>
+                <p className="text-center text-white">Stopp</p>
+                {this.getStopQuays() && (
+                  <Select
+                    isMulti
+                    value={this.getStopQuays()}
+                    options={[this.getStopQuays()]}
+                  />
                 )}
               </>
             )}

@@ -38,11 +38,13 @@ class Register extends React.Component {
   }
 
   createStops = () => {
-    let stop = [];
-    this.props.lines.map(item => (stop = stop.concat(item.quays)));
+    const stops = this.props.lines.reduce(
+      (acc, line) => (acc = acc.concat(line.quays)),
+      []
+    );
 
     this.setState({
-      stops: stop
+      stops
     });
   };
 
