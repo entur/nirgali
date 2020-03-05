@@ -57,7 +57,7 @@ jobs:
       - *attach_workspace
       - run:
           name: "Deploy"
-          command: node_modules/.bin/firebase deploy -P default --token={$FIREBASE_TOKEN} --non-interactive --only hosting
+          command: node_modules/.bin/firebase deploy -P default --token=${FIREBASE_TOKEN} --non-interactive --only hosting
 workflows:
   "Build Pipeline":
     jobs:
