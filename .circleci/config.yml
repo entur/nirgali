@@ -59,7 +59,6 @@ jobs:
       - firebase-deploy/deploy:
           token: $FIREBASE_TOKEN
           project: default
-          only: hosting
 workflows:
   "Build Pipeline":
     jobs:

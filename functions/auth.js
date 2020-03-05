@@ -5,10 +5,6 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-const AUTH_DOMAIN = 'kc-dev.devstage.entur.io';
-const AUTH_REALM = 'rutebanken';
-const AUTH_ALGORITHM = 'RS256';
-
 const transformRoles = (roles, claim) =>
   roles
     .map(JSON.parse)
@@ -29,10 +25,10 @@ exports.auth = function(firebaseAdmin) {
       cache: true,
       rateLimit: true,
       jwksRequestsPerMinute: 5,
-      jwksUri: `https://${AUTH_DOMAIN}/auth/realms/${AUTH_REALM}/protocol/openid-connect/certs`
+      jwksUri: functions.config().auth.firebase.auth_jwks_uri
     }),
-    issuer: `https://${AUTH_DOMAIN}/auth/realms/${AUTH_REALM}`,
-    algorithm: AUTH_ALGORITHM
+    issuer: functions.config().auth.firebase.auth_issuer,
+    algorithm: 'RS256'
   });
 
   app.get('/firebase', jwtCheck, (req, res) => {
