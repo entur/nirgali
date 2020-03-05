@@ -50,8 +50,8 @@ jobs:
           cache-version: v1
           steps:
             - run:
-                name: Install devDependencies
-                working_directory: $CIRCLE_WORKING_DIRECTORY/functions
+                name: Install dependencies
+                working_directory: ${CIRCLE_WORKING_DIRECTORY}/functions
                 command: npm install
       - run:
           name: "Run tests"
