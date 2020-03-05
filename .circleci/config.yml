@@ -57,7 +57,7 @@ jobs:
       - *attach_workspace
       - run:
           name: "Deploy"
-          command: npm run deploy --token=$FIREBASE_TOKEN --non-interactive
+          command: npm run deploy --token=${FIREBASE_TOKEN} --non-interactive
 workflows:
   "Build Pipeline":
     jobs:
