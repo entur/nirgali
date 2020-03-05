@@ -39,7 +39,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "test:functions": "jest functions",
-    "deploy": "firebase deploy -P default"
+    "deploy": "firebase deploy -P default --only hosting"
   },
   "eslintConfig": {
     "extends": "react-app"
