@@ -11,21 +11,23 @@ import api from './api/api';
 import NavBar from './components/navbar';
 import Background from './img/background.jpg';
 
-var config = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGEBUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID
+const firebaseConfig = {
+  apiKey: 'AIzaSyCKcRzWRYlZkwG4I4WTTb2uRnI7VczCX5M',
+  authDomain: 'deviation-messages.firebaseapp.com',
+  databaseURL: 'https://deviation-messages.firebaseio.com',
+  projectId: 'deviation-messages',
+  storageBucket: 'deviation-messages.appspot.com',
+  messagingSenderId: '132641363074',
+  appId: '1:132641363074:web:1069e5f0a9717b4c',
 };
+
+const firebaseAuthFunction = 'https://us-central1-deviation-messages.cloudfunctions.net/auth/firebase';
 
 const firebase = require('firebase/app');
 require('firebase/firestore');
 require('firebase/auth');
 
-firebase.initializeApp(config);
+firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 
 class App extends React.Component {
@@ -178,7 +180,7 @@ const renderIndex = userInfo => {
 
 auth.initAuth(token => {
   return fetch(
-    'https://us-central1-deviation-messages.cloudfunctions.net/auth/firebase',
+    firebaseAuthFunction,
     {
       headers: {
         Authorization: 'Bearer ' + token

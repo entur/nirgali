@@ -38,7 +38,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "test:functions": "jest functions"
+    "test:functions": "jest functions",
+    "deploy": "firebase deploy -P default"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -67,5 +68,8 @@
   },
   "prettier": {
     "singleQuote": true
+  },
+  "devDependencies": {
+    "firebase-cli": "^1.2.0"
   }
 }
