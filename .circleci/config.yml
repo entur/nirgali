@@ -28,44 +28,27 @@ jobs:
             - run:
                name: Install dependencies
                command: npm install
+      - node/with-cache:
+          cache-key: functions/package-lock.json
+          cache-version: v1
+          steps:
+            - run:
+                name: Install functions dependencies
+                working_directory: functions/
+                command: npm install
       - run:
           name: "Run tests"
           command: npm run test
+      - run:
+          name: "Run functions tests"
+          command: "npm run test:functions"
       - run:
           name: "Create production build"
           command: npm run build
       - persist_to_workspace:
           root: *workspace_root
           paths:
-            - package.json
-            - .firebaserc
-            - firebase.json
-            - firestore.indexes.json
-            - firestore.rules
-            - build/*
-            - node_modules/*
-  build-functions:
-    executor:
-      name: node/default
-      tag: '10.13'
-    steps:
-      - *attach_workspace
-      - checkout
-      - node/with-cache:
-          cache-key: functions/package-lock.json
-          cache-version: v1
-          steps:
-            - run:
-                name: Install dependencies
-                working_directory: functions/
-                command: npm install
-      - run:
-          name: "Run tests"
-          command: "npm run test:functions"
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - functions/node_modules/**
+            - .
   deploy:
     executor:
       name: node/default
@@ -79,7 +62,6 @@ workflows:
   "Build Pipeline":
     jobs:
       - build
-      - build-functions
       - deploy:
           context: global
           filters:
@@ -87,4 +69,3 @@ workflows:
               only: master
           requires:
             - build
-            - build-functions
