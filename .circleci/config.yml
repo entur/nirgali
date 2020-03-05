@@ -1,0 +1,76 @@
+# For help and tutorials, visit https://circleci.com/docs/
+# For internal documentation visit https://enturas.atlassian.net/wiki/spaces/ESP/pages/580026490/CircleCI
+version: 2.1
+
+orbs:
+#  slack: circleci/slack@1.0.0
+  node: circleci/node@1.1.6
+
+references:
+  workspace_root: &workspace_root
+    ~/project
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *workspace_root
+
+jobs:
+  build:
+    executor:
+      name: node/default
+      tag: '10.13'
+    steps:
+      - *attach_workspace
+      - checkout
+      - node/with-cache:
+          cache-key: package-lock.json
+          cache-version: v1
+          steps:
+            - run:
+               name: Install dependencies
+               command: npm install
+      - run:
+          name: "Run tests"
+          command: npm run test
+      - run:
+          name: "Create production build"
+          command: npm run build
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - build/*
+  build-functions:
+    executor:
+      name: node/default
+      tag: '10.13'
+    steps:
+      - *attach_workspace
+      - checkout
+      - node/with-cache:
+          cache-key: functions/package-lock.json
+          cache-version: v1
+          steps:
+            - run:
+                name: Install devDependencies
+                working_directory: $CIRCLE_WORKING_DIRECTORY/functions
+                command: npm install
+      - run:
+          name: "Run tests"
+          command: "npm run test:functions"
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - functions/node_modules/**
+
+workflows:
+  "Build Pipeline":
+    jobs:
+      - build
+      - build-functions
+      # - deploy:
+      #     context: global
+      #     filters:
+      #       branches:
+      #         only: master
+      #     requires:
+      #       - build
+      #       - build-functions
