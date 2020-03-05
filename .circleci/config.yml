@@ -51,7 +51,7 @@ jobs:
           steps:
             - run:
                 name: Install dependencies
-                working_directory: ${CIRCLE_WORKING_DIRECTORY}/functions
+                working_directory: functions/
                 command: npm install
       - run:
           name: "Run tests"
