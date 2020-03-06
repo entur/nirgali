@@ -34,6 +34,7 @@
     "xml-js": "1.6.10"
   },
   "scripts": {
+    "prestart": "cp config/keycloak-dev.json public/keycloak.json",
     "start": "PORT=3001 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -61,7 +62,7 @@
     }
   },
   "lint-staged": {
-    "{src,functions}/**!(*node_modules)/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+    "{src,functions,config}/**!(*node_modules)/*.{js,jsx,ts,tsx,json,css,scss,md}": [
       "prettier --write"
     ]
   },

@@ -56,6 +56,9 @@ jobs:
       tag: '10.13'
     steps:
       - *attach_workspace
+      - run:
+          name: "Prepare keycloak config"
+          command: cp config/keycloak-dev.json public/keycloak.json
       - firebase-deploy/deploy:
           token: $FIREBASE_TOKEN_DEV
           project: dev

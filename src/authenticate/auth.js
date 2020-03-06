@@ -9,7 +9,7 @@ const minValiditySeconds = 60;
 const refreshRateMs = 60 * 1000;
 
 const initAuth = onSuccessfulAuth => {
-  const kc = new Keycloak('/key.json');
+  const kc = new Keycloak('/keycloak.json');
   const options = { checkLoginIframe: false };
   kc.init(options).success(authenticated => {
     if (authenticated) {
