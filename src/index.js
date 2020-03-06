@@ -11,22 +11,9 @@ import api from './api/api';
 import NavBar from './components/navbar';
 import Background from './img/background.jpg';
 
-const firebaseConfig = {
-  apiKey: 'AIzaSyCKcRzWRYlZkwG4I4WTTb2uRnI7VczCX5M',
-  authDomain: 'deviation-messages.firebaseapp.com',
-  databaseURL: 'https://deviation-messages.firebaseio.com',
-  projectId: 'deviation-messages',
-  storageBucket: 'deviation-messages.appspot.com',
-  messagingSenderId: '132641363074',
-  appId: '1:132641363074:web:1069e5f0a9717b4c',
-};
-
 const firebase = require('firebase/app');
 require('firebase/firestore');
 require('firebase/auth');
-
-firebase.initializeApp(firebaseConfig);
-var db = firebase.firestore();
 
 class App extends React.Component {
   state = {
@@ -87,7 +74,7 @@ class App extends React.Component {
     }
     const codespace = this.state.selectedOrganization.split(':')[0];
     const authority = this.state.selectedOrganization;
-    this.unsubscribeSnapshotListener = db
+    this.unsubscribeSnapshotListener = this.props.db
       .collection(`codespaces/${codespace}/authorities/${authority}/messages`)
       .onSnapshot(this.onMessagesUpdate);
   };
@@ -150,7 +137,7 @@ class App extends React.Component {
                   ({ id }) => id === props.match.params.id
                 )}
                 lines={this.state.lines}
-                firebase={db}
+                firebase={this.props.db}
                 organization={this.state.selectedOrganization}
               />
             )}
@@ -160,7 +147,7 @@ class App extends React.Component {
             render={props => (
               <Register
                 {...props}
-                firebase={db}
+                firebase={this.props.db}
                 lines={this.state.lines}
                 organization={this.state.selectedOrganization}
               />
@@ -173,7 +160,10 @@ class App extends React.Component {
 }
 
 const renderIndex = userInfo => {
-  ReactDOM.render(<App userInfo={userInfo} />, document.getElementById('root'));
+  fetch('/__/firebase/init.json').then(async response => {
+    firebase.initializeApp(await response.json());
+    ReactDOM.render(<App userInfo={userInfo} db={firebase.firestore()} />, document.getElementById('root'));
+  });
 };
 
 auth.initAuth(token => {
