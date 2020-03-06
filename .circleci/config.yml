@@ -50,20 +50,20 @@ jobs:
           root: *workspace_root
           paths:
             - .
-  deploy:
+  deploy-dev:
     executor:
       name: node/default
       tag: '10.13'
     steps:
       - *attach_workspace
       - firebase-deploy/deploy:
-          token: $FIREBASE_TOKEN
-          project: default
+          token: $FIREBASE_TOKEN_DEV
+          project: dev
 workflows:
   "Build Pipeline":
     jobs:
       - build
-      - deploy:
+      - deploy-dev:
           context: global
           filters:
             branches:
