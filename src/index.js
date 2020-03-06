@@ -26,6 +26,7 @@ class App extends React.Component {
 
   componentDidMount() {
     this.setOrganizations();
+    this.db = firebase.firestore();
   }
 
   setOrganizations = async () => {
@@ -74,7 +75,7 @@ class App extends React.Component {
     }
     const codespace = this.state.selectedOrganization.split(':')[0];
     const authority = this.state.selectedOrganization;
-    this.unsubscribeSnapshotListener = this.props.db
+    this.unsubscribeSnapshotListener = this.db
       .collection(`codespaces/${codespace}/authorities/${authority}/messages`)
       .onSnapshot(this.onMessagesUpdate);
   };
@@ -137,7 +138,7 @@ class App extends React.Component {
                   ({ id }) => id === props.match.params.id
                 )}
                 lines={this.state.lines}
-                firebase={this.props.db}
+                firebase={this.db}
                 organization={this.state.selectedOrganization}
               />
             )}
@@ -147,7 +148,7 @@ class App extends React.Component {
             render={props => (
               <Register
                 {...props}
-                firebase={this.props.db}
+                firebase={this.db}
                 lines={this.state.lines}
                 organization={this.state.selectedOrganization}
               />
@@ -160,25 +161,26 @@ class App extends React.Component {
 }
 
 const renderIndex = userInfo => {
-  fetch('/__/firebase/init.json').then(async response => {
-    firebase.initializeApp(await response.json());
-    ReactDOM.render(<App userInfo={userInfo} db={firebase.firestore()} />, document.getElementById('root'));
-  });
+  ReactDOM.render(<App userInfo={userInfo} />, document.getElementById('root'));
 };
 
-auth.initAuth(token => {
-  return fetch(
-    '/api/auth/firebase',
-    {
-      headers: {
-        Authorization: 'Bearer ' + token
+fetch('/__/firebase/init.json').then(async response => {
+  firebase.initializeApp(await response.json());
+
+  auth.initAuth(token => {
+    return fetch(
+      '/api/auth/firebase',
+      {
+        headers: {
+          Authorization: 'Bearer ' + token
+        }
       }
-    }
-  )
-    .then(resp => resp.json())
-    .then(({ firebaseToken }) =>
-      firebase.auth().signInWithCustomToken(firebaseToken)
-    );
+    )
+      .then(resp => resp.json())
+      .then(({ firebaseToken }) =>
+        firebase.auth().signInWithCustomToken(firebaseToken)
+      );
+  });
 });
 
 export default renderIndex;
