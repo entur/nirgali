@@ -1,6 +1,5 @@
 import Keycloak from 'keycloak-js';
 import token from './token';
-import renderIndex from '../index';
 
 // Minimum number of seconds left of token before a refresh is needed
 const minValiditySeconds = 60;
@@ -8,7 +7,7 @@ const minValiditySeconds = 60;
 // How often should lib check for valid token
 const refreshRateMs = 60 * 1000;
 
-const initAuth = onSuccessfulAuth => {
+const initAuth = (onFirstToken, onNewToken) => {
   const kc = new Keycloak('/keycloak.json');
   const options = { checkLoginIframe: false };
   kc.init(options).success(authenticated => {
@@ -17,7 +16,7 @@ const initAuth = onSuccessfulAuth => {
       setInterval(() => {
         kc.updateToken(minValiditySeconds).error(() => kc.logout());
         token.save(kc.token);
-        onSuccessfulAuth(kc.token);
+        onNewToken(kc.token);
       }, refreshRateMs);
       const userInfo = {
         logoutUrl: kc.createLogoutUrl(options),
@@ -28,9 +27,7 @@ const initAuth = onSuccessfulAuth => {
         roles: kc.tokenParsed.roles
       };
 
-      onSuccessfulAuth(kc.token).then(() => {
-        renderIndex(userInfo);
-      });
+      onFirstToken(kc.token, userInfo);
     } else {
       kc.login();
     }

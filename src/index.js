@@ -164,23 +164,25 @@ const renderIndex = userInfo => {
   ReactDOM.render(<App userInfo={userInfo} />, document.getElementById('root'));
 };
 
-fetch('/__/firebase/init.json').then(async response => {
-  firebase.initializeApp(await response.json());
+const init = async () => {
+  const firebaseConfigResponse = await fetch('/__/firebase/init.json');
+  firebase.initializeApp(await firebaseConfigResponse.json());
 
-  auth.initAuth(token => {
-    return fetch(
-      '/api/auth/firebase',
-      {
-        headers: {
-          Authorization: 'Bearer ' + token
-        }
-      }
-    )
-      .then(resp => resp.json())
-      .then(({ firebaseToken }) =>
-        firebase.auth().signInWithCustomToken(firebaseToken)
-      );
+  const headers = token => ({
+    headers: {
+      Authorization: 'Bearer ' + token
+    }
   });
-});
+  const newTokenHandler = async token => {
+    const authResponse = await fetch('/api/auth/firebase', headers(token));
+    const {firebaseToken} = await authResponse.json();
+    return firebase.auth().signInWithCustomToken(firebaseToken);
+  };
 
-export default renderIndex;
+  auth.initAuth(async (token, userInfo) => {
+    await newTokenHandler(token);
+    renderIndex(userInfo);
+  }, newTokenHandler);
+}
+
+init();
