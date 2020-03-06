@@ -31,7 +31,7 @@ exports.auth = function(firebaseAdmin) {
     algorithm: 'RS256'
   });
 
-  app.get('/firebase', jwtCheck, (req, res) => {
+  app.get('/api/auth/firebase', jwtCheck, (req, res) => {
     const { sub: uid, roles } = req.user;
 
     const additionalClaims = {

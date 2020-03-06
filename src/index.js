@@ -21,8 +21,6 @@ const firebaseConfig = {
   appId: '1:132641363074:web:1069e5f0a9717b4c',
 };
 
-const firebaseAuthFunction = 'https://us-central1-deviation-messages.cloudfunctions.net/auth/firebase';
-
 const firebase = require('firebase/app');
 require('firebase/firestore');
 require('firebase/auth');
@@ -180,7 +178,7 @@ const renderIndex = userInfo => {
 
 auth.initAuth(token => {
   return fetch(
-    firebaseAuthFunction,
+    '/api/auth/firebase',
     {
       headers: {
         Authorization: 'Bearer ' + token
