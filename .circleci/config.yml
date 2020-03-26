@@ -69,11 +69,11 @@ jobs:
     steps:
       - *attach_workspace
       - run:
-        name: "Prepare keycloak config"
-        command: cp config/keycloak-staging.json build/keycloak.json
+          name: "Prepare keycloak config"
+          command: cp config/keycloak-staging.json build/keycloak.json
       - firebase-deploy/deploy:
-        token: $FIREBASE_TOKEN_STAGING
-        project: staging
+          token: $FIREBASE_TOKEN_STAGING
+          project: staging
 workflows:
   "Build Pipeline":
     jobs:
