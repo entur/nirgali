@@ -62,6 +62,18 @@ jobs:
       - firebase-deploy/deploy:
           token: $FIREBASE_TOKEN_DEV
           project: dev
+  deploy-staging:
+    executor:
+      name: node/default
+      tag: '10.13'
+    steps:
+      - *attach_workspace
+      - run:
+        name: "Prepare keycloak config"
+        command: cp config/keycloak-staging.json build/keycloak.json
+      - firebase-deploy/deploy:
+        token: $FIREBASE_TOKEN_STAGING
+        project: staging
 workflows:
   "Build Pipeline":
     jobs:
@@ -73,3 +85,14 @@ workflows:
               only: master
           requires:
             - build
+      - approve-deploy-staging:
+          type: approval
+          requires:
+            - deploy-dev
+      - deploy-staging:
+          context: global
+          filters:
+            branches:
+              only: master
+          requires:
+            - approve-deploy-staging
