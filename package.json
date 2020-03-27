@@ -15,14 +15,14 @@
     "apollo-link-http": "^1.5.15",
     "bootstrap": "^4.3.1",
     "date-fns": "^2.9.0",
-    "firebase": "^6.2.4",
-    "firebase-admin": "^8.2.0",
+    "firebase": "^7.13.0",
     "graphql": "^14.3.1",
     "graphql-tag": "^2.10.1",
     "husky": "^4.2.3",
     "jquery": "^3.4.1",
     "keycloak-js": "3.4.3",
     "lint-staged": "^10.0.8",
+    "npm-run-all": "^4.1.5",
     "prettier": "^1.19.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
@@ -35,7 +35,9 @@
   },
   "scripts": {
     "prestart": "cp config/keycloak-dev.json public/keycloak.json",
-    "start": "PORT=3001 react-scripts start",
+    "start": "run-p --race start:firebase start:react",
+    "start:firebase": "firebase serve -p 4000",
+    "start:react": "PORT=3001 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -69,5 +71,6 @@
   "prettier": {
     "singleQuote": true
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "proxy": "http://localhost:4000"
 }
