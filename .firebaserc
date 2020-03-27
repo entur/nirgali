@@ -1,6 +1,7 @@
 {
   "projects": {
     "dev": "deviation-messages-dev",
-    "staging": "deviation-messages-staging"
+    "staging": "deviation-messages-staging",
+    "prod": "deviation-messages-prod"
   }
 }
