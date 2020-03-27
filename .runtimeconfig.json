@@ -1,0 +1,8 @@
+{
+  "auth": {
+    "firebase": {
+      "auth_jwks_uri": "https://kc-dev.devstage.entur.io/auth/realms/rutebanken/protocol/openid-connect/certs",
+      "auth_issuer": "https://kc-dev.devstage.entur.io/auth/realms/rutebanken"
+    }
+  }
+}
