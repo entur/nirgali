@@ -21,10 +21,14 @@ export default class App extends React.Component {
     this.db = this.props.firebase.firestore();
   }
 
+  logout = () => {
+    window.alert('You are not assigned to a company');
+    window.location.href = this.props.userInfo.logoutUrl;
+  };
+
   setOrganizations = async () => {
-    if (!this.props.userInfo.roles) {
-      window.alert('You are not assigned to a company');
-      window.location.href = this.props.userInfo.logoutUrl;
+    if (!this.props.userInfo.roles.length > 0) {
+      this.logout();
     }
 
     const allowedCodespaces = this.props.userInfo.roles
@@ -32,10 +36,18 @@ export default class App extends React.Component {
       .filter(({ r: role }) => role === 'editSX')
       .map(({ o: org }) => org);
 
+    if (!allowedCodespaces.length > 0) {
+      this.logout();
+    }
+
     const response = await api.getAuthorities();
     const organizations = response.data.authorities.filter(authority =>
       allowedCodespaces.includes(authority.id.split(':')[0])
     );
+
+    if (!organizations.length > 0) {
+      this.logout();
+    }
 
     this.setState(
       {
