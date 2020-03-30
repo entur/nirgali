@@ -1,0 +1,4 @@
+{
+  "journey-planner-api": "https://api.entur.io/journey-planner/v2/graphql",
+  "organisations-api": "https://api.entur.io/organisations/v1/register/organisations"
+}

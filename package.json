@@ -34,7 +34,9 @@
     "xml-js": "1.6.10"
   },
   "scripts": {
-    "prestart": "cp config/keycloak-dev.json public/keycloak.json",
+    "copy:config": "cp config/config-dev.json public/config.json",
+    "copy:keycloak": "cp config/keycloak-dev.json public/keycloak.json",
+    "prestart": "run-p --race copy:config copy:keycloak",
     "start": "run-p --race start:firebase start:react",
     "start:firebase": "firebase serve -p 4000",
     "start:react": "PORT=3001 react-scripts start",

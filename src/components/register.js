@@ -1,6 +1,5 @@
 import React from 'react';
 import Select from 'react-select';
-import api from '../api/api';
 import 'flatpickr/dist/themes/material_blue.css';
 import Flatpickr from 'react-flatpickr';
 import { Button } from '@entur/component-library';
@@ -350,7 +349,7 @@ class Register extends React.Component {
     const date = document.getElementById('date').value;
     const line = this.state.chosenLine;
 
-    api.getDepartures(line, date).then(response => {
+    this.props.api.getDepartures(line, date).then(response => {
       this.setState({
         departures: response.data.serviceJourneys,
         departureSok: true

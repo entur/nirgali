@@ -1,8 +1,6 @@
 const { createApolloFetch } = require('apollo-fetch');
 
-const URI = 'https://api.dev.entur.io/journey-planner/v2/graphql';
-
-const getAuthorities = () => {
+const getAuthorities = URI => () => {
   const apolloFetch = createApolloFetch({
     uri: URI,
     headers: { 'ET-client-Name': 'entur - deviation-messages' }
@@ -20,7 +18,7 @@ const getAuthorities = () => {
     .then(response => response);
 };
 
-const getLines = authorities => {
+const getLines = URI => authorities => {
   const apolloFetch = createApolloFetch({
     uri: URI,
     headers: { 'ET-client-Name': 'entur - deviation-messages' }
@@ -45,7 +43,7 @@ const getLines = authorities => {
     .then(response => response);
 };
 
-const getDepartures = (line, date) => {
+const getDepartures = URI => (line, date) => {
   const apolloFetch = createApolloFetch({
     uri: URI,
     headers: { 'ET-client-Name': 'entur - deviation-messages' }
@@ -71,7 +69,7 @@ const getDepartures = (line, date) => {
     .then(response => response);
 };
 
-const getServiceJourney = (id, date) => {
+const getServiceJourney = URI => (id, date) => {
   const apolloFetch = createApolloFetch({
     uri: URI,
     headers: { 'ET-client-Name': 'entur - deviation-messages' }
@@ -103,20 +101,16 @@ const fetchGet = {
   }
 };
 
-const organisationID = id => {
-  fetch(
-    'https://api.staging.entur.io/organisations/v1/register/organisations/' +
-      id,
-    fetchGet
-  )
+const organisationID = URI => id => {
+  fetch(`${URI}/${id}`, fetchGet)
     .catch(error => error)
     .then(response => response);
 };
 
-export default {
-  getAuthorities,
-  organisationID,
-  getLines,
-  getDepartures,
-  getServiceJourney
-};
+export default config => ({
+  getAuthorities: getAuthorities(config['journey-planner-api']),
+  organisationID: organisationID(config['organisations-api']),
+  getLines: getLines(config['journey-planner-api']),
+  getDepartures: getDepartures(config['journey-planner-api']),
+  getServiceJourney: getServiceJourney(config['journey-planner-api'])
+});

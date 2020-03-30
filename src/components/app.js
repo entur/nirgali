@@ -3,7 +3,6 @@ import { Route, BrowserRouter as Router } from 'react-router-dom';
 import Overview from './overview';
 import Register from './register';
 import Edit from './edit';
-import api from '../api/api';
 import NavBar from './navbar';
 import Background from '../img/background.jpg';
 
@@ -40,7 +39,7 @@ export default class App extends React.Component {
       this.logout();
     }
 
-    const response = await api.getAuthorities();
+    const response = await this.props.api.getAuthorities();
     const organizations = response.data.authorities.filter(authority =>
       allowedCodespaces.includes(authority.id.split(':')[0])
     );
@@ -97,7 +96,9 @@ export default class App extends React.Component {
   };
 
   getLines = async () => {
-    const response = await api.getLines(this.state.selectedOrganization);
+    const response = await this.props.api.getLines(
+      this.state.selectedOrganization
+    );
     if (response.data) {
       this.setState({
         lines: response.data.lines
@@ -152,6 +153,7 @@ export default class App extends React.Component {
             render={props => (
               <Register
                 {...props}
+                api={this.props.api}
                 firebase={this.db}
                 lines={this.state.lines}
                 organization={this.state.selectedOrganization}

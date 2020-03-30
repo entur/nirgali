@@ -59,6 +59,9 @@ jobs:
       - run:
           name: "Prepare keycloak config"
           command: cp config/keycloak-dev.json build/keycloak.json
+      - run:
+          name: "Prepare app config"
+          command: cp config/config-dev.json build/config.json
       - firebase-deploy/deploy:
           token: $FIREBASE_TOKEN_DEV
           project: dev
@@ -71,6 +74,9 @@ jobs:
       - run:
           name: "Prepare keycloak config"
           command: cp config/keycloak-staging.json build/keycloak.json
+      - run:
+          name: "Prepare app config"
+          command: cp config/config-staging.json build/config.json
       - firebase-deploy/deploy:
           token: $FIREBASE_TOKEN_STAGING
           project: staging
@@ -83,6 +89,9 @@ jobs:
       - run:
           name: "Prepare keycloak config"
           command: cp config/keycloak-prod.json build/keycloak.json
+      - run:
+          name: "Prepare app config"
+          command: cp config/config-prod.json build/config.json
       - firebase-deploy/deploy:
           token: $FIREBASE_TOKEN_PROD
           project: prod
