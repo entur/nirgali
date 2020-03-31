@@ -80,8 +80,8 @@ Deployment is handled by [circleci](https://app.circleci.com/pipelines/github/en
 
 The auth function in firebase needs two config parameters to be set:
 
-* `config auth_jwks_uri`
-* `auth_issuer`
+* `auth.firebase.config auth_jwks_uri`
+* `auth.firebase.auth_issuer`
 
 Use firebase cli to set them (project alias from .firebaserc)
 
