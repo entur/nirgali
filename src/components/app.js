@@ -144,6 +144,7 @@ export default class App extends React.Component {
                 )}
                 lines={this.state.lines}
                 firebase={this.db}
+                api={this.props.api}
                 organization={this.state.selectedOrganization}
               />
             )}

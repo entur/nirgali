@@ -4,7 +4,6 @@ import { Button } from '@entur/component-library';
 import format from 'date-fns/format';
 import addHours from 'date-fns/addHours';
 import Select from 'react-select';
-import api from '../api/api';
 
 class Edit extends React.Component {
   state = {
@@ -254,7 +253,7 @@ class Edit extends React.Component {
     const DataFrameRef = FramedVehicleJourneyRef?.DataFrameRef;
 
     if (DatedVehicleJourneyRef) {
-      api
+      this.props.api
         .getServiceJourney(DatedVehicleJourneyRef, DataFrameRef)
         .then(({ data }) => {
           this.setState({ serviceJourney: data.serviceJourney });
