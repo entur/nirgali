@@ -12,6 +12,7 @@ class Register extends React.Component {
     departures: '',
     type: undefined,
     chosenLine: undefined,
+    datedVehicleJourney: undefined,
     departure: undefined,
     checkbox: undefined,
     checkbox2: undefined,
@@ -94,7 +95,7 @@ class Register extends React.Component {
         AffectedVehicleJourney: {
           FramedVehicleJourneyRef: {
             DataFrameRef: document.getElementById('date').value,
-            DatedVehicleJourneyRef: this.state.chosenLine
+            DatedVehicleJourneyRef: this.state.datedVehicleJourney
           },
           Route: null
         }
@@ -108,7 +109,7 @@ class Register extends React.Component {
         AffectedVehicleJourney: {
           FramedVehicleJourneyRef: {
             DataFrameRef: document.getElementById('date').value,
-            DatedVehicleJourneyRef: this.state.chosenLine
+            DatedVehicleJourneyRef: this.state.datedVehicleJourney
           },
           Route: this.createAffectedRoute()
         }
@@ -345,6 +346,16 @@ class Register extends React.Component {
     this.setState({ multipleStops: event });
   };
 
+  handleDepartureDateChange = ([dObj]) => {
+    this.setState({
+      departureDate: dObj,
+      datedVehicleJourney: undefined,
+      departures: undefined,
+      message: false,
+      submit: false
+    });
+  };
+
   callApiDeparture = () => {
     const date = document.getElementById('date').value;
     const line = this.state.chosenLine;
@@ -511,7 +522,7 @@ class Register extends React.Component {
                     dateFormat: 'Y-m-d'
                   }}
                   value={this.state.departureDate}
-                  onChange={([dObj]) => this.setState({ departureDate: dObj })}
+                  onChange={this.handleDepartureDateChange}
                 />
                 <button
                   onClick={this.callApiDeparture}
