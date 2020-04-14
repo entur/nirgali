@@ -196,7 +196,7 @@ class Edit extends React.Component {
     const line = this.props.lines.find(l => l.id === id);
     return {
       value: line.id,
-      label: line.name + ' - ' + line.id
+      label: `${line.name} (${line.publicCode}) - ${line.id}`
     };
   };
 

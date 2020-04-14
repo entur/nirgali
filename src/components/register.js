@@ -378,7 +378,7 @@ class Register extends React.Component {
       }));
     } else {
       return list.map(item => ({
-        label: item.name + ' - ' + item.id,
+        label: `${item.name} (${item.publicCode}) - ${item.id}`,
         value: item.id
       }));
     }

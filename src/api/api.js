@@ -28,6 +28,7 @@ const getLines = URI => authorities => {
         lines(authorities: "${authorities}") {
           name
           id
+          publicCode
           quays {
             id
             name
