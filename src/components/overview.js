@@ -1,7 +1,7 @@
 import React from 'react';
 import red from '../img/red.png';
 import green from '../img/green.png';
-import { PrimaryButton as Button } from '@entur/button';
+import { PrimaryButton as Button, SecondaryButton } from '@entur/button';
 import { Table, Thead, Tbody, Tr, Th, Td } from 'react-super-responsive-table';
 import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import { Switch } from '@entur/form';
@@ -111,14 +111,11 @@ class Overview extends React.Component {
           <h2 className="text-center text-white">Oversikt</h2>
           <br></br>
           <div>
-            <Button
-              variant="secondary"
-              onClick={this.handleClick}
-              type="button"
-              className="btn btn-warning btn-lg btn-block"
-            >
-              Ny melding
-            </Button>
+            <Contrast>
+              <SecondaryButton width="fluid" onClick={this.handleClick}>
+                Ny melding
+              </SecondaryButton>
+            </Contrast>
           </div>
           <br></br>
           <Contrast>
