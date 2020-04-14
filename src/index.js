@@ -11,6 +11,8 @@ import "firebase/firestore";
 import 'bootstrap/dist/css/bootstrap.css';
 import './style/index.css';
 
+import '@entur/button/dist/styles.css';
+
 const renderApp = (userInfo, config) => {
   ReactDOM.render((
     <App firebase={firebase} userInfo={userInfo} api={api(config)}/>

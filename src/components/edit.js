@@ -1,6 +1,12 @@
 import React from 'react';
 import Flatpickr from 'react-flatpickr';
-import { Button } from '@entur/component-library';
+import {
+  PrimaryButton as Button,
+  NegativeButton,
+  SecondaryButton
+} from '@entur/button';
+import { ButtonGroup } from '@entur/button';
+import { Contrast } from '@entur/layout';
 import format from 'date-fns/format';
 import addHours from 'date-fns/addHours';
 import Select from 'react-select';
@@ -99,54 +105,28 @@ class Edit extends React.Component {
   checkStatus = param => {
     if (param === 'open') {
       return (
-        <div className="submit justify-content-center">
-          <div className="form-group d-flex">
-            <Button
-              variant="negative"
-              width="fluid"
-              type="button"
-              onClick={this.setProgressToClosed}
-              className="p-2 btn "
-            >
+        <Contrast>
+          <ButtonGroup>
+            <NegativeButton type="button" onClick={this.setProgressToClosed}>
               Deaktiver
-            </Button>
-            <Button
-              variant="secondary"
-              width="fluid"
-              type="submit"
-              className="p-2 btn "
-            >
-              Endre
-            </Button>
-          </div>
-          <Button
-            variant="secondary"
-            onClick={this.handleClick}
-            type="submit"
-            className="btn btn-warning btn-lg btn-block"
-          >
+            </NegativeButton>
+            <SecondaryButton type="submit">Endre</SecondaryButton>
+          </ButtonGroup>
+          <Button onClick={this.handleClick} type="submit">
             Tilbake
           </Button>
-        </div>
+        </Contrast>
       );
     } else {
       return (
-        <div className="submit justify-content-center">
-          <Button
-            variant="success"
-            className="btn btn-success btn-lg btn-block"
-          >
-            Aktiver
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={this.handleClick}
-            type="submit"
-            className="btn btn-warning btn-lg btn-block"
-          >
-            Tilbake
-          </Button>
-        </div>
+        <Contrast>
+          <ButtonGroup>
+            <SecondaryButton>Aktiver</SecondaryButton>
+            <Button onClick={this.handleClick} type="submit">
+              Tilbake
+            </Button>
+          </ButtonGroup>
+        </Contrast>
       );
     }
   };

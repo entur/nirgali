@@ -1,7 +1,7 @@
 import React from 'react';
 import red from '../img/red.png';
 import green from '../img/green.png';
-import { Button } from '@entur/component-library';
+import { PrimaryButton as Button } from '@entur/button';
 import { Table, Thead, Tbody, Tr, Th, Td } from 'react-super-responsive-table';
 import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import { Switch } from '@entur/form';

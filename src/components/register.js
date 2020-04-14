@@ -2,7 +2,8 @@ import React from 'react';
 import Select from 'react-select';
 import 'flatpickr/dist/themes/material_blue.css';
 import Flatpickr from 'react-flatpickr';
-import { Button } from '@entur/component-library';
+import { PrimaryButton as Button, SecondaryButton } from '@entur/button';
+import { Contrast } from '@entur/layout';
 
 class Register extends React.Component {
   state = {
@@ -362,6 +363,7 @@ class Register extends React.Component {
 
     this.props.api.getDepartures(line, date).then(response => {
       this.setState({
+        departureDate: date,
         departures: response.data.serviceJourneys,
         departureSok: true
       });
@@ -524,13 +526,11 @@ class Register extends React.Component {
                   value={this.state.departureDate}
                   onChange={this.handleDepartureDateChange}
                 />
-                <button
-                  onClick={this.callApiDeparture}
-                  type="button"
-                  className="btn btn-primary btn-lg btn-block"
-                >
-                  Søk avganger
-                </button>
+                <Contrast>
+                  <Button width="fluid" onClick={this.callApiDeparture}>
+                    Søk avganger
+                  </Button>
+                </Contrast>
               </div>
             )}
 
@@ -657,23 +657,12 @@ class Register extends React.Component {
             )}
             <br></br>
             <div className="submit justify-content-center">
-              {this.state.submit && (
-                <Button
-                  variant="success"
-                  type="submit"
-                  className="btn btn-primary btn-lg btn-block"
-                >
-                  Registrer
-                </Button>
-              )}
-              <Button
-                variant="secondary"
-                onClick={this.handleClick}
-                type="submit"
-                className="btn btn-warning btn-lg btn-block"
-              >
-                Tilbake
-              </Button>
+              <Contrast>
+                {this.state.submit && <Button type="submit">Registrer</Button>}
+                <SecondaryButton onClick={this.handleClick} type="submit">
+                  Tilbake
+                </SecondaryButton>
+              </Contrast>
             </div>
           </form>
         </div>
