@@ -98,8 +98,8 @@ class Overview extends React.Component {
       ? this.props.messages
       : this.props.messages.filter(({ data: message }) => {
           return (
-            message.Progress === 'open' ||
-            message.ValidityPeriod.EndTime > this.state.date
+            Date.parse(message.ValidityPeriod.EndTime) >
+            Date.parse(this.state.date)
           );
         });
 
