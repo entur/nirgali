@@ -1,9 +1,9 @@
 import React from 'react';
 import Select from 'react-select';
-import 'flatpickr/dist/themes/material_blue.css';
-import Flatpickr from 'react-flatpickr';
 import { PrimaryButton as Button, SecondaryButton } from '@entur/button';
 import { Contrast } from '@entur/layout';
+import { DatePicker } from '@entur/datepicker';
+import { formatISO } from 'date-fns';
 
 class Register extends React.Component {
   state = {
@@ -99,7 +99,9 @@ class Register extends React.Component {
       VehicleJourneys: {
         AffectedVehicleJourney: {
           FramedVehicleJourneyRef: {
-            DataFrameRef: document.getElementById('date').value,
+            DataFrameRef: formatISO(this.state.date, {
+              representation: 'date'
+            }),
             DatedVehicleJourneyRef: this.state.datedVehicleJourney
           },
           Route: null
@@ -113,7 +115,9 @@ class Register extends React.Component {
       VehicleJourneys: {
         AffectedVehicleJourney: {
           FramedVehicleJourneyRef: {
-            DataFrameRef: document.getElementById('date').value,
+            DataFrameRef: formatISO(this.state.date, {
+              representation: 'date'
+            }),
             DatedVehicleJourneyRef: this.state.datedVehicleJourney
           },
           Route: this.createAffectedRoute()
@@ -348,7 +352,7 @@ class Register extends React.Component {
     this.setState({ multipleStops: event });
   };
 
-  handleDepartureDateChange = ([dObj]) => {
+  handleDepartureDateChange = dObj => {
     this.setState({
       departureDate: dObj,
       datedVehicleJourney: undefined,
@@ -359,16 +363,17 @@ class Register extends React.Component {
   };
 
   callApiDeparture = () => {
-    const date = document.getElementById('date').value;
+    const date = this.state.departureDate;
     const line = this.state.chosenLine;
 
-    this.props.api.getDepartures(line, date).then(response => {
-      this.setState({
-        departureDate: date,
-        departures: response.data.serviceJourneys,
-        departureSok: true
+    this.props.api
+      .getDepartures(line, formatISO(date, { representation: 'date' }))
+      .then(response => {
+        this.setState({
+          departures: response.data.serviceJourneys,
+          departureSok: true
+        });
       });
-    });
   };
 
   returnMappedObjects = list => {
@@ -510,17 +515,10 @@ class Register extends React.Component {
             <div>
               <br></br>
               <p className="text-center text-white">Gyldighetsperiode</p>
-              <Flatpickr
-                id="date"
-                name="to"
-                className="form-control"
-                options={{
-                  enableTime: false,
-                  minDate: this.state.date,
-                  dateFormat: 'Y-m-d'
-                }}
-                value={this.state.departureDate}
+              <DatePicker
+                selectedDate={this.state.departureDate}
                 onChange={this.handleDepartureDateChange}
+                dateFormat="Y-m-d"
               />
               <Contrast>
                 <Button width="fluid" onClick={this.callApiDeparture}>
@@ -577,7 +575,7 @@ class Register extends React.Component {
             <div className="bd-highlight justify-content-center">
               <p className="text-center text-white">Gyldighetsperiode</p>
               <div className="form-group d-flex">
-                <Flatpickr
+                {/* <Flatpickr
                   data-enable-time
                   id="from"
                   value={this.state.from}
@@ -607,7 +605,7 @@ class Register extends React.Component {
                     time_24hr: true
                   }}
                   onChange={([dObj]) => this.setState({ to: dObj })}
-                />
+                /> */}
               </div>
             </div>
           )}
