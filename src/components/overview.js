@@ -7,40 +7,13 @@ import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import { Switch } from '@entur/form';
 import { Contrast } from '@entur/layout';
 import { sortBySituationNumber } from '../util/sort';
+import format from 'date-fns/format';
 
 class Overview extends React.Component {
   state = {
-    date: '',
+    date: new Date(),
     showExpiredMessages: false
   };
-
-  componentDidMount() {
-    let date = new Date().getDate();
-    if (date < 10) {
-      date = '0' + date;
-    }
-    let month = new Date().getMonth() + 1;
-    if (month < 10) {
-      month = '0' + month;
-    }
-    let year = new Date().getFullYear();
-    let hours = new Date().getHours();
-    if (hours < 10) {
-      hours = '0' + hours;
-    }
-    let min = new Date().getMinutes();
-    if (min < 10) {
-      min = '0' + min;
-    }
-    let sec = new Date().getSeconds();
-    if (sec < 10) {
-      sec = '0' + sec;
-    }
-
-    this.setState({
-      date: `${year}-${month}-${date}T${hours}:${min}:${sec}+02:00`
-    });
-  }
 
   handleClick = () => {
     this.props.history.push('/register');
@@ -48,7 +21,7 @@ class Overview extends React.Component {
 
   returnRedOrGreenIcon = param => {
     if (
-      Date.parse(param.ValidityPeriod.EndTime) < Date.parse(this.state.date) ||
+      Date.parse(param.ValidityPeriod.EndTime) < this.state.date ||
       param.Progress === 'closed'
     ) {
       return <img src={red} id="not_active" alt="" height="30" width="30" />;
@@ -76,17 +49,7 @@ class Overview extends React.Component {
   };
 
   getDate = param => {
-    if (param) {
-      var datePart = param.match(/\d+/g),
-        year = datePart[0].substring(2),
-        month = datePart[1],
-        day = datePart[2],
-        hour = datePart[3],
-        minutes = datePart[4];
-      return `${hour}:${minutes}  ${day}.${month}.${year}`;
-    } else {
-      return 'Ikke oppgitt';
-    }
+    return param ? format(new Date(param), 'HH:mm dd.MM.yyyy') : 'Ikke oppgitt';
   };
 
   edit = id => {
@@ -98,8 +61,9 @@ class Overview extends React.Component {
       ? this.props.messages
       : this.props.messages.filter(({ data: message }) => {
           return (
+            !message.ValidityPeriod.EndTime ||
             Date.parse(message.ValidityPeriod.EndTime) >
-            Date.parse(this.state.date)
+              Date.parse(this.state.date)
           );
         });
 

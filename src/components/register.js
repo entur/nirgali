@@ -519,6 +519,7 @@ class Register extends React.Component {
                 selectedDate={this.state.departureDate}
                 onChange={this.handleDepartureDateChange}
                 dateFormat="Y-m-d"
+                minDate={this.state.date}
               />
               <Contrast>
                 <Button width="fluid" onClick={this.callApiDeparture}>
@@ -575,37 +576,20 @@ class Register extends React.Component {
             <div className="bd-highlight justify-content-center">
               <p className="text-center text-white">Gyldighetsperiode</p>
               <div className="form-group d-flex">
-                {/* <Flatpickr
-                  data-enable-time
-                  id="from"
-                  value={this.state.from}
-                  name="from"
-                  className="date-form form-control"
-                  options={{
-                    enableTime: true,
-                    dateFormat: 'Y-m-d H:i',
-                    minDate: this.state.date,
-                    time_24hr: true
-                  }}
-                  onChange={([dObj]) => this.setState({ from: dObj })}
+                <DatePicker
+                  selectedDate={this.state.from}
+                  onChange={from => this.setState({ from })}
+                  dateFormat="yyyy-MM-dd HH:mm"
+                  minDate={this.state.date}
+                  showTimeInput
                 />
-                <Flatpickr
-                  id="date-to"
-                  data-enable-time
-                  value={this.state.to}
-                  name="to"
-                  placeholder="Til-dato"
-                  className="date-form form-control"
-                  options={{
-                    enableTime: true,
-                    dateFormat: 'Y-m-d H:i',
-                    minDate: this.state.from
-                      ? this.state.from
-                      : this.state.date,
-                    time_24hr: true
-                  }}
-                  onChange={([dObj]) => this.setState({ to: dObj })}
-                /> */}
+                <DatePicker
+                  selectedDate={this.state.to}
+                  onChange={to => this.setState({ to })}
+                  dateFormat="yyyy-MM-dd HH:mm"
+                  minDate={this.state.from}
+                  showTimeInput
+                />
               </div>
             </div>
           )}
@@ -616,7 +600,6 @@ class Register extends React.Component {
                 <p className="text-center text-white">Rapporttype</p>
                 <select
                   className="form-control"
-                  defaultValue={'incident'}
                   name="ReportType"
                   value={this.state.reportType}
                   onChange={reportType => this.setState({ reportType })}

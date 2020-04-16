@@ -1,5 +1,5 @@
 import React from 'react';
-import Flatpickr from 'react-flatpickr';
+import { DatePicker } from '@entur/datepicker';
 import {
   PrimaryButton as Button,
   NegativeButton,
@@ -7,25 +7,16 @@ import {
 } from '@entur/button';
 import { ButtonGroup } from '@entur/button';
 import { Contrast } from '@entur/layout';
-import format from 'date-fns/format';
 import addHours from 'date-fns/addHours';
 import Select from 'react-select';
+import { formatISO } from 'date-fns';
 
 class Edit extends React.Component {
   state = {
-    id: this.props.match.params.id,
-    date: '',
-    dateShort: '',
-    serviceJourney: undefined
+    serviceJourney: undefined,
+    from: undefined,
+    to: undefined
   };
-
-  componentDidMount() {
-    const now = new Date();
-    this.setState({
-      date: format(now, `yyyy-MM-dd'T'HH:mm:ss+02:00`),
-      dateShort: format(now, `yyyy-MM-dd'T'HH:mm`)
-    });
-  }
 
   componentDidUpdate(prevProps) {
     if (
@@ -60,13 +51,13 @@ class Edit extends React.Component {
         delete this.props.issue.data.Advice;
       }
     }
-    if (event.target.from.value) {
-      this.props.issue.data.ValidityPeriod.StartTime =
-        event.target.from.value.replace(' ', 'T') + ':00+02:00';
+    if (this.state.from) {
+      this.props.issue.data.ValidityPeriod.StartTime = formatISO(
+        this.state.from
+      );
     }
-    if (event.target.to.value) {
-      this.props.issue.data.ValidityPeriod.EndTime =
-        event.target.to.value.replace(' ', 'T') + ':00+02:00';
+    if (this.state.to) {
+      this.props.issue.data.ValidityPeriod.EndTime = formatISO(this.state.to);
     }
     this.props.issue.data.ReportType = event.target.reportType.value;
 
@@ -88,7 +79,7 @@ class Edit extends React.Component {
     const update = {
       Progress: 'closed',
       ValidityPeriod: {
-        EndTime: format(addHours(new Date(), 5), `yyyy-MM-dd'T'HH:mm:ss+02:00`)
+        EndTime: formatISO(addHours(new Date(), 5))
       }
     };
     const codespace = this.props.organization.split(':')[0];
@@ -154,16 +145,7 @@ class Edit extends React.Component {
         return '';
       }
     }
-    if (type === 'from') {
-      return issue.ValidityPeriod.StartTime.replace(':00+02:00', '');
-    }
-    if (type === 'to') {
-      if (issue.ValidityPeriod.EndTime) {
-        return issue.ValidityPeriod.EndTime.replace(':00+02:00', '');
-      } else {
-        return 'Til-dato';
-      }
-    }
+
     return 'error';
   };
 
@@ -358,31 +340,28 @@ class Edit extends React.Component {
 
             <p className="text-center text-white">Gyldighetsperiode</p>
             <div className="form-group d-flex">
-              <Flatpickr
-                data-enable-time
-                value={this.returnValue('from')}
-                name="from"
-                className="date-form form-control"
-                options={{
-                  enableTime: true,
-                  dateFormat: 'Y-m-d H:i',
-                  time_24hr: true
-                }}
+              <DatePicker
+                selectedDate={
+                  this.state.from ||
+                  new Date(this.props.issue.data.ValidityPeriod.StartTime)
+                }
+                onChange={from => this.setState({ from })}
+                dateFormat="yyyy-MM-dd HH:mm"
+                minDate={new Date()}
+                showTimeInput
               />
-              <Flatpickr
-                onChange={this.handleChangeDate}
-                id="date-to"
-                data-enable-time
+              <DatePicker
+                selectedDate={
+                  this.state.to ||
+                  (this.props.issue.data.ValidityPeriod.EndTime
+                    ? new Date(this.props.issue.data.ValidityPeriod.EndTime)
+                    : undefined)
+                }
+                onChange={to => this.setState({ to })}
+                dateFormat="yyyy-MM-dd HH:mm"
+                minDate={this.state.from}
+                showTimeInput
                 placeholder="Til-dato"
-                value={this.returnValue('to')}
-                name="to"
-                className="date-form form-control"
-                options={{
-                  enableTime: true,
-                  minDate: this.state.dateShort,
-                  dateFormat: 'Y-m-d H:i',
-                  time_24hr: true
-                }}
               />
             </div>
             <br></br>
