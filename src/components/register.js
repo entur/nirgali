@@ -26,7 +26,11 @@ class Register extends React.Component {
     date: undefined,
     departureDate: undefined,
     from: undefined,
-    to: undefined
+    to: undefined,
+    reportType: 'incident',
+    oppsummering: '',
+    beskrivelse: '',
+    forslag: ''
   };
 
   componentDidMount() {
@@ -123,17 +127,13 @@ class Register extends React.Component {
   };
 
   handleSubmit = async event => {
-    event.preventDefault();
+    const newIssue = await this.createNewIssue();
 
-    const target = event.target;
-
-    const newIssue = await this.createNewIssue(target);
-
-    if (target.beskrivelse.value === '') {
+    if (this.state.beskrivelse === '') {
       delete newIssue.Description;
     }
 
-    if (target.forslag.value === '') {
+    if (this.state.forslag === '') {
       delete newIssue.Advice;
     }
 
@@ -199,8 +199,9 @@ class Register extends React.Component {
     this.props.history.push('/');
   };
 
-  createNewIssue = async target => {
+  createNewIssue = async () => {
     const count = await this.getNextSituationNumber();
+
     return {
       CreationTime: this.state.date.toISOString(),
       ParticipantRef: this.props.organization.split(':')[0],
@@ -212,24 +213,24 @@ class Register extends React.Component {
       Progress: 'open',
       ValidityPeriod: null,
       Severity: 'normal',
-      ReportType: target.ReportType.value,
+      ReportType: this.state.reportType,
       Summary: {
         _attributes: {
           'xml:lang': 'NO'
         },
-        _text: target.oppsummering.value
+        _text: this.state.oppsummering
       },
       Description: {
         _attributes: {
           'xml:lang': 'NO'
         },
-        _text: target.beskrivelse.value
+        _text: this.state.beskrivelse
       },
       Advice: {
         _attributes: {
           'xml:lang': 'NO'
         },
-        _text: target.forslag.value
+        _text: this.state.forslag
       },
       Affects: []
     };
@@ -302,7 +303,7 @@ class Register extends React.Component {
 
   handleChangeDeparture = event => {
     this.setState({
-      chosenLine: event.value,
+      datedVehicleJourney: event.value,
       message: true,
       submit: true
     });
@@ -431,240 +432,250 @@ class Register extends React.Component {
     return (
       <div>
         <div className="register_box">
-          <form
-            className="register"
-            onSubmit={this.handleSubmit}
-            autoComplete="off"
-          >
-            <h2 className="text-center text-white">Registrer ny melding</h2>
-            <br></br>
+          <h2 className="text-center text-white">Registrer ny melding</h2>
+          <br></br>
+          <div className="choose_type">
+            <p className="text-center text-white">
+              Velg linje, stopp eller avgang
+            </p>
+            <select
+              className="browser-default custom-select"
+              defaultValue={'default'}
+              onChange={this.handleChangeType}
+            >
+              <option value="default" disabled>
+                {' '}
+              </option>
+              <option value="line">Linje</option>
+              <option value="stop">Stopp</option>
+              <option value="departure">Avgang</option>
+            </select>
+          </div>
+          {this.props.lines && (
             <div className="choose_type">
-              <p className="text-center text-white">
-                Velg linje, stopp eller avgang
-              </p>
-              <select
-                className="browser-default custom-select"
-                defaultValue={'default'}
-                onChange={this.handleChangeType}
-              >
-                <option value="default" disabled>
-                  {' '}
-                </option>
-                <option value="line">Linje</option>
-                <option value="stop">Stopp</option>
-                <option value="departure">Avgang</option>
-              </select>
-            </div>
-            {this.props.lines && (
-              <div className="choose_type">
-                {(this.state.type === 'line' ||
-                  this.state.type === 'departure') && (
-                  <Select
-                    placeholder="Velg linje"
-                    onChange={this.handleChangeLine}
-                    options={this.returnMappedObjects(this.props.lines)}
-                  />
-                )}
+              {(this.state.type === 'line' ||
+                this.state.type === 'departure') && (
+                <Select
+                  placeholder="Velg linje"
+                  onChange={this.handleChangeLine}
+                  options={this.returnMappedObjects(this.props.lines)}
+                />
+              )}
 
-                {this.state.type === 'line' && this.state.chosenLine && (
-                  <div className="form-check d-flex">
-                    <label className="form-check-label" htmlFor="gridCheck">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="gridCheck"
-                        value="stops"
-                        onChange={this.handleChangeSpecifyStopsLine}
-                      />
-                      <p className="text-center text-white">
-                        Gjelder avviket for spesifikke stopp?
-                      </p>
-                    </label>
-                  </div>
-                )}
+              {this.state.type === 'line' && this.state.chosenLine && (
+                <div className="form-check d-flex">
+                  <label className="form-check-label" htmlFor="gridCheck">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="gridCheck"
+                      value="stops"
+                      onChange={this.handleChangeSpecifyStopsLine}
+                    />
+                    <p className="text-center text-white">
+                      Gjelder avviket for spesifikke stopp?
+                    </p>
+                  </label>
+                </div>
+              )}
 
-                {this.state.type === 'line' &&
-                  this.state.chosenLine &&
-                  this.state.checkbox && (
-                    <div>
-                      <Select
-                        isMulti
-                        placeholder=" "
-                        onChange={this.handleChangeSpecifiedStops}
-                        options={this.returnSpecifiedLines()}
-                      />
-                      <br></br>
-                    </div>
-                  )}
-
-                {this.state.type === 'stop' && this.state.stops && (
+              {this.state.type === 'line' &&
+                this.state.chosenLine &&
+                this.state.checkbox && (
                   <div>
                     <Select
                       isMulti
-                      placeholder="Velg stopp"
+                      placeholder=" "
                       onChange={this.handleChangeSpecifiedStops}
-                      options={this.returnMappedObjects(this.state.stops)}
+                      options={this.returnSpecifiedLines()}
                     />
                     <br></br>
                   </div>
                 )}
-              </div>
-            )}
-            {this.state.departure && this.state.chosenLine && (
-              <div>
-                <br></br>
-                <p className="text-center text-white">Gyldighetsperiode</p>
-                <Flatpickr
-                  id="date"
-                  name="to"
-                  className="form-control"
-                  options={{
-                    enableTime: false,
-                    minDate: this.state.date,
-                    dateFormat: 'Y-m-d'
-                  }}
-                  value={this.state.departureDate}
-                  onChange={this.handleDepartureDateChange}
-                />
-                <Contrast>
-                  <Button width="fluid" onClick={this.callApiDeparture}>
-                    Søk avganger
-                  </Button>
-                </Contrast>
-              </div>
-            )}
 
-            {this.state.departureSok &&
-              this.state.chosenLine &&
-              this.state.departures && (
-                <div className="choose_type">
-                  <br></br>
-                  <p className="text-center text-white">Velg avgang</p>
+              {this.state.type === 'stop' && this.state.stops && (
+                <div>
                   <Select
-                    placeholder=" "
-                    onChange={this.handleChangeDeparture}
-                    options={this.returnServiceJourney()}
+                    isMulti
+                    placeholder="Velg stopp"
+                    onChange={this.handleChangeSpecifiedStops}
+                    options={this.returnMappedObjects(this.state.stops)}
                   />
+                  <br></br>
                 </div>
               )}
-
-            {this.state.departure && this.state.message && (
-              <div className="form-check d-flex">
-                <label className="form-check-label" htmlFor="gridCheck2">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="gridCheck2"
-                    value="stops"
-                    onChange={this.handleChangeSpecifyStopsDeparture}
-                  />
-                  <p className="text-center text-white">
-                    Gjelder avviket for spesifikke stopp?
-                  </p>
-                </label>
-              </div>
-            )}
-
-            {this.state.departure && this.state.checkbox2 && (
-              <div>
-                <Select
-                  isMulti
-                  placeholder=" "
-                  onChange={this.handleChangeSpecifiedStopsDeparture}
-                  options={this.returnSpecifiedLinesDeparture()}
-                />
-                <br></br>
-              </div>
-            )}
-
-            {this.state.dateFromTo && (
-              <div className="bd-highlight justify-content-center">
-                <p className="text-center text-white">Gyldighetsperiode</p>
-                <div className="form-group d-flex">
-                  <Flatpickr
-                    data-enable-time
-                    id="from"
-                    value={this.state.from}
-                    name="from"
-                    className="date-form form-control"
-                    options={{
-                      enableTime: true,
-                      dateFormat: 'Y-m-d H:i',
-                      minDate: this.state.date,
-                      time_24hr: true
-                    }}
-                    onChange={([dObj]) => this.setState({ from: dObj })}
-                  />
-                  <Flatpickr
-                    id="date-to"
-                    data-enable-time
-                    value={this.state.to}
-                    name="to"
-                    placeholder="Til-dato"
-                    className="date-form form-control"
-                    options={{
-                      enableTime: true,
-                      dateFormat: 'Y-m-d H:i',
-                      minDate: this.state.from
-                        ? this.state.from
-                        : this.state.date,
-                      time_24hr: true
-                    }}
-                    onChange={([dObj]) => this.setState({ to: dObj })}
-                  />
-                </div>
-              </div>
-            )}
-
-            {this.state.message && (
-              <div>
-                <div className="severity&type">
-                  <p className="text-center text-white">Rapporttype</p>
-                  <select
-                    className="form-control"
-                    defaultValue={'incident'}
-                    name="ReportType"
-                  >
-                    <option value="incident">Incident</option>
-                    <option value="general">General</option>
-                  </select>
-                  <br></br>
-                </div>
-                <div className="message">
-                  <p className="text-center text-white">Melding</p>
-                  <input
-                    type="String"
-                    name="oppsummering"
-                    className="form-control"
-                    placeholder="Kort, beskrivende avvikstekst"
-                    maxLength="160"
-                    required
-                  />
-                  <input
-                    type="String"
-                    name="beskrivelse"
-                    className="form-control"
-                    placeholder="Eventuell utdypende detaljer om avviket (ikke påkrevd)"
-                  />
-                  <input
-                    type="String"
-                    name="forslag"
-                    className="form-control"
-                    placeholder="Beskrivelse om hva kunden skal/kan gjøre (ikke påkrevd)"
-                  />
-                </div>
-              </div>
-            )}
-            <br></br>
-            <div className="submit justify-content-center">
+            </div>
+          )}
+          {this.state.departure && this.state.chosenLine && (
+            <div>
+              <br></br>
+              <p className="text-center text-white">Gyldighetsperiode</p>
+              <Flatpickr
+                id="date"
+                name="to"
+                className="form-control"
+                options={{
+                  enableTime: false,
+                  minDate: this.state.date,
+                  dateFormat: 'Y-m-d'
+                }}
+                value={this.state.departureDate}
+                onChange={this.handleDepartureDateChange}
+              />
               <Contrast>
-                {this.state.submit && <Button type="submit">Registrer</Button>}
-                <SecondaryButton onClick={this.handleClick} type="submit">
-                  Tilbake
-                </SecondaryButton>
+                <Button width="fluid" onClick={this.callApiDeparture}>
+                  Søk avganger
+                </Button>
               </Contrast>
             </div>
-          </form>
+          )}
+
+          {this.state.departureSok &&
+            this.state.chosenLine &&
+            this.state.departures && (
+              <div className="choose_type">
+                <br></br>
+                <p className="text-center text-white">Velg avgang</p>
+                <Select
+                  placeholder=" "
+                  onChange={this.handleChangeDeparture}
+                  options={this.returnServiceJourney()}
+                />
+              </div>
+            )}
+
+          {this.state.departure && this.state.message && (
+            <div className="form-check d-flex">
+              <label className="form-check-label" htmlFor="gridCheck2">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="gridCheck2"
+                  value="stops"
+                  onChange={this.handleChangeSpecifyStopsDeparture}
+                />
+                <p className="text-center text-white">
+                  Gjelder avviket for spesifikke stopp?
+                </p>
+              </label>
+            </div>
+          )}
+
+          {this.state.departure && this.state.checkbox2 && (
+            <div>
+              <Select
+                isMulti
+                placeholder=" "
+                onChange={this.handleChangeSpecifiedStopsDeparture}
+                options={this.returnSpecifiedLinesDeparture()}
+              />
+              <br></br>
+            </div>
+          )}
+
+          {this.state.dateFromTo && (
+            <div className="bd-highlight justify-content-center">
+              <p className="text-center text-white">Gyldighetsperiode</p>
+              <div className="form-group d-flex">
+                <Flatpickr
+                  data-enable-time
+                  id="from"
+                  value={this.state.from}
+                  name="from"
+                  className="date-form form-control"
+                  options={{
+                    enableTime: true,
+                    dateFormat: 'Y-m-d H:i',
+                    minDate: this.state.date,
+                    time_24hr: true
+                  }}
+                  onChange={([dObj]) => this.setState({ from: dObj })}
+                />
+                <Flatpickr
+                  id="date-to"
+                  data-enable-time
+                  value={this.state.to}
+                  name="to"
+                  placeholder="Til-dato"
+                  className="date-form form-control"
+                  options={{
+                    enableTime: true,
+                    dateFormat: 'Y-m-d H:i',
+                    minDate: this.state.from
+                      ? this.state.from
+                      : this.state.date,
+                    time_24hr: true
+                  }}
+                  onChange={([dObj]) => this.setState({ to: dObj })}
+                />
+              </div>
+            </div>
+          )}
+
+          {this.state.message && (
+            <div>
+              <div className="severity&type">
+                <p className="text-center text-white">Rapporttype</p>
+                <select
+                  className="form-control"
+                  defaultValue={'incident'}
+                  name="ReportType"
+                  value={this.state.reportType}
+                  onChange={reportType => this.setState({ reportType })}
+                >
+                  <option value="incident">Incident</option>
+                  <option value="general">General</option>
+                </select>
+                <br></br>
+              </div>
+              <div className="message">
+                <p className="text-center text-white">Melding</p>
+                <input
+                  type="String"
+                  name="oppsummering"
+                  className="form-control"
+                  placeholder="Kort, beskrivende avvikstekst"
+                  maxLength="160"
+                  required
+                  value={this.state.oppsummering}
+                  onChange={({ target: { value: oppsummering } }) =>
+                    this.setState({ oppsummering })
+                  }
+                />
+                <input
+                  type="String"
+                  name="beskrivelse"
+                  className="form-control"
+                  placeholder="Eventuell utdypende detaljer om avviket (ikke påkrevd)"
+                  value={this.state.beskrivelse}
+                  onChange={({ target: { value: beskrivelse } }) =>
+                    this.setState({ beskrivelse })
+                  }
+                />
+                <input
+                  type="String"
+                  name="forslag"
+                  className="form-control"
+                  placeholder="Beskrivelse om hva kunden skal/kan gjøre (ikke påkrevd)"
+                  value={this.state.forslag}
+                  onChange={({ target: { value: forslag } }) =>
+                    this.setState({ forslag })
+                  }
+                />
+              </div>
+            </div>
+          )}
+          <br></br>
+          <div className="submit justify-content-center">
+            <Contrast>
+              {this.state.submit && (
+                <Button onClick={this.handleSubmit}>Registrer</Button>
+              )}
+              <SecondaryButton onClick={this.handleClick}>
+                Tilbake
+              </SecondaryButton>
+            </Contrast>
+          </div>
         </div>
       </div>
     );
