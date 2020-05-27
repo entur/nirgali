@@ -14,6 +14,10 @@ export default ({ stops, isMulti, onChange }) => {
 
 const getOptions = stops => {
   return stops
+    .filter(
+      (item, i, list) =>
+        i === list.findIndex(j => j.stopPlace.id === item.stopPlace.id)
+    )
     .sort((a, b) => {
       if (a.name > b.name) return 1;
       if (b.name > a.name) return -1;
