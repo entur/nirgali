@@ -101,10 +101,10 @@ class Edit extends React.Component {
             <NegativeButton type="button" onClick={this.setProgressToClosed}>
               Deaktiver
             </NegativeButton>
-            <SecondaryButton type="submit">Endre</SecondaryButton>
+            <SecondaryButton type="submit">Lagre endringer</SecondaryButton>
           </ButtonGroup>
           <Button onClick={this.handleClick} type="submit">
-            Tilbake
+            Lukk uten å lagre
           </Button>
         </Contrast>
       );
@@ -114,7 +114,7 @@ class Edit extends React.Component {
           <ButtonGroup>
             <SecondaryButton>Aktiver</SecondaryButton>
             <Button onClick={this.handleClick} type="submit">
-              Tilbake
+              Lukk uten å lagre
             </Button>
           </ButtonGroup>
         </Contrast>
@@ -366,7 +366,7 @@ class Edit extends React.Component {
             </div>
             <br></br>
             <div className="severity">
-              <p className="text-center text-white">Rapporttype</p>
+              <p className="text-center text-white">Avvikstype</p>
               <select
                 className="form-control"
                 id="cssmenu"

@@ -597,7 +597,7 @@ class Register extends React.Component {
           {this.state.message && (
             <div>
               <div className="severity&type">
-                <p className="text-center text-white">Rapporttype</p>
+                <p className="text-center text-white">Avvikstype</p>
                 <select
                   className="form-control"
                   name="ReportType"

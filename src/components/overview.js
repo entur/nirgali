@@ -116,7 +116,7 @@ class Overview extends React.Component {
                       <b>Oppsummering</b>
                     </Th>
                     <Th scope="col">
-                      <b>Rapporttype</b>
+                      <b>Avvikstype</b>
                     </Th>
                     <Th scope="col">
                       <b>Fra dato</b>
