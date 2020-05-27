@@ -4,6 +4,8 @@ import { PrimaryButton as Button, SecondaryButton } from '@entur/button';
 import { Contrast } from '@entur/layout';
 import { DatePicker } from '@entur/datepicker';
 import { formatISO } from 'date-fns';
+import LinePicker from './line-picker';
+import StopPicker from './stop-picker';
 
 class Register extends React.Component {
   state = {
@@ -391,14 +393,7 @@ class Register extends React.Component {
   };
 
   returnSpecifiedLines = () => {
-    const tmp = this.props.lines.find(
-      item => item.id === this.state.chosenLine
-    );
-
-    if (tmp) {
-      return this.returnMappedObjects(tmp.quays);
-    }
-    return [];
+    return this.props.lines.find(item => item.id === this.state.chosenLine);
   };
 
   returnSpecifiedLinesDeparture = () => {
@@ -460,10 +455,9 @@ class Register extends React.Component {
             <div className="choose_type">
               {(this.state.type === 'line' ||
                 this.state.type === 'departure') && (
-                <Select
-                  placeholder="Velg linje"
+                <LinePicker
+                  lines={this.props.lines}
                   onChange={this.handleChangeLine}
-                  options={this.returnMappedObjects(this.props.lines)}
                 />
               )}
 
@@ -488,11 +482,9 @@ class Register extends React.Component {
                 this.state.chosenLine &&
                 this.state.checkbox && (
                   <div>
-                    <Select
-                      isMulti
-                      placeholder=" "
+                    <StopPicker
+                      stops={this.returnSpecifiedLines().quays}
                       onChange={this.handleChangeSpecifiedStops}
-                      options={this.returnSpecifiedLines()}
                     />
                     <br></br>
                   </div>
@@ -500,11 +492,10 @@ class Register extends React.Component {
 
               {this.state.type === 'stop' && this.state.stops && (
                 <div>
-                  <Select
+                  <StopPicker
                     isMulti
-                    placeholder="Velg stopp"
+                    stops={this.state.stops}
                     onChange={this.handleChangeSpecifiedStops}
-                    options={this.returnMappedObjects(this.state.stops)}
                   />
                   <br></br>
                 </div>
