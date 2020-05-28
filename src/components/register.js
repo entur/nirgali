@@ -593,7 +593,7 @@ class Register extends React.Component {
                   className="form-control"
                   name="ReportType"
                   value={this.state.reportType}
-                  onChange={reportType => this.setState({ reportType })}
+                  onChange={e => this.setState({ reportType: e.target.value })}
                 >
                   <option value="incident">Incident</option>
                   <option value="general">General</option>
