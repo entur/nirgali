@@ -509,7 +509,7 @@ class Register extends React.Component {
               <DatePicker
                 selectedDate={this.state.departureDate}
                 onChange={this.handleDepartureDateChange}
-                dateFormat="Y-m-d"
+                dateFormat="yyyy-MM-dd"
                 minDate={this.state.date}
               />
               <Contrast>
