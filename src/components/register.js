@@ -3,9 +3,11 @@ import Select from 'react-select';
 import { PrimaryButton as Button, SecondaryButton } from '@entur/button';
 import { Contrast } from '@entur/layout';
 import { DatePicker } from '@entur/datepicker';
-import { formatISO } from 'date-fns';
+import { lightFormat } from 'date-fns';
 import LinePicker from './line-picker';
 import StopPicker from './stop-picker';
+
+const formatDate = date => lightFormat(date, 'yyyy-MM-dd');
 
 class Register extends React.Component {
   state = {
@@ -101,7 +103,7 @@ class Register extends React.Component {
       VehicleJourneys: {
         AffectedVehicleJourney: {
           FramedVehicleJourneyRef: {
-            DataFrameRef: formatISO(this.state.date, {
+            DataFrameRef: formatDate(this.state.departureDate, {
               representation: 'date'
             }),
             DatedVehicleJourneyRef: this.state.datedVehicleJourney
@@ -117,7 +119,7 @@ class Register extends React.Component {
       VehicleJourneys: {
         AffectedVehicleJourney: {
           FramedVehicleJourneyRef: {
-            DataFrameRef: formatISO(this.state.date, {
+            DataFrameRef: formatDate(this.state.departureDate, {
               representation: 'date'
             }),
             DatedVehicleJourneyRef: this.state.datedVehicleJourney
@@ -369,7 +371,7 @@ class Register extends React.Component {
     const line = this.state.chosenLine;
 
     this.props.api
-      .getDepartures(line, formatISO(date, { representation: 'date' }))
+      .getDepartures(line, formatDate(date, { representation: 'date' }))
       .then(response => {
         this.setState({
           departures: response.data.serviceJourneys,
