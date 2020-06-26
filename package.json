@@ -33,6 +33,7 @@
     "react-scripts": "3.4.0",
     "react-select": "3.0.4",
     "react-super-responsive-table": "^5.0.0",
+    "react-windowed-select": "^2.0.3",
     "xml-js": "1.6.10"
   },
   "scripts": {

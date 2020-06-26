@@ -1,13 +1,15 @@
-import React from 'react';
-import Select from 'react-select';
+import React, { useMemo } from 'react';
+import Select from 'react-windowed-select';
 
 export default ({ stops, isMulti, onChange }) => {
+  const options = useMemo(() => getOptions(stops), [stops]);
+
   return (
     <Select
       isMulti={isMulti}
       placeholder="Velg stopp"
       onChange={onChange}
-      options={getOptions(stops)}
+      options={options}
     />
   );
 };
