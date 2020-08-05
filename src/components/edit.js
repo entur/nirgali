@@ -27,6 +27,10 @@ class Edit extends React.Component {
     }
   }
 
+  componentDidMount() {
+    this.getDepartureLine();
+  }
+
   handleSubmit = event => {
     event.preventDefault();
     this.props.issue.data.Progress = 'open';
