@@ -73,6 +73,34 @@ exports.xml = function(admin) {
         .set('Content-Type', 'text/xml')
         .status(200)
         .send(result);
-    });
+    } catch (e) {
+      console.warning('Error in XML requeest', e);
+      response.status(500);
+    }
   });
 };
+
+exports.closeOpenExpiredMessages = function(admin) {
+  return functions.pubsub.schedule('every 5 minutes').onRun(async (context) => {
+    const dateTime = new Date().toISOString();
+    console.info('closeOpenExpiredMessages started - dateTime=' + dateTime);
+    const db = admin.firestore();
+
+    try {
+      const openSnapshot = await db
+        .collectionGroup('messages')
+        .where('Progress', '==', 'open')
+        .get();
+
+        openSnapshot.forEach(doc => {
+          if (doc.data().ValidityPeriod.EndTime && doc.data().ValidityPeriod.EndTime > dateTime) {
+            doc.update({
+              Progress: 'closed'
+            })
+          }
+        })
+    } catch (e) {
+      console.warning('error in closeExpiredMessages', e);
+    }
+  });
+}
