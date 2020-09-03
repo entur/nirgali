@@ -3,7 +3,7 @@ const convert = require('xml-js');
 const {transformSituationData, filterOpenExpiredMessages} = require('./utils');
 
 exports.xml = function(admin) {
-  return functions.https.onRequest((request, response) => {
+  return functions.https.onRequest(async (request, response) => {
     if (request.method !== 'POST') {
       const xmlString =
         '<?xml version="1.0" encoding="UTF-8"?><Response><Message><Body>This endpoint only handles POST requests</Body></Message></Response>';
@@ -51,7 +51,9 @@ exports.xml = function(admin) {
       .where('ValidityPeriod.EndTime', '>', dateTime)
       .get();
 
-    Promise.all([open, closed]).then(([openSnapshot, closedSnapshot]) => {
+    try {
+      const [openSnapshot, closedSnapshot] = await Promise.all([open, closed]);
+
       const allDocs = openSnapshot.docs.concat(closedSnapshot.docs);
       const situations = { PtSituationElement: [] };
 
