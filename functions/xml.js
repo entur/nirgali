@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const convert = require('xml-js');
-const transformSituationData = require('./utils').transformSituationData;
+const {transformSituationData, filterOpenExpiredMessages} = require('./utils');
 
 exports.xml = function(admin) {
   return functions.https.onRequest((request, response) => {
@@ -55,10 +55,9 @@ exports.xml = function(admin) {
       const allDocs = openSnapshot.docs.concat(closedSnapshot.docs);
       const situations = { PtSituationElement: [] };
 
-      allDocs.forEach(doc => {
-        const transformedData = transformSituationData(doc.data());
-        situations.PtSituationElement.push(transformedData);
-      });
+      situations.PtSituationElement = allDocs
+        .map(doc => transformSituationData(doc.data()))
+        .filter(filterOpenExpiredMessages(dateTime));
 
       array.SituationExchangeDelivery.Situations.push(situations);
       siri.Siri.ServiceDelivery = array;
