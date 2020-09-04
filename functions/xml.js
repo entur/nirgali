@@ -76,7 +76,7 @@ exports.xml = function(admin) {
         .status(200)
         .send(result);
     } catch (e) {
-      console.warning('Error in XML requeest', e);
+      console.error('Error in XML requeest', e);
       response.status(500);
     }
   });
@@ -102,7 +102,7 @@ exports.closeOpenExpiredMessages = function(admin) {
           }
         })
     } catch (e) {
-      console.warning('error in closeExpiredMessages', e);
+      console.error('error in closeExpiredMessages', e);
     }
   });
 }
