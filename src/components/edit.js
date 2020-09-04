@@ -9,7 +9,6 @@ import { ButtonGroup } from '@entur/button';
 import { Contrast } from '@entur/layout';
 import addHours from 'date-fns/addHours';
 import Select from 'react-select';
-import { formatISO } from 'date-fns';
 
 class Edit extends React.Component {
   state = {
@@ -56,12 +55,10 @@ class Edit extends React.Component {
       }
     }
     if (this.state.from) {
-      this.props.issue.data.ValidityPeriod.StartTime = formatISO(
-        this.state.from
-      );
+      this.props.issue.data.ValidityPeriod.StartTime = this.state.from.toISOString();
     }
     if (this.state.to) {
-      this.props.issue.data.ValidityPeriod.EndTime = formatISO(this.state.to);
+      this.props.issue.data.ValidityPeriod.EndTime = this.state.to.toISOString();
     }
     this.props.issue.data.ReportType = event.target.reportType.value;
 
@@ -83,7 +80,7 @@ class Edit extends React.Component {
     const update = {
       Progress: 'closed',
       ValidityPeriod: {
-        EndTime: formatISO(addHours(new Date(), 5))
+        EndTime: addHours(new Date(), 5).toISOString()
       }
     };
     const codespace = this.props.organization.split(':')[0];
