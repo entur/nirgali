@@ -97,7 +97,7 @@ exports.closeOpenExpiredMessages = function(admin) {
       openSnapshot.docs.forEach((docSnapshot) => {
         db.runTransaction(transaction => {
           return transaction.get(docSnapshot.ref).then(doc => {
-            if (doc.data().ValidityPeriod.EndTime && doc.data().ValidityPeriod.EndTime > dateTime) {
+            if (doc.data().ValidityPeriod.EndTime && dateTime > doc.data().ValidityPeriod.EndTime) {
               transaction.update(docSnapshot.ref, {
                 Progress: 'closed'
               });
