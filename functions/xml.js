@@ -83,7 +83,7 @@ exports.xml = function(admin) {
 };
 
 exports.closeOpenExpiredMessages = function(admin) {
-  return functions.pubsub.schedule('every 5 minutes').onRun(async (_) => {
+  return functions.pubsub.schedule('every 30 minutes').onRun(async (_) => {
     const dateTime = new Date().toISOString();
     console.info('closeOpenExpiredMessages started - dateTime=' + dateTime);
     const db = admin.firestore();
