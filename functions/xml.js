@@ -1,9 +1,9 @@
 const functions = require('firebase-functions');
 const convert = require('xml-js');
-const transformSituationData = require('./utils').transformSituationData;
+const {transformSituationData, filterOpenExpiredMessages} = require('./utils');
 
 exports.xml = function(admin) {
-  return functions.https.onRequest((request, response) => {
+  return functions.https.onRequest(async (request, response) => {
     if (request.method !== 'POST') {
       const xmlString =
         '<?xml version="1.0" encoding="UTF-8"?><Response><Message><Body>This endpoint only handles POST requests</Body></Message></Response>';
@@ -51,14 +51,15 @@ exports.xml = function(admin) {
       .where('ValidityPeriod.EndTime', '>', dateTime)
       .get();
 
-    Promise.all([open, closed]).then(([openSnapshot, closedSnapshot]) => {
+    try {
+      const [openSnapshot, closedSnapshot] = await Promise.all([open, closed]);
+
       const allDocs = openSnapshot.docs.concat(closedSnapshot.docs);
       const situations = { PtSituationElement: [] };
 
-      allDocs.forEach(doc => {
-        const transformedData = transformSituationData(doc.data());
-        situations.PtSituationElement.push(transformedData);
-      });
+      situations.PtSituationElement = allDocs
+        .map(doc => transformSituationData(doc.data()))
+        .filter(filterOpenExpiredMessages(dateTime));
 
       array.SituationExchangeDelivery.Situations.push(situations);
       siri.Siri.ServiceDelivery = array;
@@ -74,6 +75,34 @@ exports.xml = function(admin) {
         .set('Content-Type', 'text/xml')
         .status(200)
         .send(result);
-    });
+    } catch (e) {
+      console.error('Error in XML requeest', e);
+      response.status(500);
+    }
   });
 };
+
+exports.closeOpenExpiredMessages = function(admin) {
+  return functions.pubsub.schedule('every 5 minutes').onRun(async (context) => {
+    const dateTime = new Date().toISOString();
+    console.info('closeOpenExpiredMessages started - dateTime=' + dateTime);
+    const db = admin.firestore();
+
+    try {
+      const openSnapshot = await db
+        .collectionGroup('messages')
+        .where('Progress', '==', 'open')
+        .get();
+
+        openSnapshot.docs.forEach(doc => {
+          if (doc.data().ValidityPeriod.EndTime && doc.data().ValidityPeriod.EndTime > dateTime) {
+            doc.ref.update({
+              Progress: 'closed'
+            })
+          }
+        })
+    } catch (e) {
+      console.error('error in closeExpiredMessages', e);
+    }
+  });
+}

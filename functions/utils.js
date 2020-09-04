@@ -140,3 +140,12 @@ const transformValidityPeriod = ({ StartTime, EndTime }) => {
 };
 
 exports.transformSituationData = transformSituationData;
+
+const filterOpenExpiredMessages = (dateTime) => (data) => {
+  if (data.Progress === 'open' && data.ValidityPeriod.EndTime) {
+    return data.ValidityPeriod.EndTime > dateTime;
+  }
+  return true;
+}
+
+exports.filterOpenExpiredMessages = filterOpenExpiredMessages;
