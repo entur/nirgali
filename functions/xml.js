@@ -76,7 +76,7 @@ exports.xml = function(admin) {
         .status(200)
         .send(result);
     } catch (error) {
-      console.error('Error in XML requeest: ', e);
+      console.error('Error in XML requeest: ', error);
       response.status(500);
     }
   });
