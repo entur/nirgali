@@ -94,9 +94,9 @@ exports.closeOpenExpiredMessages = function(admin) {
         .where('Progress', '==', 'open')
         .get();
 
-        openSnapshot.forEach(doc => {
+        openSnapshot.docs.forEach(doc => {
           if (doc.data().ValidityPeriod.EndTime && doc.data().ValidityPeriod.EndTime > dateTime) {
-            doc.update({
+            doc.ref.update({
               Progress: 'closed'
             })
           }
