@@ -75,15 +75,15 @@ exports.xml = function(admin) {
         .set('Content-Type', 'text/xml')
         .status(200)
         .send(result);
-    } catch (e) {
-      console.error('Error in XML requeest', e);
+    } catch (error) {
+      console.error('Error in XML requeest: ', e);
       response.status(500);
     }
   });
 };
 
 exports.closeOpenExpiredMessages = function(admin) {
-  return functions.pubsub.schedule('every 5 minutes').onRun(async (context) => {
+  return functions.pubsub.schedule('every 30 minutes').onRun(async (_) => {
     const dateTime = new Date().toISOString();
     console.info('closeOpenExpiredMessages started - dateTime=' + dateTime);
     const db = admin.firestore();
@@ -94,15 +94,23 @@ exports.closeOpenExpiredMessages = function(admin) {
         .where('Progress', '==', 'open')
         .get();
 
-        openSnapshot.docs.forEach(doc => {
-          if (doc.data().ValidityPeriod.EndTime && doc.data().ValidityPeriod.EndTime > dateTime) {
-            doc.ref.update({
-              Progress: 'closed'
-            })
-          }
-        })
-    } catch (e) {
-      console.error('error in closeExpiredMessages', e);
+      openSnapshot.docs.forEach((docSnapshot) => {
+        db.runTransaction(transaction => {
+          return transaction.get(docSnapshot.ref).then(doc => {
+            if (doc.data().ValidityPeriod.EndTime && doc.data().ValidityPeriod.EndTime > dateTime) {
+              transaction.update(docSnapshot.ref, {
+                Progress: 'closed'
+              });
+            }
+          }).then(function() {
+            console.debug("Transaction successfully committed!");
+          }).catch(function(error) {
+            console.log("Transaction failed: ", error);
+          });
+        });
+      });
+    } catch (error) {
+      console.error('Error in closeOpenExpiredMessages: ', error);
     }
   });
 }
