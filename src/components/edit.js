@@ -9,6 +9,7 @@ import { ButtonGroup } from '@entur/button';
 import { Contrast } from '@entur/layout';
 import addHours from 'date-fns/addHours';
 import Select from 'react-select';
+import { isBefore } from 'date-fns';
 
 class Edit extends React.Component {
   state = {
@@ -358,7 +359,20 @@ class Edit extends React.Component {
                     ? new Date(this.props.issue.data.ValidityPeriod.EndTime)
                     : undefined)
                 }
-                onChange={to => this.setState({ to })}
+                onChange={to => {
+                  const now = new Date();
+                  const from =
+                    this.state.from ||
+                    new Date(this.props.issue.data.ValidityPeriod.StartTime);
+
+                  if (isBefore(to, now)) {
+                    this.setState({ to: now });
+                  } else if (isBefore(to, from)) {
+                    this.setState({ to: from });
+                  } else {
+                    this.setState({ to });
+                  }
+                }}
                 dateFormat="yyyy-MM-dd HH:mm"
                 minDate={this.state.from}
                 showTimeInput
