@@ -120,3 +120,17 @@ exports.closeOpenExpiredMessages = function(admin) {
     }
   });
 }
+
+exports.logDbWrites = function(admin) {
+  return functions.firestore
+    .document('codespaces/{codespace}/authorities/{authority}/messages/{messageId}')
+    .onWrite((change, context) => {
+      const {
+        codespace,
+        authority,
+        messageId
+      } = context.params;
+
+      console.log(`Message written: codespace=${codespace} authority=${authority} messageId=${messageId}:\n${JSON.stringify(change.after.data())}`)
+    });
+}
