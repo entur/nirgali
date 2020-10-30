@@ -99,12 +99,13 @@ exports.closeOpenExpiredMessages = function(admin) {
         db.runTransaction(transaction => {
           return transaction.get(docSnapshot.ref).then(doc => {
             if (doc.data().ValidityPeriod.EndTime && dateTime > doc.data().ValidityPeriod.EndTime) {
-              console.log(`Closing message id=${doc.id} situationNumber=${doc.data().SituationNumber}`)
+              const endTime = addHours(parse(doc.data().ValidityPeriod.EndTime), 5).toISOString();
+              console.log(`Closing message id=${doc.id} situationNumber=${doc.data().SituationNumber} newEndTime=${endTime}`)
               transaction.update(docSnapshot.ref, {
                 Progress: 'closed',
                 ValidityPeriod: {
                   StartTime: doc.data().ValidityPeriod.StartTime,
-                  EndTime: addHours(parse(doc.data().ValidityPeriod.EndTime), 5).toISOString()
+                  EndTime: endTime
                 }
               });
             }
