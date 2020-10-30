@@ -1,4 +1,4 @@
-const { addHours, parse } = require('date-fns');
+const { addHours, parseISO } = require('date-fns');
 const functions = require('firebase-functions');
 const convert = require('xml-js');
 const {transformSituationData, filterOpenExpiredMessages} = require('./utils');
@@ -99,7 +99,7 @@ exports.closeOpenExpiredMessages = function(admin) {
         db.runTransaction(transaction => {
           return transaction.get(docSnapshot.ref).then(doc => {
             if (doc.data().ValidityPeriod.EndTime && dateTime > doc.data().ValidityPeriod.EndTime) {
-              const endTime = addHours(parse(doc.data().ValidityPeriod.EndTime), 5).toISOString();
+              const endTime = addHours(parseISO(doc.data().ValidityPeriod.EndTime), 5).toISOString();
               console.log(`Closing message id=${doc.id} situationNumber=${doc.data().SituationNumber} newEndTime=${endTime}`)
               transaction.update(docSnapshot.ref, {
                 Progress: 'closed',
