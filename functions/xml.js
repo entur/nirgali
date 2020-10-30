@@ -1,3 +1,4 @@
+const { addHours, parse } = require('date-fns');
 const functions = require('firebase-functions');
 const convert = require('xml-js');
 const {transformSituationData, filterOpenExpiredMessages} = require('./utils');
@@ -98,8 +99,13 @@ exports.closeOpenExpiredMessages = function(admin) {
         db.runTransaction(transaction => {
           return transaction.get(docSnapshot.ref).then(doc => {
             if (doc.data().ValidityPeriod.EndTime && dateTime > doc.data().ValidityPeriod.EndTime) {
+              console.log(`Closing message id=${doc.id} situationNumber=${doc.data().SituationNumber}`)
               transaction.update(docSnapshot.ref, {
-                Progress: 'closed'
+                Progress: 'closed',
+                ValidityPeriod: {
+                  StartTime: doc.data().ValidityPeriod.StartTime,
+                  EndTime: addHours(parse(doc.data().ValidityPeriod.EndTime), 5).toISOString()
+                }
               });
             }
           }).then(function() {
@@ -113,4 +119,18 @@ exports.closeOpenExpiredMessages = function(admin) {
       console.error('Error in closeOpenExpiredMessages: ', error);
     }
   });
+}
+
+exports.logDbWrites = function(admin) {
+  return functions.firestore
+    .document('codespaces/{codespace}/authorities/{authority}/messages/{messageId}')
+    .onWrite((change, context) => {
+      const {
+        codespace,
+        authority,
+        messageId
+      } = context.params;
+
+      console.log(`Message written: codespace=${codespace} authority=${authority} messageId=${messageId}:\n${JSON.stringify(change.after.data())}`)
+    });
 }

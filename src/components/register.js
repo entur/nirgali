@@ -6,6 +6,7 @@ import { DatePicker } from '@entur/datepicker';
 import { lightFormat } from 'date-fns';
 import LinePicker from './line-picker';
 import StopPicker from './stop-picker';
+import { isBefore } from 'date-fns';
 
 const formatDate = date => lightFormat(date, 'yyyy-MM-dd');
 
@@ -578,7 +579,16 @@ class Register extends React.Component {
                 />
                 <DatePicker
                   selectedDate={this.state.to}
-                  onChange={to => this.setState({ to })}
+                  onChange={to => {
+                    const now = new Date();
+                    if (isBefore(to, now)) {
+                      this.setState({ to: now });
+                    } else if (isBefore(to, this.state.from)) {
+                      this.setState({ to: this.state.from });
+                    } else {
+                      this.setState({ to });
+                    }
+                  }}
                   dateFormat="yyyy-MM-dd HH:mm"
                   minDate={this.state.from}
                   showTimeInput
