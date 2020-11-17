@@ -246,7 +246,9 @@ class Edit extends React.Component {
 
   getQuayOptions = (StopPoints, quays) => {
     return StopPoints?.AffectedStopPoint?.map(AffectedStopPoint => {
-      return quays.find(q => q.stopPlace.id === AffectedStopPoint.StopPointRef);
+      return quays.find(
+        q => q.stopPlace && q.stopPlace.id === AffectedStopPoint.StopPointRef
+      );
     })?.map(({ id, name }) => ({
       value: id,
       label: `${name} - ${id}`
