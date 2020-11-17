@@ -400,17 +400,9 @@ class Register extends React.Component {
   };
 
   returnSpecifiedLinesDeparture = () => {
-    const tmp = this.state.departures.find(
-      item => item.id === this.state.chosenLine
+    return this.state.departures.find(
+      item => item.id === this.state.datedVehicleJourney
     );
-
-    if (tmp) {
-      return tmp.estimatedCalls.map(item => ({
-        label: item.quay.name + ' - ' + item.quay.stopPlace.id,
-        value: item.quay.stopPlace.id
-      }));
-    }
-    return [];
   };
 
   returnServiceJourney = () => {
@@ -557,11 +549,12 @@ class Register extends React.Component {
 
           {this.state.departure && this.state.checkbox2 && (
             <div>
-              <Select
+              <StopPicker
                 isMulti
-                placeholder=" "
+                stops={this.returnSpecifiedLinesDeparture().estimatedCalls.map(
+                  ({ quay }) => quay
+                )}
                 onChange={this.handleChangeSpecifiedStopsDeparture}
-                options={this.returnSpecifiedLinesDeparture()}
               />
               <br></br>
             </div>
