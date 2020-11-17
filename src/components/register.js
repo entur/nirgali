@@ -486,6 +486,7 @@ class Register extends React.Component {
                 this.state.checkbox && (
                   <div>
                     <StopPicker
+                      isMulti
                       stops={this.returnSpecifiedLines().quays}
                       onChange={this.handleChangeSpecifiedStops}
                     />
