@@ -19,7 +19,12 @@ const getOptions = stops => {
     .filter(
       (item, i, list) =>
         i ===
-        list.findIndex(j => j.stopPlace && j.stopPlace.id === item.stopPlace.id)
+        list.findIndex(
+          j =>
+            j.stopPlace &&
+            item.stopPlace &&
+            j.stopPlace.id === item.stopPlace.id
+        )
     )
     .sort((a, b) => {
       if (a.name > b.name) return 1;
