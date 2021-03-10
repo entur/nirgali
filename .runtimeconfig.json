@@ -7,7 +7,8 @@
       },
       "auth0": {
         "auth_jwks_uri": "https://ror-entur-dev.eu.auth0.com/.well-known/jwks.json",
-        "auth_issuer": "https://ror-entur-dev.eu.auth0.com/"
+        "auth_issuer": "https://ror-entur-dev.eu.auth0.com/",
+        "claims_namespace": "https://ror.entur.io/role_assignments"
       }
     }
   }

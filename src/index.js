@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/app';
 import api from './api/api';
@@ -23,13 +23,16 @@ const TOKEN_REFRESH_RATE = 60 * 1000;
 const AuthenticatedApp = ({ config }) => {
   const auth = useAuth();
 
+  const [loggedIn, setLoggedIn] = useState(false);
+
   useEffect(() => {
     const getToken = async () => {
       const token = await auth.getAccessToken();
       const authMethod = localStorage.getItem('ENTUR::authMethod');
       const authResponse = await fetch(`/api/auth/firebase/${authMethod}`, headers(token));
       const {firebaseToken} = await authResponse.json();
-      return firebase.auth().signInWithCustomToken(firebaseToken);
+      await firebase.auth().signInWithCustomToken(firebaseToken);
+      setLoggedIn(true);
     }
 
     if (auth.isAuthenticated) {
@@ -37,7 +40,9 @@ const AuthenticatedApp = ({ config }) => {
     }
 
     const updater = setInterval(() => {
-      getToken()
+      if (auth.isAuthenticated) {
+        getToken();
+      }
     }, TOKEN_REFRESH_RATE);
 
     return () => {
@@ -47,7 +52,7 @@ const AuthenticatedApp = ({ config }) => {
 
   return (
     <>
-      {auth.isAuthenticated && (
+      {loggedIn && (
         <App firebase={firebase} auth={auth} api={api(config)}/>
       )}
    </>
@@ -58,6 +63,13 @@ const renderApp = (config) => {
   ReactDOM.render((
     <AuthProvider
       keycloakConfigUrl="/keycloak.json"
+      auth0Config={{
+        domain: config.auth0.domain,
+        clientId: config.auth0.clientId,
+        audience: config.auth0.audience,
+        redirectUri: window.location.origin
+      }}
+      auth0ClaimsNamespace={config.auth0.claimsNamespace}
       defaultAuthMethod="kc"
     >
       <AuthenticatedApp config={config} />

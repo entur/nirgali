@@ -1,9 +1,11 @@
 const functions = require('firebase-functions');
-const jwt = require('express-jwt');
+const jwt = require('express-jwt'); 
 const jwks = require('jwks-rsa');
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+
+const auth0ClaimsNamespace = functions.config().auth.firebase.auth0.claims_namespace;
 
 const transformRoles = (roles, claim) =>
   roles
@@ -31,8 +33,17 @@ exports.auth = function(firebaseAdmin) {
     algorithm: 'RS256'
   });
 
-  const auth = (req, res) => {
-    const { sub: uid, roles } = req.user;
+  const authenticate = authMethod => (req, res) => {
+    const { sub: uid } = req.user;
+    let roles;
+
+    if (authMethod === 'kc') {
+      roles = req.user.roles;
+    } else if (authMethod === 'auth0') {
+      roles = req.user[auth0ClaimsNamespace];
+    } else {
+      throw new Error("Unknown auth method");
+    }
 
     const additionalClaims = {
       editSX: transformRoles(roles, 'editSX')
@@ -51,8 +62,8 @@ exports.auth = function(firebaseAdmin) {
       });
   };
 
-  app.get('/api/auth/firebase/kc', jwtCheck('kc'), auth);
-  app.get('/api/auth/firebase/auth0', jwtCheck('auth0'), auth);
+  app.get('/api/auth/firebase/kc', jwtCheck('kc'), authenticate('kc'));
+  app.get('/api/auth/firebase/auth0', jwtCheck('auth0'), authenticate('auth0'));
 
   return functions.https.onRequest(app);
 };
