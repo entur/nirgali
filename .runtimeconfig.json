@@ -1,8 +1,14 @@
 {
   "auth": {
     "firebase": {
-      "auth_jwks_uri": "https://kc-dev.devstage.entur.io/auth/realms/rutebanken/protocol/openid-connect/certs",
-      "auth_issuer": "https://kc-dev.devstage.entur.io/auth/realms/rutebanken"
+      "kc": {
+        "auth_jwks_uri": "https://kc-dev.devstage.entur.io/auth/realms/rutebanken/protocol/openid-connect/certs",
+        "auth_issuer": "https://kc-dev.devstage.entur.io/auth/realms/rutebanken"
+      },
+      "auth0": {
+        "auth_jwks_uri": "https://ror-entur-dev.eu.auth0.com/.well-known/jwks.json",
+        "auth_issuer": "https://ror-entur-dev.eu.auth0.com/"
+      }
     }
   }
 }

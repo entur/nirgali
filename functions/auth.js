@@ -20,18 +20,18 @@ exports.auth = function(firebaseAdmin) {
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(cors());
 
-  const jwtCheck = jwt({
+  const jwtCheck = (authMethod) => jwt({
     secret: jwks.expressJwtSecret({
       cache: true,
       rateLimit: true,
       jwksRequestsPerMinute: 5,
-      jwksUri: functions.config().auth.firebase.auth_jwks_uri
+      jwksUri: functions.config().auth.firebase[authMethod].auth_jwks_uri
     }),
-    issuer: functions.config().auth.firebase.auth_issuer,
+    issuer: functions.config().auth.firebase[authMethod].auth_issuer,
     algorithm: 'RS256'
   });
 
-  app.get('/api/auth/firebase', jwtCheck, (req, res) => {
+  const auth = (req, res) => {
     const { sub: uid, roles } = req.user;
 
     const additionalClaims = {
@@ -49,7 +49,10 @@ exports.auth = function(firebaseAdmin) {
           error: err
         });
       });
-  });
+  };
+
+  app.get('/api/auth/firebase/kc', jwtCheck('kc'), auth);
+  app.get('/api/auth/firebase/auth0', jwtCheck('auth0'), auth);
 
   return functions.https.onRequest(app);
 };
