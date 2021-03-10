@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@entur/auth-provider": "^0.1.0",
     "@entur/button": "^2.2.5",
     "@entur/component-library": "^0.21.1",
     "@entur/datepicker": "^0.3.15",
@@ -22,7 +23,6 @@
     "graphql-tag": "^2.10.1",
     "husky": "^4.2.3",
     "jquery": "^3.4.1",
-    "keycloak-js": "3.4.3",
     "lint-staged": "^10.0.8",
     "npm-run-all": "^4.1.5",
     "prettier": "^1.19.1",

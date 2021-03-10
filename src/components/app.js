@@ -22,16 +22,16 @@ export default class App extends React.Component {
 
   logout = () => {
     window.alert('You are not assigned to a company');
-    window.location.href = this.props.userInfo.logoutUrl;
+    this.props.auth.logout();
   };
 
   setOrganizations = async () => {
-    if (!this.props.userInfo.roles.length > 0) {
+    if (!this.props.auth.roleAssignments?.length > 0) {
       this.logout();
     }
 
-    const allowedCodespaces = this.props.userInfo.roles
-      .map(JSON.parse)
+    const allowedCodespaces = this.props.auth.roleAssignments
+      ?.map(JSON.parse)
       .filter(({ r: role }) => role === 'editSX')
       .map(({ o: org }) => org);
 
@@ -123,7 +123,7 @@ export default class App extends React.Component {
                 onSelectOrganization={this.updateOrganization}
                 user={this.state.organizations}
                 name={this.state.organizationsName}
-                logout={this.props.userInfo.logoutUrl}
+                logout={this.props.auth.logout}
               />
             )}
           />

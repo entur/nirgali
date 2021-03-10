@@ -78,10 +78,13 @@ Deployment is handled by [circleci](https://app.circleci.com/pipelines/github/en
 
 ## Infrastructure
 
-The auth function in firebase needs two config parameters to be set:
+The auth function in firebase needs some config parameters to be set:
 
-* `auth.firebase.config auth_jwks_uri`
-* `auth.firebase.auth_issuer`
+* `auth.firebase.kc.auth_jwks_uri`
+* `auth.firebase.kc.auth_issuer`
+* `auth.firebase.auth0.auth_jwks_uri`
+* `auth.firebase.auth0.auth_issuer`
+* `auth.firebase.auth0.claims_namespace`
 
 Use firebase cli to set them (project alias from .firebaserc)
 
@@ -96,14 +99,21 @@ Output:
     {
       "auth": {
         "firebase": {
-          "auth_issuer": "https://kc-dev.devstage.entur.io/auth/realms/rutebanken",
-          "auth_jwks_uri": "https://kc-dev.devstage.entur.io/auth/realms/rutebanken/protocol/openid-connect/certs"
+          "kc": {
+            "auth_jwks_uri": "https://kc-dev.devstage.entur.io/auth/realms/rutebanken/protocol/openid-connect/certs",
+            "auth_issuer": "https://kc-dev.devstage.entur.io/auth/realms/rutebanken"
+          },
+          "auth0": {
+            "auth_jwks_uri": "https://ror-entur-dev.eu.auth0.com/.well-known/jwks.json",
+            "auth_issuer": "https://ror-entur-dev.eu.auth0.com/",
+            "claims_namespace": "https://ror.entur.io/role_assignments"
+          }
         }
       }
     }
 
 
-Keycloak configuration for the frontend app is located in the `config/` folder.
+Configuration for the frontend app is located in the `config/` folder.
 
 #### Firebase requirements:
 

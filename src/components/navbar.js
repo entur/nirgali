@@ -1,6 +1,8 @@
 import React from 'react';
 import logo from '../img/entur_logo.jpg';
 import Select from 'react-select';
+import { PrimaryButton } from '@entur/button';
+import { Contrast } from '@entur/layout';
 
 class NavBar extends React.Component {
   handleChange = event => {
@@ -34,9 +36,11 @@ class NavBar extends React.Component {
             />
           </div>
           <div className="logout">
-            <a href={this.props.logout}>
-              <h6 className="text-center text-white">LOGG UT</h6>
-            </a>
+            <Contrast>
+              <PrimaryButton onClick={() => this.props.logout()}>
+                Logg ut
+              </PrimaryButton>
+            </Contrast>
           </div>
         </div>
       </nav>

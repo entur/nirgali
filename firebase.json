@@ -12,7 +12,7 @@
         "function": "xml"
       },
       {
-        "source": "/api/auth/firebase",
+        "source": "/api/auth/firebase/**",
         "function": "auth"
       },
       {
