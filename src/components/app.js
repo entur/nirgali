@@ -21,8 +21,7 @@ export default class App extends React.Component {
   }
 
   logout = () => {
-    window.alert('You are not assigned to a company');
-    this.props.auth.logout();
+    this.props.auth.logout({ returnTo: window.location.origin });
   };
 
   setOrganizations = async () => {
@@ -123,7 +122,7 @@ export default class App extends React.Component {
                 onSelectOrganization={this.updateOrganization}
                 user={this.state.organizations}
                 name={this.state.organizationsName}
-                logout={this.props.auth.logout}
+                logout={() => this.logout()}
               />
             )}
           />
