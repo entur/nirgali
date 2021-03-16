@@ -1,4 +1,10 @@
 {
   "journey-planner-api": "https://api.staging.entur.io/journey-planner/v2/graphql",
-  "organisations-api": "https://api.staging.entur.io/organisations/v1/register/organisations"
+  "organisations-api": "https://api.staging.entur.io/organisations/v1/register/organisations",
+  "auth0": {
+    "domain": "ror-entur-staging.eu.auth0.com",
+    "clientId": "0g13z7Ah2mMxfvwSLKrkV8W2WNthuqLU",
+    "audience": "https://ror.api.staging.entur.io",
+    "claimsNamespace": "https://ror.entur.io/role_assignments"
+  }
 }
