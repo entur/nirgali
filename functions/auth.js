@@ -30,7 +30,7 @@ exports.auth = function(firebaseAdmin) {
       jwksUri: functions.config().auth.firebase[authMethod].auth_jwks_uri
     }),
     issuer: functions.config().auth.firebase[authMethod].auth_issuer,
-    algorithm: 'RS256'
+    algorithms: ['RS256']
   });
 
   const authenticate = authMethod => (req, res) => {
