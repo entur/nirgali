@@ -70,7 +70,7 @@ const renderApp = (config) => {
         redirectUri: window.location.origin
       }}
       auth0ClaimsNamespace={config.auth0.claimsNamespace}
-      defaultAuthMethod="kc"
+      defaultAuthMethod={config.defaultAuthMethod}
     >
       <AuthenticatedApp config={config} />
     </AuthProvider>
