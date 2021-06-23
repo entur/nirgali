@@ -7,5 +7,5 @@
     "audience": "https://ror.api.staging.entur.io",
     "claimsNamespace": "https://ror.entur.io/role_assignments"
   },
-  "defaultAuthMethod": "kc"
+  "defaultAuthMethod": "auth0"
 }
