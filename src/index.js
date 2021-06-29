@@ -28,8 +28,7 @@ const AuthenticatedApp = ({ config }) => {
   useEffect(() => {
     const getToken = async () => {
       const token = await auth.getAccessToken();
-      const authMethod = localStorage.getItem('ENTUR::authMethod');
-      const authResponse = await fetch(`/api/auth/firebase/${authMethod}`, headers(token));
+      const authResponse = await fetch(`/api/auth/firebase/auth0`, headers(token));
       const {firebaseToken} = await authResponse.json();
       await firebase.auth().signInWithCustomToken(firebaseToken);
       setLoggedIn(true);
