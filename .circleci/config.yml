@@ -57,9 +57,6 @@ jobs:
     steps:
       - *attach_workspace
       - run:
-          name: "Prepare keycloak config"
-          command: cp config/keycloak-dev.json build/keycloak.json
-      - run:
           name: "Prepare app config"
           command: cp config/config-dev.json build/config.json
       - firebase-deploy/deploy:
@@ -72,9 +69,6 @@ jobs:
     steps:
       - *attach_workspace
       - run:
-          name: "Prepare keycloak config"
-          command: cp config/keycloak-staging.json build/keycloak.json
-      - run:
           name: "Prepare app config"
           command: cp config/config-staging.json build/config.json
       - firebase-deploy/deploy:
@@ -86,9 +80,6 @@ jobs:
       tag: '10.13'
     steps:
       - *attach_workspace
-      - run:
-          name: "Prepare keycloak config"
-          command: cp config/keycloak-prod.json build/keycloak.json
       - run:
           name: "Prepare app config"
           command: cp config/config-prod.json build/config.json

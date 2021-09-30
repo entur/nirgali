@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@entur/auth-provider": "^0.4.0",
+    "@entur/auth-provider": "^1.0.0",
     "@entur/button": "^2.2.5",
     "@entur/component-library": "^0.21.1",
     "@entur/datepicker": "^0.3.15",
@@ -38,8 +38,7 @@
   },
   "scripts": {
     "copy:config": "cp config/config-dev.json public/config.json",
-    "copy:keycloak": "cp config/keycloak-dev.json public/keycloak.json",
-    "prestart": "run-p --race copy:config copy:keycloak",
+    "prestart": "run-p --race copy:config",
     "start": "run-p --race start:firebase start:react",
     "start:firebase": "firebase serve -p 4000",
     "start:react": "PORT=3001 react-scripts start",

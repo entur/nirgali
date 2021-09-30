@@ -22,28 +22,20 @@ exports.auth = function(firebaseAdmin) {
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(cors());
 
-  const jwtCheck = (authMethod) => jwt({
+  const jwtCheck = jwt({
     secret: jwks.expressJwtSecret({
       cache: true,
       rateLimit: true,
       jwksRequestsPerMinute: 5,
-      jwksUri: functions.config().auth.firebase[authMethod].auth_jwks_uri
+      jwksUri: functions.config().auth.firebase['auth0'].auth_jwks_uri
     }),
-    issuer: functions.config().auth.firebase[authMethod].auth_issuer,
+    issuer: functions.config().auth.firebase['auth0'].auth_issuer,
     algorithms: ['RS256']
   });
 
-  const authenticate = authMethod => (req, res) => {
+  const authenticate = (req, res) => {
     const { sub: uid } = req.user;
-    let roles;
-
-    if (authMethod === 'kc') {
-      roles = req.user.roles;
-    } else if (authMethod === 'auth0') {
-      roles = req.user[auth0ClaimsNamespace];
-    } else {
-      throw new Error("Unknown auth method");
-    }
+    let roles = req.user[auth0ClaimsNamespace];
 
     const additionalClaims = {
       editSX: transformRoles(roles, 'editSX')
@@ -62,8 +54,7 @@ exports.auth = function(firebaseAdmin) {
       });
   };
 
-  app.get('/api/auth/firebase/kc', jwtCheck('kc'), authenticate('kc'));
-  app.get('/api/auth/firebase/auth0', jwtCheck('auth0'), authenticate('auth0'));
+  app.get('/api/auth/firebase/auth0', jwtCheck, authenticate);
 
   return functions.https.onRequest(app);
 };

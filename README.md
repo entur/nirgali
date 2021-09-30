@@ -34,7 +34,7 @@ At Entur, the Anshar application is responsible for consuming this endpoint and 
 
 ### Custom tokens
 
-In order to enforce security in the firebase database, a custom token is created in [the auth function](functions/auth) based on the keycloak token. The `editSX` roles are carried over to the custom token and used in `firestore.rules` for authorization.
+In order to enforce security in the firebase database, a custom token is created in [the auth function](functions/auth) based on the auth0 token. The `editSX` roles are carried over to the custom token and used in `firestore.rules` for authorization.
 
 ## Local development
 
@@ -80,8 +80,6 @@ Deployment is handled by [circleci](https://app.circleci.com/pipelines/github/en
 
 The auth function in firebase needs some config parameters to be set:
 
-* `auth.firebase.kc.auth_jwks_uri`
-* `auth.firebase.kc.auth_issuer`
 * `auth.firebase.auth0.auth_jwks_uri`
 * `auth.firebase.auth0.auth_issuer`
 * `auth.firebase.auth0.claims_namespace`
@@ -99,10 +97,6 @@ Output:
     {
       "auth": {
         "firebase": {
-          "kc": {
-            "auth_jwks_uri": "https://kc-dev.devstage.entur.io/auth/realms/rutebanken/protocol/openid-connect/certs",
-            "auth_issuer": "https://kc-dev.devstage.entur.io/auth/realms/rutebanken"
-          },
           "auth0": {
             "auth_jwks_uri": "https://ror-entur-dev.eu.auth0.com/.well-known/jwks.json",
             "auth_issuer": "https://ror-entur-dev.eu.auth0.com/",

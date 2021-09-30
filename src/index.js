@@ -61,7 +61,6 @@ const AuthenticatedApp = ({ config }) => {
 const renderApp = (config) => {
   ReactDOM.render((
     <AuthProvider
-      keycloakConfigUrl="/keycloak.json"
       auth0Config={{
         domain: config.auth0.domain,
         clientId: config.auth0.clientId,
@@ -69,7 +68,6 @@ const renderApp = (config) => {
         redirectUri: window.location.origin
       }}
       auth0ClaimsNamespace={config.auth0.claimsNamespace}
-      defaultAuthMethod={config.defaultAuthMethod}
     >
       <AuthenticatedApp config={config} />
     </AuthProvider>

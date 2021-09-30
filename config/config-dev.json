@@ -6,6 +6,5 @@
     "clientId": "ze7TvpcC4FbVfU1CPJf7ljb3eTeTS39J",
     "audience": "https://ror.api.dev.entur.io",
     "claimsNamespace": "https://ror.entur.io/role_assignments"
-  },
-  "defaultAuthMethod": "auth0"
+  }
 }
