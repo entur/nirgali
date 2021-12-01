@@ -201,10 +201,13 @@ class Register extends React.Component {
     if (this.state.infoLink) {
       newIssue.InfoLinks = {
         InfoLink: {
-          Uri: this.state.infoLink.uri,
-          Label: this.state.infoLink.label
+          Uri: this.state.infoLink.uri
         }
       };
+
+      if (this.state.infoLink.label) {
+        newIssue.InfoLinks.InfoLink.Label = this.state.infoLink.label;
+      }
     }
 
     this.props.firebase
