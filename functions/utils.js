@@ -27,7 +27,8 @@ const transformSituationData = data => {
     Summary,
     Description,
     Advice,
-    Affects
+    Affects,
+    InfoLinks
   } = data;
 
   const transformedData = {
@@ -52,6 +53,10 @@ const transformSituationData = data => {
   }
 
   transformedData.Affects = transformAffects(Affects);
+
+  if (InfoLinks) {
+    transformedData.InfoLinks = InfoLinks;
+  }
 
   return transformedData;
 };

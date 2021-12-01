@@ -63,6 +63,17 @@ class Edit extends React.Component {
     }
     this.props.issue.data.ReportType = event.target.reportType.value;
 
+    if (event.target.infoLinkUri.value !== '') {
+      this.props.issue.data.InfoLinks = {
+        InfoLink: {
+          Uri: event.target.infoLinkUri.value,
+          Label: event.target.infoLinkLabel.value
+        }
+      };
+    } else {
+      delete this.props.issue.data.InfoLinks;
+    }
+
     const codespace = this.props.organization.split(':')[0];
     const authority = this.props.organization;
     const id = this.props.issue.id;
@@ -145,6 +156,22 @@ class Edit extends React.Component {
         return issue.Advice['_text'];
       } else {
         return '';
+      }
+    }
+
+    if (type === 'infoLinkUri') {
+      if (issue.InfoLinks) {
+        return issue.InfoLinks.InfoLink.Uri;
+      } else {
+        return undefined;
+      }
+    }
+
+    if (type === 'infoLinkLabel') {
+      if (issue.InfoLinks) {
+        return issue.InfoLinks.InfoLink.Label;
+      } else {
+        return undefined;
       }
     }
 
@@ -415,6 +442,22 @@ class Edit extends React.Component {
               name="forslag"
               className="form-control"
               defaultValue={this.returnValue('advice')}
+            />
+            <br></br>
+            <p className="text-center text-white">
+              Lenke til nettside som har mer informasjon om hendelsen
+            </p>
+            <input
+              className="form-control"
+              name="infoLinkUri"
+              placeholder="Lenke"
+              defaultValue={this.returnValue('infoLinkUri')}
+            />
+            <input
+              className="form-control"
+              name="infoLinkLabel"
+              placeholder="Tekst til lenken"
+              defaultValue={this.returnValue('infoLinkLabel')}
             />
             <br></br>
             {this.checkStatus(this.props.issue.data.Progress)}

@@ -35,7 +35,8 @@ class Register extends React.Component {
     reportType: 'incident',
     oppsummering: '',
     beskrivelse: '',
-    forslag: ''
+    forslag: '',
+    infoLink: undefined
   };
 
   componentDidMount() {
@@ -195,6 +196,15 @@ class Register extends React.Component {
         const newAffect = this.createAffectedDeparture();
         newIssue.Affects = newAffect;
       }
+    }
+
+    if (this.state.infoLink) {
+      newIssue.InfoLinks = {
+        InfoLink: {
+          Uri: this.state.infoLink.uri,
+          Label: this.state.infoLink.label
+        }
+      };
     }
 
     this.props.firebase
@@ -638,6 +648,40 @@ class Register extends React.Component {
                   value={this.state.forslag}
                   onChange={({ target: { value: forslag } }) =>
                     this.setState({ forslag })
+                  }
+                />
+                <br></br>
+              </div>
+              <div className="message">
+                <p className="text-center text-white">
+                  Lenke til nettside som har mer informasjon om hendelsen
+                </p>
+                <input
+                  className="form-control"
+                  placeholder="Lenke"
+                  value={this.state.infoLink?.uri}
+                  onChange={event =>
+                    this.setState({
+                      ...this.state,
+                      infoLink: {
+                        ...this.state.infoLink,
+                        uri: event.target.value
+                      }
+                    })
+                  }
+                />
+                <input
+                  className="form-control"
+                  placeholder="Tekst til lenken"
+                  value={this.state.infoLink?.label}
+                  onChange={event =>
+                    this.setState({
+                      ...this.state,
+                      infoLink: {
+                        ...this.state.infoLink,
+                        label: event.target.value
+                      }
+                    })
                   }
                 />
               </div>
