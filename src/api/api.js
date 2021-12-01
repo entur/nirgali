@@ -1,10 +1,24 @@
 const { createApolloFetch } = require('apollo-fetch');
 
-const getAuthorities = URI => () => {
+const createFetch = URI => {
   const apolloFetch = createApolloFetch({
-    uri: URI,
-    headers: { 'ET-client-Name': 'entur - deviation-messages' }
+    uri: URI
   });
+
+  apolloFetch.use(({ request, options }, next) => {
+    if (!options.headers) {
+      options.headers = {}; // Create the headers object if needed.
+    }
+    options.headers['ET-Client-Name'] = 'entur - deviation-messages';
+
+    next();
+  });
+
+  return apolloFetch;
+};
+
+const getAuthorities = URI => () => {
+  const apolloFetch = createFetch(URI);
   const query = `
       {
         authorities{
@@ -19,10 +33,8 @@ const getAuthorities = URI => () => {
 };
 
 const getLines = URI => authorities => {
-  const apolloFetch = createApolloFetch({
-    uri: URI,
-    headers: { 'ET-client-Name': 'entur - deviation-messages' }
-  });
+  const apolloFetch = createFetch(URI);
+
   const query = `
       {
         lines(authorities: "${authorities}") {
@@ -45,10 +57,8 @@ const getLines = URI => authorities => {
 };
 
 const getDepartures = URI => (line, date) => {
-  const apolloFetch = createApolloFetch({
-    uri: URI,
-    headers: { 'ET-client-Name': 'entur - deviation-messages' }
-  });
+  const apolloFetch = createFetch(URI);
+
   const query = `
       {
         serviceJourneys(lines: "${line}", activeDates: "${date}") {
@@ -71,10 +81,8 @@ const getDepartures = URI => (line, date) => {
 };
 
 const getServiceJourney = URI => (id, date) => {
-  const apolloFetch = createApolloFetch({
-    uri: URI,
-    headers: { 'ET-client-Name': 'entur - deviation-messages' }
-  });
+  const apolloFetch = createFetch(URI);
+
   const query = `
     {
       serviceJourney(id: "${id}") {
