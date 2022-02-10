@@ -56,5 +56,7 @@ exports.auth = function(firebaseAdmin) {
 
   app.get('/api/auth/firebase/auth0', jwtCheck, authenticate);
 
-  return functions.https.onRequest(app);
+  return functions
+    .region('europe-west1')
+    .https.onRequest(app);
 };
