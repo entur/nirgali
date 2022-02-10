@@ -22,21 +22,9 @@ jobs:
     steps:
       - *attach_workspace
       - checkout
-      - node/with-cache:
-          cache-key: package-lock.json
-          cache-version: v1
-          steps:
-            - run:
-               name: Install dependencies
-               command: npm install
-      - node/with-cache:
-          cache-key: functions/package-lock.json
-          cache-version: v1
-          steps:
-            - run:
-                name: Install functions dependencies
-                working_directory: functions/
-                command: npm install
+      - node/install-packages
+      - node/install-packages:
+          app-dir: functions
       - run:
           name: "Run tests"
           command: npm run test
