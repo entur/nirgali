@@ -30,7 +30,7 @@
     "react-dom": "^16.8.6",
     "react-flatpickr": "3.9.0",
     "react-router-dom": "^5.0.1",
-    "react-scripts": "3.4.0",
+    "react-scripts": "3.4.4",
     "react-select": "3.0.4",
     "react-super-responsive-table": "^5.0.0",
     "react-windowed-select": "^2.0.3",
