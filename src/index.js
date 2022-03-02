@@ -22,11 +22,10 @@ const TOKEN_REFRESH_RATE = 60 * 1000;
 
 const AuthenticatedApp = ({ config }) => {
   const auth = useAuth();
-
   const [loggedIn, setLoggedIn] = useState(false);
+  const authApi = config['auth-api'];
 
   useEffect(() => {
-    const authApi = config['auth-api'];
     const getToken = async () => {
       const token = await auth.getAccessToken();
       const authResponse = await fetch(authApi, headers(token));
