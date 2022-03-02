@@ -8,11 +8,11 @@
     ],
     "rewrites": [
       {
-        "source": "/api/xml",
+        "source": "/xml",
         "function": "xml"
       },
       {
-        "source": "/api/auth/firebase/**",
+        "source": "/auth/firebase/**",
         "function": "auth"
       },
       {

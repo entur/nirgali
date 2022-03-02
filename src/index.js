@@ -28,7 +28,7 @@ const AuthenticatedApp = ({ config }) => {
   useEffect(() => {
     const getToken = async () => {
       const token = await auth.getAccessToken();
-      const authResponse = await fetch(`/api/auth/firebase/auth0`, headers(token));
+      const authResponse = await fetch(`/auth/firebase/auth0`, headers(token));
       const {firebaseToken} = await authResponse.json();
       await firebase.auth().signInWithCustomToken(firebaseToken);
       setLoggedIn(true);

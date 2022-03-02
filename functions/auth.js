@@ -54,7 +54,7 @@ exports.auth = function(firebaseAdmin) {
       });
   };
 
-  app.get('/api/auth/firebase/auth0', jwtCheck, authenticate);
+  app.get('/auth/firebase/auth0', jwtCheck, authenticate);
 
   return functions.https.onRequest(app);
 };
