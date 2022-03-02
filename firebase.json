@@ -8,7 +8,7 @@
     ],
     "rewrites": [
       {
-        "source": "/xml",
+        "source": "/api/xml",
         "function": "xml"
       },
       {
