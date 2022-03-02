@@ -26,9 +26,10 @@ const AuthenticatedApp = ({ config }) => {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
+    const authApi = config['auth-api'];
     const getToken = async () => {
       const token = await auth.getAccessToken();
-      const authResponse = await fetch(config['auth-api'], headers(token));
+      const authResponse = await fetch(authApi, headers(token));
       const {firebaseToken} = await authResponse.json();
       await firebase.auth().signInWithCustomToken(firebaseToken);
       setLoggedIn(true);
@@ -47,7 +48,7 @@ const AuthenticatedApp = ({ config }) => {
     return () => {
       clearInterval(updater);
     }
-  }, [auth]);
+  }, [auth, authApi]);
 
   return (
     <>
