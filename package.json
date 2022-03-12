@@ -34,7 +34,7 @@
     "react-select": "3.0.4",
     "react-super-responsive-table": "5.0.0",
     "react-windowed-select": "2.0.5",
-    "xml-js": "1.6.10"
+    "xml-js": "1.6.11"
   },
   "scripts": {
     "copy:config": "cp config/config-dev.json public/config.json",
