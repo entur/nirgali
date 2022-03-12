@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@entur/auth-provider": "1.0.0",
-    "@entur/button": "2.2.5",
+    "@entur/button": "2.8.0",
     "@entur/component-library": "0.21.1",
     "@entur/datepicker": "0.3.15",
     "@entur/form": "2.4.0",
