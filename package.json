@@ -28,7 +28,7 @@
     "prettier": "1.19.1",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "react-flatpickr": "3.9.0",
+    "react-flatpickr": "3.10.8",
     "react-router-dom": "5.0.1",
     "react-scripts": "3.4.4",
     "react-select": "3.0.4",
