@@ -32,7 +32,7 @@
     "react-router-dom": "5.3.3",
     "react-scripts": "3.4.4",
     "react-select": "3.2.0",
-    "react-super-responsive-table": "5.2.0",
+    "react-super-responsive-table": "5.2.1",
     "react-windowed-select": "2.0.5",
     "xml-js": "1.6.11"
   },
