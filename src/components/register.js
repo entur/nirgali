@@ -492,6 +492,7 @@ class Register extends React.Component {
                   <div>
                     <StopPicker
                       isMulti
+                      api={this.props.api}
                       stops={this.returnSpecifiedLines().quays}
                       onChange={this.handleChangeSpecifiedStops}
                     />
@@ -503,6 +504,7 @@ class Register extends React.Component {
                 <div>
                   <StopPicker
                     isMulti
+                    api={this.props.api}
                     stops={this.state.stops}
                     onChange={this.handleChangeSpecifiedStops}
                   />
@@ -564,6 +566,7 @@ class Register extends React.Component {
             <div>
               <StopPicker
                 isMulti
+                api={this.props.api}
                 stops={this.returnSpecifiedLinesDeparture().estimatedCalls.map(
                   ({ quay }) => quay
                 )}

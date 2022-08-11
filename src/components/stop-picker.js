@@ -6,29 +6,7 @@ const chunk = (arr, size) =>
     arr.slice(i * size, i * size + size)
   );
 
-const headers = {
-  'Et-Client-Name': 'entur-nirgali'
-};
-
-const getStopPlaces = async ids => {
-  const response = await fetch(
-    `https://api.dev.entur.io/stop-places/v1/read/stop-places?ids=${ids}`,
-    { headers }
-  );
-  const stopPlaces = await response.json();
-  return stopPlaces;
-};
-
-const getTopographicPlaces = async ids => {
-  const response = await fetch(
-    `https://api.dev.entur.io/stop-places/v1/read/topographic-places?ids=${ids}`,
-    { headers }
-  );
-  const topographicPlaces = await response.json();
-  return topographicPlaces;
-};
-
-const useTopographicPlaces = stops => {
+const useTopographicPlaces = (stops, api) => {
   const stopPlaceTopographicPlaceIndex = useRef({});
   const [stopPlaces, setStopPlaces] = useState({});
   const [topographicPlaces, setTopographicPlaces] = useState({});
@@ -36,7 +14,9 @@ const useTopographicPlaces = stops => {
   useEffect(() => {
     const populateTopographicPlaces = async stopPlaceIds => {
       const stopPlaces = await Promise.all(
-        chunk(stopPlaceIds, 200).map(async chunk => await getStopPlaces(chunk))
+        chunk(stopPlaceIds, 200).map(
+          async chunk => await api.getStopPlaces(chunk)
+        )
       );
 
       setStopPlaces(prev =>
@@ -52,9 +32,9 @@ const useTopographicPlaces = stops => {
         return stopPlace.topographicPlaceRef.ref;
       });
 
-      const topographicPlacesData = await await Promise.all(
+      const topographicPlacesData = await Promise.all(
         chunk(topographicPlaceIds, 200).map(
-          async chunk => await getTopographicPlaces(chunk)
+          async chunk => await api.getTopographicPlaces(chunk)
         )
       );
 
@@ -67,7 +47,7 @@ const useTopographicPlaces = stops => {
     };
 
     populateTopographicPlaces(stops.map(stop => stop.stopPlace.id));
-  }, [stops]);
+  }, [stops, api]);
 
   return {
     stopPlaceTopographicPlaceIndex: stopPlaceTopographicPlaceIndex.current,
@@ -76,12 +56,12 @@ const useTopographicPlaces = stops => {
   };
 };
 
-const useOptions = stops => {
+const useOptions = (stops, api) => {
   const {
     stopPlaceTopographicPlaceIndex,
     topographicPlaces,
     stopPlaces
-  } = useTopographicPlaces(stops);
+  } = useTopographicPlaces(stops, api);
 
   const options = useMemo(() => {
     return stops
@@ -121,8 +101,8 @@ const useOptions = stops => {
   return options;
 };
 
-export default ({ stops, isMulti, onChange }) => {
-  const options = useOptions(stops);
+export default ({ stops, isMulti, onChange, api }) => {
+  const options = useOptions(stops, api);
 
   return (
     <Select

@@ -1,5 +1,6 @@
 {
   "journey-planner-api": "https://api.dev.entur.io/journey-planner/v2/graphql",
+  "stop-places-api": "https://api.dev.entur.io/stop-places/v1/read",
   "organisations-api": "https://api.dev.entur.io/organisations/v1/register/organisations",
   "auth-api": "https://api.dev.entur.io/deviation-messages/v1/auth/firebase/auth0",
   "auth0": {
