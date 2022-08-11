@@ -2,15 +2,14 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/app';
 import api from './api/api';
-import * as firebase from "firebase/app";
+import * as firebase from 'firebase/app';
 import AuthProvider, { useAuth } from '@entur/auth-provider';
 
-import "firebase/auth";
-import "firebase/firestore";
+import 'firebase/auth';
+import 'firebase/firestore';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './style/index.css';
-
 
 const headers = token => ({
   headers: {
@@ -29,10 +28,10 @@ const AuthenticatedApp = ({ config }) => {
     const getToken = async () => {
       const token = await auth.getAccessToken();
       const authResponse = await fetch(authApi, headers(token));
-      const {firebaseToken} = await authResponse.json();
+      const { firebaseToken } = await authResponse.json();
       await firebase.auth().signInWithCustomToken(firebaseToken);
       setLoggedIn(true);
-    }
+    };
 
     if (auth.isAuthenticated) {
       getToken();
@@ -46,20 +45,16 @@ const AuthenticatedApp = ({ config }) => {
 
     return () => {
       clearInterval(updater);
-    }
+    };
   }, [auth, authApi]);
 
   return (
-    <>
-      {loggedIn && (
-        <App firebase={firebase} auth={auth} api={api(config)}/>
-      )}
-   </>
+    <>{loggedIn && <App firebase={firebase} auth={auth} api={api(config)} />}</>
   );
-}
+};
 
-const renderApp = (config) => {
-  ReactDOM.render((
+const renderApp = config => {
+  ReactDOM.render(
     <AuthProvider
       auth0Config={{
         domain: config.auth0.domain,
@@ -70,8 +65,9 @@ const renderApp = (config) => {
       auth0ClaimsNamespace={config.auth0.claimsNamespace}
     >
       <AuthenticatedApp config={config} />
-    </AuthProvider>
-  ), document.getElementById('root'));
+    </AuthProvider>,
+    document.getElementById('root')
+  );
 };
 
 const init = async () => {
@@ -82,6 +78,6 @@ const init = async () => {
   firebase.initializeApp(await firebaseConfigResponse.json());
 
   renderApp(config);
-}
+};
 
 init();

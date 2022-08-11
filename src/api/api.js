@@ -116,10 +116,32 @@ const organisationID = URI => id => {
     .then(response => response);
 };
 
+const getStopPlaces = URI => async ids => {
+  const response = await fetch(`${URI}/stop-places?ids=${ids}`, {
+    headers: {
+      'Et-Client-Name': 'entur - deviation-messages'
+    }
+  });
+  const stopPlaces = await response.json();
+  return stopPlaces;
+};
+
+const getTopographicPlaces = URI => async ids => {
+  const response = await fetch(`${URI}/topographic-places?ids=${ids}`, {
+    headers: {
+      'Et-Client-Name': 'entur - deviation-messages'
+    }
+  });
+  const topographicPlaces = await response.json();
+  return topographicPlaces;
+};
+
 export default config => ({
   getAuthorities: getAuthorities(config['journey-planner-api']),
   organisationID: organisationID(config['organisations-api']),
   getLines: getLines(config['journey-planner-api']),
   getDepartures: getDepartures(config['journey-planner-api']),
-  getServiceJourney: getServiceJourney(config['journey-planner-api'])
+  getServiceJourney: getServiceJourney(config['journey-planner-api']),
+  getStopPlaces: getStopPlaces(config['stop-places-api']),
+  getTopographicPlaces: getTopographicPlaces(config['stop-places-api'])
 });
