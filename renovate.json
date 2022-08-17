@@ -1,3 +1,9 @@
 {
-  "extends": ["github>entur/ror-renovate-config"]
+  "extends": ["github>entur/ror-renovate-config"],
+  "packageRules": [
+    {
+      "matchPackageNames": ["@entur/datepicker"],
+      "allowedVersions": "<=0.11.3"
+    }
+  ]
 }
