@@ -276,10 +276,12 @@ class Edit extends React.Component {
       return quays.find(
         q => q.stopPlace && q.stopPlace.id === AffectedStopPoint.StopPointRef
       );
-    })?.map(({ id, name }) => ({
-      value: id,
-      label: `${name} - ${id}`
-    }));
+    })
+      ?.filter(v => v !== undefined)
+      ?.map(({ id, name }) => ({
+        value: id,
+        label: `${name} - ${id}`
+      }));
   };
 
   render() {
