@@ -205,10 +205,14 @@ class Edit extends React.Component {
 
   getLineOption = id => {
     const line = this.props.lines.find(l => l.id === id);
-    return {
-      value: line.id,
-      label: `${line.name} (${line.publicCode}) - ${line.id}`
-    };
+    return line
+      ? {
+          value: line.id,
+          label: `${line.name} (${line.publicCode}) - ${line.id}`
+        }
+      : {
+          label: 'Ukjent linje'
+        };
   };
 
   getLineDepartureOption = () => {
@@ -232,7 +236,7 @@ class Edit extends React.Component {
     const LineRef = AffectedLine?.LineRef;
     const line = this.props.lines.find(l => l.id === LineRef);
     const StopPoints = AffectedLine?.Routes?.AffectedRoute?.StopPoints;
-    return this.getQuayOptions(StopPoints, line.quays);
+    return this.getQuayOptions(StopPoints, line?.quays);
   };
 
   getDepartureLine = () => {
@@ -272,16 +276,23 @@ class Edit extends React.Component {
   };
 
   getQuayOptions = (StopPoints, quays) => {
-    return StopPoints?.AffectedStopPoint?.map(AffectedStopPoint => {
-      return quays.find(
-        q => q.stopPlace && q.stopPlace.id === AffectedStopPoint.StopPointRef
-      );
-    })
-      ?.filter(v => v !== undefined)
-      ?.map(({ id, name }) => ({
-        value: id,
-        label: `${name} - ${id}`
-      }));
+    return quays
+      ? StopPoints?.AffectedStopPoint?.map(AffectedStopPoint => {
+          return quays.find(
+            q =>
+              q.stopPlace && q.stopPlace.id === AffectedStopPoint.StopPointRef
+          );
+        })
+          ?.filter(v => v !== undefined)
+          ?.map(({ id, name }) => ({
+            value: id,
+            label: `${name} - ${id}`
+          }))
+      : [
+          {
+            label: 'Ukjent stoppested'
+          }
+        ];
   };
 
   render() {
