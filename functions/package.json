@@ -20,7 +20,7 @@
     "express-jwt": "6.1.2",
     "firebase-admin": "9.12.0",
     "firebase-functions": "3.21.2",
-    "jwks-rsa": "1.12.3",
+    "jwks-rsa": "2.1.5",
     "xml-js": "1.6.11"
   },
   "devDependencies": {
