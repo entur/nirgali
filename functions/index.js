@@ -1,11 +1,11 @@
-const firebaseAdmin = require('firebase-admin');
+const {initializeApp} = require('firebase-admin/app');
 
 const auth = require('./auth');
 const xml = require('./xml');
 
-firebaseAdmin.initializeApp();
+initializeApp();
 
-exports.auth = auth.auth(firebaseAdmin);
-exports.xml = xml.xml(firebaseAdmin);
-exports.closeOpenExpiredMessages = xml.closeOpenExpiredMessages(firebaseAdmin);
-exports.logDbWrites = xml.logDbWrites(firebaseAdmin);
+exports.auth = auth.auth();
+exports.xml = xml.xml();
+exports.closeOpenExpiredMessages = xml.closeOpenExpiredMessages();
+exports.logDbWrites = xml.logDbWrites();

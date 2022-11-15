@@ -1,5 +1,4 @@
-@import '../fonts/fonts.scss';
-@include font-face('fonts/');
+@import '~@entur/tokens/dist/styles.scss';
 
 body {
   margin: 0;
@@ -11,7 +10,7 @@ h1 {
   font-size: 34px;
   font-weight: 600;
   line-height: 42px;
-  color: $blue;
+  color: $colors-brand-blue;
 }
 
 h2 {

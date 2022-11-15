@@ -1,4 +1,5 @@
 const { addHours, parseISO } = require('date-fns');
+const { getFirestore } = require('firebase-admin/firestore');
 const functions = require('firebase-functions');
 const convert = require('xml-js');
 const {
@@ -6,7 +7,7 @@ const {
   filterOpenExpiredMessages
 } = require('./utils');
 
-exports.xml = function(admin) {
+exports.xml = function() {
   return functions
     .region('europe-west1')
     .https.onRequest(async (request, response) => {
@@ -23,7 +24,7 @@ exports.xml = function(admin) {
 
       console.info('XML request received - dateTime=' + dateTime);
 
-      const db = admin.firestore();
+      const db = getFirestore();
 
       const siri = {
         Siri: {
@@ -91,14 +92,14 @@ exports.xml = function(admin) {
     });
 };
 
-exports.closeOpenExpiredMessages = function(admin) {
+exports.closeOpenExpiredMessages = function() {
   return functions
     .region('europe-west1')
     .pubsub.schedule('every 30 minutes')
     .onRun(async _ => {
       const dateTime = new Date().toISOString();
       console.info('closeOpenExpiredMessages started - dateTime=' + dateTime);
-      const db = admin.firestore();
+      const db = getFirestore();
 
       try {
         const openSnapshot = await db
@@ -147,7 +148,7 @@ exports.closeOpenExpiredMessages = function(admin) {
     });
 };
 
-exports.logDbWrites = function(admin) {
+exports.logDbWrites = function() {
   return functions
     .region('europe-west1')
     .firestore.document(

@@ -10,6 +10,7 @@ import 'firebase/firestore';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './style/index.css';
+import './style/base/base.scss';
 
 const headers = token => ({
   headers: {

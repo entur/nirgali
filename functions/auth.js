@@ -4,8 +4,9 @@ const jwks = require('jwks-rsa');
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { getAuth } = require('firebase-admin/auth');
 
-const auth0ClaimsNamespace = functions.config().auth.firebase.auth0
+const getAuth0ClaimsNamespace = () => functions.config().auth.firebase.auth0
   .claims_namespace;
 
 const transformRoles = (roles, claim) =>
@@ -17,7 +18,7 @@ const transformRoles = (roles, claim) =>
       return acc;
     }, {});
 
-exports.auth = function(firebaseAdmin) {
+exports.auth = function() {
   const app = express();
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
@@ -36,14 +37,14 @@ exports.auth = function(firebaseAdmin) {
 
   const authenticate = (req, res) => {
     const { sub: uid } = req.user;
+    const auth0ClaimsNamespace = getAuth0ClaimsNamespace();
     let roles = req.user[auth0ClaimsNamespace];
 
     const additionalClaims = {
       editSX: transformRoles(roles, 'editSX')
     };
 
-    firebaseAdmin
-      .auth()
+    getAuth()
       .createCustomToken(uid, additionalClaims)
       .then(customToken => res.json({ firebaseToken: customToken }))
       .catch(err => {

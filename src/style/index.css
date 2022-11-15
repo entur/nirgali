@@ -1,5 +1,3 @@
-@import './base/base.scss';
-@import '~@entur/component-library/lib/index.css';
 @import '~@entur/layout/dist/styles.css';
 @import '~@entur/form/dist/styles.css';
 @import '~@entur/typography/dist/styles.css';
