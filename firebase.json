@@ -8,13 +8,13 @@
     ],
     "rewrites": [
       {
-        "source": "**",
-        "destination": "/index.html"
-      },
-      {
-        "source": "/api/auth",
+        "source": "/auth",
         "function": "auth",
         "region": "europe-west1"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
       }
     ]
   },
