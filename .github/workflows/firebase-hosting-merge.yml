@@ -32,6 +32,8 @@ jobs:
         continue-on-error: true
         run: npm list
       - run: npm ci
+      - working-directory: ./functions
+        run: npm ci
       - run: npm run check
       - run: npm run test -- --coverage
       - run: npm run test:functions
