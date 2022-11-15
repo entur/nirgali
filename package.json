@@ -45,8 +45,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "test:functions": "jest functions",
-    "format": "prettier --write \"{src,functions}/**/*.{js,jsx,json,css,md}\"",
-    "check": "prettier --check \"{src,functions}/**/*.{js,jsx,json,css,md}\""
+    "format": "prettier --write \"{src,functions,config}/**!(*node_modules)/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "check": "prettier --check \"{src,functions,config}/**!(*node_modules)/*.{js,jsx,ts,tsx,json,css,scss,md}\""
   },
   "eslintConfig": {
     "extends": "react-app"
