@@ -3,7 +3,7 @@ import Select from 'react-select';
 
 const DEFAULT_PLACEHOLDER = 'Velg linje';
 
-export default ({ lines, onChange }) => {
+const LinePicker = ({ lines, onChange }) => {
   return (
     <Select
       placeholder={DEFAULT_PLACEHOLDER}
@@ -25,3 +25,5 @@ const getLineOptions = lines => {
       value: item.id
     }));
 };
+
+export default LinePicker;

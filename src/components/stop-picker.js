@@ -101,7 +101,7 @@ const useOptions = (stops, api) => {
   return options;
 };
 
-export default ({ stops, isMulti, onChange, api }) => {
+const StopPicker = ({ stops, isMulti, onChange, api }) => {
   const options = useOptions(stops, api);
 
   return (
@@ -113,3 +113,5 @@ export default ({ stops, isMulti, onChange, api }) => {
     />
   );
 };
+
+export default StopPicker;

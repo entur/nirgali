@@ -136,7 +136,7 @@ const getTopographicPlaces = URI => async ids => {
   return topographicPlaces;
 };
 
-export default config => ({
+const api = config => ({
   getAuthorities: getAuthorities(config['journey-planner-api']),
   organisationID: organisationID(config['organisations-api']),
   getLines: getLines(config['journey-planner-api']),
@@ -145,3 +145,5 @@ export default config => ({
   getStopPlaces: getStopPlaces(config['stop-places-api']),
   getTopographicPlaces: getTopographicPlaces(config['stop-places-api'])
 });
+
+export default api;
