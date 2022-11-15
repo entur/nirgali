@@ -1,11 +1,12 @@
 const functions = require('firebase-functions');
-const jwt = require('express-jwt'); 
+const jwt = require('express-jwt');
 const jwks = require('jwks-rsa');
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-const auth0ClaimsNamespace = functions.config().auth.firebase.auth0.claims_namespace;
+const auth0ClaimsNamespace = functions.config().auth.firebase.auth0
+  .claims_namespace;
 
 const transformRoles = (roles, claim) =>
   roles
@@ -57,7 +58,5 @@ exports.auth = function(firebaseAdmin) {
   app.get('/auth/firebase/auth0', jwtCheck, authenticate);
   app.get('/firebase/auth0', jwtCheck, authenticate);
 
-  return functions
-    .region('europe-west1')
-    .https.onRequest(app);
+  return functions.region('europe-west1').https.onRequest(app);
 };

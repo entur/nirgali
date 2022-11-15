@@ -82,7 +82,9 @@ const transformAffects = ({
   }
 
   if (VehicleJourneys) {
-    transformedAffects.VehicleJourneys = transformVehicleJourneys(VehicleJourneys);
+    transformedAffects.VehicleJourneys = transformVehicleJourneys(
+      VehicleJourneys
+    );
   }
 
   return transformedAffects;
@@ -91,10 +93,7 @@ const transformAffects = ({
 const transformVehicleJourneys = VehicleJourneys => {
   const {
     AffectedVehicleJourney: {
-      FramedVehicleJourneyRef: {
-        DataFrameRef,
-        DatedVehicleJourneyRef
-      },
+      FramedVehicleJourneyRef: { DataFrameRef, DatedVehicleJourneyRef },
       Route
     }
   } = VehicleJourneys;
@@ -107,8 +106,8 @@ const transformVehicleJourneys = VehicleJourneys => {
       },
       Route
     }
-  }
-}
+  };
+};
 
 const transformNetworks = Networks => {
   const {
@@ -146,11 +145,11 @@ const transformValidityPeriod = ({ StartTime, EndTime }) => {
 
 exports.transformSituationData = transformSituationData;
 
-const filterOpenExpiredMessages = (dateTime) => (data) => {
+const filterOpenExpiredMessages = dateTime => data => {
   if (data.Progress === 'open' && data.ValidityPeriod.EndTime) {
     return data.ValidityPeriod.EndTime > dateTime;
   }
   return true;
-}
+};
 
 exports.filterOpenExpiredMessages = filterOpenExpiredMessages;

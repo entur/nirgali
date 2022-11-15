@@ -1,7 +1,0 @@
-{
-  "realm": "rutebanken",
-  "auth-server-url": "https://auth.entur.org/auth",
-  "ssl-required": "external",
-  "resource": "deviation-messages",
-  "public-client": true
-}

@@ -44,7 +44,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "test:functions": "jest functions"
+    "test:functions": "jest functions",
+    "format": "prettier --write \"{src,functions}/**/*.{js,jsx,json,css,md}\"",
+    "check": "prettier --check \"{src,functions}/**/*.{js,jsx,json,css,md}\""
   },
   "eslintConfig": {
     "extends": "react-app"

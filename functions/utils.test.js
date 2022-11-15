@@ -7,7 +7,7 @@ const assertKeyOrder = (expected, actual) => {
       assertKeyOrder(expected[key], actual[key]);
     }
   });
-}
+};
 
 describe('transformSituationData', () => {
   test('line', () => {
