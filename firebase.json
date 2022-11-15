@@ -8,7 +8,7 @@
     ],
     "rewrites": [
       {
-        "source": "/auth",
+        "source": "/auth/firebase/auth0",
         "function": "auth",
         "region": "europe-west1"
       },
