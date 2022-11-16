@@ -1,5 +1,5 @@
 const functions = require('firebase-functions');
-const jwt = require('express-jwt');
+const {expressjwt: jwt} = require('express-jwt');
 const jwks = require('jwks-rsa');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -34,9 +34,9 @@ exports.auth = function() {
   });
 
   const authenticate = (req, res) => {
-    const { sub: uid } = req.user;
+    const { sub: uid } = req.auth;
     const auth0ClaimsNamespace = getAuth0ClaimsNamespace();
-    let roles = req.user[auth0ClaimsNamespace];
+    let roles = req.auth[auth0ClaimsNamespace];
 
     const additionalClaims = {
       editSX: transformRoles(roles, 'editSX')
