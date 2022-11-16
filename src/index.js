@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import App from './components/app';
 import api from './api/api';
 import firebase from "firebase/compat/app"
@@ -55,7 +55,8 @@ const AuthenticatedApp = ({ config }) => {
 };
 
 const renderApp = config => {
-  ReactDOM.render(
+  const root = createRoot(document.getElementById('root'));
+  root.render(
     <AuthProvider
       auth0Config={{
         domain: config.auth0.domain,
