@@ -2,7 +2,6 @@ const functions = require('firebase-functions');
 const jwt = require('express-jwt');
 const jwks = require('jwks-rsa');
 const express = require('express');
-const cors = require('cors');
 const bodyParser = require('body-parser');
 const { getAuth } = require('firebase-admin/auth');
 
@@ -22,7 +21,6 @@ exports.auth = function() {
   const app = express();
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(cors());
 
   const jwtCheck = jwt({
     secret: jwks.expressJwtSecret({
