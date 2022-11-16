@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/app';
 import api from './api/api';
-import * as firebase from 'firebase/app';
+import firebase from "firebase/compat/app"
 import AuthProvider, { useAuth } from '@entur/auth-provider';
 
-import 'firebase/auth';
-import 'firebase/firestore';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './style/index.css';
