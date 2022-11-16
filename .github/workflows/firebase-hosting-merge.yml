@@ -48,7 +48,8 @@ jobs:
             -Dsonar.projectKey=entur_nirgali
             -Dsonar.sources=src,functions
             -Dsonar.tests=src,functions
-            -Dsonar.test.inclusions=src/**/*.test.js
+            -Dsonar.test.inclusions=**/*.test.js
+            -Dsonar.coverage.exclusions=**/*.test.js
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info,functions/coverage/lcov.info
       - run: npm run build
         env:
