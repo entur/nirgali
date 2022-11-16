@@ -23,9 +23,7 @@
     "xml-js": "1.6.11"
   },
   "devDependencies": {
-    "eslint": "5.16.0",
-    "eslint-plugin-promise": "4.3.1",
-    "firebase-functions-test": "0.3.3"
+    "eslint": "5.16.0"
   },
   "private": true
 }
