@@ -4,8 +4,8 @@ import {
   PrimaryButton as Button,
   NegativeButton,
   SecondaryButton,
+  ButtonGroup
 } from '@entur/button';
-import { ButtonGroup } from '@entur/button';
 import { Contrast } from '@entur/layout';
 import addHours from 'date-fns/addHours';
 import Select from 'react-select';
