@@ -380,14 +380,12 @@ class Register extends React.Component {
     const date = this.state.departureDate;
     const line = this.state.chosenLine;
 
-    this.props.api
-      .getDepartures(line, formatDate(date))
-      .then((response) => {
-        this.setState({
-          departures: response.data.serviceJourneys,
-          departureSok: true,
-        });
+    this.props.api.getDepartures(line, formatDate(date)).then((response) => {
+      this.setState({
+        departures: response.data.serviceJourneys,
+        departureSok: true,
       });
+    });
   };
 
   returnSpecifiedLines = () => {
