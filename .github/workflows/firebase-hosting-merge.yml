@@ -36,7 +36,7 @@ jobs:
         run: npm ci
       - run: npm run check
       - run: npm run test -- --coverage
-      - run: npm run test:functions
+      - run: npm run test:functions -- --coverage --coverageDirectory functions/coverage
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
@@ -49,7 +49,7 @@ jobs:
             -Dsonar.sources=src,functions
             -Dsonar.tests=src,functions
             -Dsonar.test.inclusions=src/**/*.test.js
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info,functions/coverage/lcov.info
       - run: npm run build
         env:
           REACT_APP_VERSION: ${{ github.sha }}
