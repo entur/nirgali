@@ -271,7 +271,7 @@ class Edit extends React.Component {
     const Affects = this.props.issue.data.Affects;
     const StopPoints = Affects?.StopPoints;
     const quays = this.props.lines.reduce(
-      (acc, line) => (acc = acc.concat(line.quays)),
+      (acc, line) => [...acc, ...line.quays],
       []
     );
     return this.getQuayOptions(StopPoints, quays);

@@ -50,7 +50,7 @@ class Register extends React.Component {
 
   createStops = () => {
     const stops = this.props.lines.reduce(
-      (acc, line) => (acc = acc.concat(line.quays)),
+      (acc, line) => [...acc, ...line.quays],
       []
     );
 
