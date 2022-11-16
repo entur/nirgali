@@ -395,20 +395,6 @@ class Register extends React.Component {
       });
   };
 
-  returnMappedObjects = (list) => {
-    if (list[0].stopPlace) {
-      return list.map((item) => ({
-        label: item.name + ' - ' + item.stopPlace.id,
-        value: item.stopPlace.id,
-      }));
-    } else {
-      return list.map((item) => ({
-        label: `${item.name} (${item.publicCode}) - ${item.id}`,
-        value: item.id,
-      }));
-    }
-  };
-
   returnSpecifiedLines = () => {
     return this.props.lines.find((item) => item.id === this.state.chosenLine);
   };
