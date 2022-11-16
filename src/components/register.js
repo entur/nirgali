@@ -104,9 +104,7 @@ class Register extends React.Component {
       VehicleJourneys: {
         AffectedVehicleJourney: {
           FramedVehicleJourneyRef: {
-            DataFrameRef: formatDate(this.state.departureDate, {
-              representation: 'date',
-            }),
+            DataFrameRef: formatDate(this.state.departureDate),
             DatedVehicleJourneyRef: this.state.datedVehicleJourney,
           },
           Route: null,
@@ -120,9 +118,7 @@ class Register extends React.Component {
       VehicleJourneys: {
         AffectedVehicleJourney: {
           FramedVehicleJourneyRef: {
-            DataFrameRef: formatDate(this.state.departureDate, {
-              representation: 'date',
-            }),
+            DataFrameRef: formatDate(this.state.departureDate),
             DatedVehicleJourneyRef: this.state.datedVehicleJourney,
           },
           Route: this.createAffectedRoute(),
@@ -385,7 +381,7 @@ class Register extends React.Component {
     const line = this.state.chosenLine;
 
     this.props.api
-      .getDepartures(line, formatDate(date, { representation: 'date' }))
+      .getDepartures(line, formatDate(date))
       .then((response) => {
         this.setState({
           departures: response.data.serviceJourneys,
