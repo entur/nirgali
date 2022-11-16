@@ -12,7 +12,7 @@ export default class App extends React.Component {
     organizationsName: [],
     selectedOrganization: '',
     messages: [],
-    lines: []
+    lines: [],
   };
 
   componentDidMount() {
@@ -39,7 +39,7 @@ export default class App extends React.Component {
     }
 
     const response = await this.props.api.getAuthorities();
-    const organizations = response.data.authorities.filter(authority =>
+    const organizations = response.data.authorities.filter((authority) =>
       allowedCodespaces.includes(authority.id.split(':')[0])
     );
 
@@ -51,16 +51,16 @@ export default class App extends React.Component {
       {
         organizations: organizations.map(({ id }) => id),
         organizationsName: organizations.map(({ name }) => name),
-        selectedOrganization: organizations[0].id
+        selectedOrganization: organizations[0].id,
       },
       () => this.getMessagesAndLines()
     );
   };
 
-  updateOrganization = selectedOrg => {
+  updateOrganization = (selectedOrg) => {
     this.setState(
       {
-        selectedOrganization: selectedOrg
+        selectedOrganization: selectedOrg,
       },
       () => this.getMessagesAndLines()
     );
@@ -82,15 +82,15 @@ export default class App extends React.Component {
       .onSnapshot(this.onMessagesUpdate);
   };
 
-  onMessagesUpdate = querySnapshot => {
+  onMessagesUpdate = (querySnapshot) => {
     this.setState({
       messages:
         querySnapshot.size > 0
-          ? querySnapshot.docs.map(doc => ({
+          ? querySnapshot.docs.map((doc) => ({
               id: doc.id,
-              data: doc.data()
+              data: doc.data(),
             }))
-          : []
+          : [],
     });
   };
 
@@ -100,7 +100,7 @@ export default class App extends React.Component {
     );
     if (response.data) {
       this.setState({
-        lines: response.data.lines
+        lines: response.data.lines,
       });
     } else {
       console.log('Could not find any lines for this organization');
@@ -115,7 +115,7 @@ export default class App extends React.Component {
 
           <Route
             path="/"
-            render={props => (
+            render={(props) => (
               <NavBar
                 {...props}
                 NavBar
@@ -129,13 +129,13 @@ export default class App extends React.Component {
           <Route
             exact
             path="/"
-            render={props => (
+            render={(props) => (
               <Overview {...props} messages={this.state.messages} />
             )}
           />
           <Route
             path="/edit/:id?"
-            render={props => (
+            render={(props) => (
               <Edit
                 {...props}
                 issue={this.state.messages.find(
@@ -150,7 +150,7 @@ export default class App extends React.Component {
           />
           <Route
             path="/register"
-            render={props => (
+            render={(props) => (
               <Register
                 {...props}
                 api={this.props.api}

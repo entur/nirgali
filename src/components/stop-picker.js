@@ -12,21 +12,21 @@ const useTopographicPlaces = (stops, api) => {
   const [topographicPlaces, setTopographicPlaces] = useState({});
 
   useEffect(() => {
-    const populateTopographicPlaces = async stopPlaceIds => {
+    const populateTopographicPlaces = async (stopPlaceIds) => {
       const stopPlaces = await Promise.all(
         chunk(stopPlaceIds, 200).map(
-          async chunk => await api.getStopPlaces(chunk)
+          async (chunk) => await api.getStopPlaces(chunk)
         )
       );
 
-      setStopPlaces(prev =>
+      setStopPlaces((prev) =>
         stopPlaces.flat().reduce((acc, stopPlace) => {
           acc[stopPlace.id] = stopPlace;
           return acc;
         }, prev)
       );
 
-      const topographicPlaceIds = stopPlaces.flat().map(stopPlace => {
+      const topographicPlaceIds = stopPlaces.flat().map((stopPlace) => {
         stopPlaceTopographicPlaceIndex.current[stopPlace.id] =
           stopPlace.topographicPlaceRef.ref;
         return stopPlace.topographicPlaceRef.ref;
@@ -34,11 +34,11 @@ const useTopographicPlaces = (stops, api) => {
 
       const topographicPlacesData = await Promise.all(
         chunk(topographicPlaceIds, 200).map(
-          async chunk => await api.getTopographicPlaces(chunk)
+          async (chunk) => await api.getTopographicPlaces(chunk)
         )
       );
 
-      setTopographicPlaces(prev =>
+      setTopographicPlaces((prev) =>
         topographicPlacesData.flat().reduce((acc, topographicPlace) => {
           acc[topographicPlace.id] = topographicPlace;
           return acc;
@@ -46,22 +46,19 @@ const useTopographicPlaces = (stops, api) => {
       );
     };
 
-    populateTopographicPlaces(stops.map(stop => stop.stopPlace.id));
+    populateTopographicPlaces(stops.map((stop) => stop.stopPlace.id));
   }, [stops, api]);
 
   return {
     stopPlaceTopographicPlaceIndex: stopPlaceTopographicPlaceIndex.current,
     topographicPlaces,
-    stopPlaces
+    stopPlaces,
   };
 };
 
 const useOptions = (stops, api) => {
-  const {
-    stopPlaceTopographicPlaceIndex,
-    topographicPlaces,
-    stopPlaces
-  } = useTopographicPlaces(stops, api);
+  const { stopPlaceTopographicPlaceIndex, topographicPlaces, stopPlaces } =
+    useTopographicPlaces(stops, api);
 
   const options = useMemo(() => {
     return stops
@@ -69,7 +66,7 @@ const useOptions = (stops, api) => {
         (item, i, list) =>
           i ===
           list.findIndex(
-            j =>
+            (j) =>
               j.stopPlace &&
               item.stopPlace &&
               j.stopPlace.id === item.stopPlace.id
@@ -80,7 +77,7 @@ const useOptions = (stops, api) => {
         if (b.name > a.name) return -1;
         return 0;
       })
-      .map(item => {
+      .map((item) => {
         const topographicPlace =
           topographicPlaces[stopPlaceTopographicPlaceIndex[item.stopPlace.id]];
         const stopPlace = stopPlaces[item.stopPlace.id];
@@ -93,7 +90,7 @@ const useOptions = (stops, api) => {
               ? ' (' + topographicPlace.descriptor.name.value + ')'
               : '') +
             (stopPlace ? ' - ' + stopPlace.transportMode : ''),
-          value: item.stopPlace.id
+          value: item.stopPlace.id,
         };
       })
       .sort((a, b) => a.label.localeCompare(b.label));

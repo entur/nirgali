@@ -3,7 +3,7 @@ import { DatePicker } from '@entur/datepicker';
 import {
   PrimaryButton as Button,
   NegativeButton,
-  SecondaryButton
+  SecondaryButton,
 } from '@entur/button';
 import { ButtonGroup } from '@entur/button';
 import { Contrast } from '@entur/layout';
@@ -15,7 +15,7 @@ class Edit extends React.Component {
   state = {
     serviceJourney: undefined,
     from: undefined,
-    to: undefined
+    to: undefined,
   };
 
   componentDidUpdate(prevProps) {
@@ -31,14 +31,14 @@ class Edit extends React.Component {
     this.getDepartureLine();
   }
 
-  handleSubmit = event => {
+  handleSubmit = (event) => {
     event.preventDefault();
     this.props.issue.data.Progress = 'open';
     this.props.issue.data.Summary['_text'] = event.target.oppsummering.value;
     if (event.target.beskrivelse.value !== '') {
       this.props.issue.data['Description'] = {
         _attributes: { 'xml:lang': 'NO' },
-        _text: event.target.beskrivelse.value
+        _text: event.target.beskrivelse.value,
       };
     } else {
       if (this.props.issue.data.Description) {
@@ -48,7 +48,7 @@ class Edit extends React.Component {
     if (event.target.forslag.value !== '') {
       this.props.issue.data['Advice'] = {
         _attributes: { 'xml:lang': 'NO' },
-        _text: event.target.forslag.value
+        _text: event.target.forslag.value,
       };
     } else {
       if (this.props.issue.data.Advice) {
@@ -56,10 +56,12 @@ class Edit extends React.Component {
       }
     }
     if (this.state.from) {
-      this.props.issue.data.ValidityPeriod.StartTime = this.state.from.toISOString();
+      this.props.issue.data.ValidityPeriod.StartTime =
+        this.state.from.toISOString();
     }
     if (this.state.to) {
-      this.props.issue.data.ValidityPeriod.EndTime = this.state.to.toISOString();
+      this.props.issue.data.ValidityPeriod.EndTime =
+        this.state.to.toISOString();
     }
     this.props.issue.data.ReportType = event.target.reportType.value;
 
@@ -67,8 +69,8 @@ class Edit extends React.Component {
       this.props.issue.data.InfoLinks = {
         InfoLink: {
           Uri: event.target.infoLinkUri.value,
-          Label: event.target.infoLinkLabel.value
-        }
+          Label: event.target.infoLinkLabel.value,
+        },
       };
     } else {
       delete this.props.issue.data.InfoLinks;
@@ -92,8 +94,8 @@ class Edit extends React.Component {
     const update = {
       Progress: 'closed',
       ValidityPeriod: {
-        EndTime: addHours(new Date(), 5).toISOString()
-      }
+        EndTime: addHours(new Date(), 5).toISOString(),
+      },
     };
     const codespace = this.props.organization.split(':')[0];
     const authority = this.props.organization;
@@ -101,12 +103,12 @@ class Edit extends React.Component {
     this.props.firebase
       .doc(`codespaces/${codespace}/authorities/${authority}/messages/${id}`)
       .set(update, {
-        mergeFields: ['Progress', 'ValidityPeriod.EndTime']
+        mergeFields: ['Progress', 'ValidityPeriod.EndTime'],
       })
       .then(() => this.props.history.push('/'));
   };
 
-  checkStatus = param => {
+  checkStatus = (param) => {
     if (param === 'open') {
       return (
         <Contrast>
@@ -135,7 +137,7 @@ class Edit extends React.Component {
     }
   };
 
-  returnValue = type => {
+  returnValue = (type) => {
     let issue = this.props.issue.data;
 
     if (type === 'ReportType') {
@@ -203,15 +205,15 @@ class Edit extends React.Component {
     return this.getLineOption(LineRef);
   };
 
-  getLineOption = id => {
-    const line = this.props.lines.find(l => l.id === id);
+  getLineOption = (id) => {
+    const line = this.props.lines.find((l) => l.id === id);
     return line
       ? {
           value: line.id,
-          label: `${line.name} (${line.publicCode}) - ${line.id}`
+          label: `${line.name} (${line.publicCode}) - ${line.id}`,
         }
       : {
-          label: 'Ukjent linje'
+          label: 'Ukjent linje',
         };
   };
 
@@ -226,7 +228,7 @@ class Edit extends React.Component {
 
     return {
       value: quayName,
-      label: `${aimedDepartureTime} fra ${quayName} (${serviceJourney.id})`
+      label: `${aimedDepartureTime} fra ${quayName} (${serviceJourney.id})`,
     };
   };
 
@@ -234,7 +236,7 @@ class Edit extends React.Component {
     const Affects = this.props.issue.data.Affects;
     const AffectedLine = Affects?.Networks?.AffectedNetwork?.AffectedLine;
     const LineRef = AffectedLine?.LineRef;
-    const line = this.props.lines.find(l => l.id === LineRef);
+    const line = this.props.lines.find((l) => l.id === LineRef);
     const StopPoints = AffectedLine?.Routes?.AffectedRoute?.StopPoints;
     return this.getQuayOptions(StopPoints, line?.quays);
   };
@@ -261,7 +263,7 @@ class Edit extends React.Component {
     const Route = Affects?.VehicleJourneys?.AffectedVehicleJourney?.Route;
     const StopPoints = Route?.StopPoints;
     const lineId = this.state.serviceJourney.line.id;
-    const line = this.props.lines.find(l => l.id === lineId);
+    const line = this.props.lines.find((l) => l.id === lineId);
     return this.getQuayOptions(StopPoints, line.quays);
   };
 
@@ -277,21 +279,21 @@ class Edit extends React.Component {
 
   getQuayOptions = (StopPoints, quays) => {
     return quays
-      ? StopPoints?.AffectedStopPoint?.map(AffectedStopPoint => {
+      ? StopPoints?.AffectedStopPoint?.map((AffectedStopPoint) => {
           return quays.find(
-            q =>
+            (q) =>
               q.stopPlace && q.stopPlace.id === AffectedStopPoint.StopPointRef
           );
         })
-          ?.filter(v => v !== undefined)
+          ?.filter((v) => v !== undefined)
           ?.map(({ id, name }) => ({
             value: id,
-            label: `${name} - ${id}`
+            label: `${name} - ${id}`,
           }))
       : [
           {
-            label: 'Ukjent stoppested'
-          }
+            label: 'Ukjent stoppested',
+          },
         ];
   };
 
@@ -345,7 +347,7 @@ class Edit extends React.Component {
                           this.state.serviceJourney.line.id
                         )}
                         options={[
-                          this.getLineOption(this.state.serviceJourney.line.id)
+                          this.getLineOption(this.state.serviceJourney.line.id),
                         ]}
                       />
                     </div>
@@ -389,7 +391,7 @@ class Edit extends React.Component {
                   this.state.from ||
                   new Date(this.props.issue.data.ValidityPeriod.StartTime)
                 }
-                onChange={from => this.setState({ from })}
+                onChange={(from) => this.setState({ from })}
                 dateFormat="yyyy-MM-dd HH:mm"
                 minDate={new Date()}
                 showTimeInput
@@ -401,7 +403,7 @@ class Edit extends React.Component {
                     ? new Date(this.props.issue.data.ValidityPeriod.EndTime)
                     : undefined)
                 }
-                onChange={to => {
+                onChange={(to) => {
                   const now = new Date();
                   const from =
                     this.state.from ||

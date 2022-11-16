@@ -7,6 +7,6 @@ export const sortBySituationNumber = (a, b) => {
 
 const sortAsc = (a, b) => a - b;
 
-const getSituationNumberSequence = SituationNumber => {
+const getSituationNumberSequence = (SituationNumber) => {
   return parseInt(SituationNumber.split(':').pop());
 };

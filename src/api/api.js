@@ -1,8 +1,8 @@
 const { createApolloFetch } = require('apollo-fetch');
 
-const createFetch = URI => {
+const createFetch = (URI) => {
   const apolloFetch = createApolloFetch({
-    uri: URI
+    uri: URI,
   });
 
   apolloFetch.use(({ request, options }, next) => {
@@ -17,7 +17,7 @@ const createFetch = URI => {
   return apolloFetch;
 };
 
-const getAuthorities = URI => () => {
+const getAuthorities = (URI) => () => {
   const apolloFetch = createFetch(URI);
   const query = `
       {
@@ -28,11 +28,11 @@ const getAuthorities = URI => () => {
       } `;
 
   return apolloFetch({ query })
-    .catch(error => error)
-    .then(response => response);
+    .catch((error) => error)
+    .then((response) => response);
 };
 
-const getLines = URI => authorities => {
+const getLines = (URI) => (authorities) => {
   const apolloFetch = createFetch(URI);
 
   const query = `
@@ -52,11 +52,11 @@ const getLines = URI => authorities => {
       } `;
 
   return apolloFetch({ query })
-    .catch(error => error)
-    .then(response => response);
+    .catch((error) => error)
+    .then((response) => response);
 };
 
-const getDepartures = URI => (line, date) => {
+const getDepartures = (URI) => (line, date) => {
   const apolloFetch = createFetch(URI);
 
   const query = `
@@ -76,11 +76,11 @@ const getDepartures = URI => (line, date) => {
       }`;
 
   return apolloFetch({ query })
-    .catch(error => error)
-    .then(response => response);
+    .catch((error) => error)
+    .then((response) => response);
 };
 
-const getServiceJourney = URI => (id, date) => {
+const getServiceJourney = (URI) => (id, date) => {
   const apolloFetch = createFetch(URI);
 
   const query = `
@@ -98,52 +98,52 @@ const getServiceJourney = URI => (id, date) => {
     }`;
 
   return apolloFetch({ query })
-    .catch(error => error)
-    .then(response => response);
+    .catch((error) => error)
+    .then((response) => response);
 };
 
 const fetchGet = {
   method: 'GET',
   headers: {
     accept: 'application/json',
-    'ET-Client-Name': 'entur - deviation-messages'
-  }
+    'ET-Client-Name': 'entur - deviation-messages',
+  },
 };
 
-const organisationID = URI => id => {
+const organisationID = (URI) => (id) => {
   fetch(`${URI}/${id}`, fetchGet)
-    .catch(error => error)
-    .then(response => response);
+    .catch((error) => error)
+    .then((response) => response);
 };
 
-const getStopPlaces = URI => async ids => {
+const getStopPlaces = (URI) => async (ids) => {
   const response = await fetch(`${URI}/stop-places?ids=${ids}`, {
     headers: {
-      'Et-Client-Name': 'entur - deviation-messages'
-    }
+      'Et-Client-Name': 'entur - deviation-messages',
+    },
   });
   const stopPlaces = await response.json();
   return stopPlaces;
 };
 
-const getTopographicPlaces = URI => async ids => {
+const getTopographicPlaces = (URI) => async (ids) => {
   const response = await fetch(`${URI}/topographic-places?ids=${ids}`, {
     headers: {
-      'Et-Client-Name': 'entur - deviation-messages'
-    }
+      'Et-Client-Name': 'entur - deviation-messages',
+    },
   });
   const topographicPlaces = await response.json();
   return topographicPlaces;
 };
 
-const api = config => ({
+const api = (config) => ({
   getAuthorities: getAuthorities(config['journey-planner-api']),
   organisationID: organisationID(config['organisations-api']),
   getLines: getLines(config['journey-planner-api']),
   getDepartures: getDepartures(config['journey-planner-api']),
   getServiceJourney: getServiceJourney(config['journey-planner-api']),
   getStopPlaces: getStopPlaces(config['stop-places-api']),
-  getTopographicPlaces: getTopographicPlaces(config['stop-places-api'])
+  getTopographicPlaces: getTopographicPlaces(config['stop-places-api']),
 });
 
 export default api;

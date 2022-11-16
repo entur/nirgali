@@ -8,7 +8,7 @@ import LinePicker from './line-picker';
 import StopPicker from './stop-picker';
 import { isBefore } from 'date-fns';
 
-const formatDate = date => lightFormat(date, 'yyyy-MM-dd');
+const formatDate = (date) => lightFormat(date, 'yyyy-MM-dd');
 
 class Register extends React.Component {
   state = {
@@ -36,7 +36,7 @@ class Register extends React.Component {
     oppsummering: '',
     beskrivelse: '',
     forslag: '',
-    infoLink: undefined
+    infoLink: undefined,
   };
 
   componentDidMount() {
@@ -44,7 +44,7 @@ class Register extends React.Component {
     this.setState({
       date: now,
       from: now,
-      departureDate: now
+      departureDate: now,
     });
   }
 
@@ -55,33 +55,33 @@ class Register extends React.Component {
     );
 
     this.setState({
-      stops
+      stops,
     });
   };
 
   createNewLine = () => {
     return {
       Networks: {
-        AffectedNetwork: { AffectedLine: { LineRef: this.state.chosenLine } }
-      }
+        AffectedNetwork: { AffectedLine: { LineRef: this.state.chosenLine } },
+      },
     };
   };
 
   createAffectedRoute = () => {
     return {
       StopPoints: {
-        AffectedStopPoint: this.state.multipleStops.map(item => ({
-          StopPointRef: item.value
-        }))
-      }
+        AffectedStopPoint: this.state.multipleStops.map((item) => ({
+          StopPointRef: item.value,
+        })),
+      },
     };
   };
 
   createAffectedRouteLine = () => {
     return {
-      AffectedStopPoint: this.state.multipleStops.map(item => ({
-        StopPointRef: item.value
-      }))
+      AffectedStopPoint: this.state.multipleStops.map((item) => ({
+        StopPointRef: item.value,
+      })),
     };
   };
 
@@ -92,11 +92,11 @@ class Register extends React.Component {
           AffectedLine: {
             LineRef: this.state.chosenLine,
             Routes: {
-              AffectedRoute: { StopPoints: this.createAffectedRouteLine() }
-            }
-          }
-        }
-      }
+              AffectedRoute: { StopPoints: this.createAffectedRouteLine() },
+            },
+          },
+        },
+      },
     };
   };
 
@@ -106,13 +106,13 @@ class Register extends React.Component {
         AffectedVehicleJourney: {
           FramedVehicleJourneyRef: {
             DataFrameRef: formatDate(this.state.departureDate, {
-              representation: 'date'
+              representation: 'date',
             }),
-            DatedVehicleJourneyRef: this.state.datedVehicleJourney
+            DatedVehicleJourneyRef: this.state.datedVehicleJourney,
           },
-          Route: null
-        }
-      }
+          Route: null,
+        },
+      },
     };
   };
 
@@ -122,13 +122,13 @@ class Register extends React.Component {
         AffectedVehicleJourney: {
           FramedVehicleJourneyRef: {
             DataFrameRef: formatDate(this.state.departureDate, {
-              representation: 'date'
+              representation: 'date',
             }),
-            DatedVehicleJourneyRef: this.state.datedVehicleJourney
+            DatedVehicleJourneyRef: this.state.datedVehicleJourney,
           },
-          Route: this.createAffectedRoute()
-        }
-      }
+          Route: this.createAffectedRoute(),
+        },
+      },
     };
   };
 
@@ -136,7 +136,7 @@ class Register extends React.Component {
     this.props.history.push('/');
   };
 
-  handleSubmit = async event => {
+  handleSubmit = async (event) => {
     const newIssue = await this.createNewIssue();
 
     if (this.state.beskrivelse === '') {
@@ -160,17 +160,17 @@ class Register extends React.Component {
       to.setMilliseconds(999);
       newIssue.ValidityPeriod = {
         StartTime: from.toISOString(),
-        EndTime: to.toISOString()
+        EndTime: to.toISOString(),
       };
     } else {
       if (this.state.to) {
         newIssue.ValidityPeriod = {
           StartTime: this.state.from.toISOString(),
-          EndTime: this.state.to.toISOString()
+          EndTime: this.state.to.toISOString(),
         };
       } else {
         newIssue.ValidityPeriod = {
-          StartTime: this.state.from.toISOString()
+          StartTime: this.state.from.toISOString(),
         };
       }
     }
@@ -201,8 +201,8 @@ class Register extends React.Component {
     if (this.state.infoLink) {
       newIssue.InfoLinks = {
         InfoLink: {
-          Uri: this.state.infoLink.uri
-        }
+          Uri: this.state.infoLink.uri,
+        },
       };
 
       if (this.state.infoLink.label) {
@@ -230,7 +230,7 @@ class Register extends React.Component {
       SituationNumber:
         this.props.organization.split(':')[0] + ':SituationNumber:' + count,
       Source: {
-        SourceType: 'directReport'
+        SourceType: 'directReport',
       },
       Progress: 'open',
       ValidityPeriod: null,
@@ -238,23 +238,23 @@ class Register extends React.Component {
       ReportType: this.state.reportType,
       Summary: {
         _attributes: {
-          'xml:lang': 'NO'
+          'xml:lang': 'NO',
         },
-        _text: this.state.oppsummering
+        _text: this.state.oppsummering,
       },
       Description: {
         _attributes: {
-          'xml:lang': 'NO'
+          'xml:lang': 'NO',
         },
-        _text: this.state.beskrivelse
+        _text: this.state.beskrivelse,
       },
       Advice: {
         _attributes: {
-          'xml:lang': 'NO'
+          'xml:lang': 'NO',
         },
-        _text: this.state.forslag
+        _text: this.state.forslag,
       },
-      Affects: []
+      Affects: [],
     };
   };
 
@@ -266,28 +266,29 @@ class Register extends React.Component {
     );
   };
 
-  getNextSituationNumberTransaction = codespaceDocRef => async transaction => {
-    const codespaceDoc = await transaction.get(codespaceDocRef);
+  getNextSituationNumberTransaction =
+    (codespaceDocRef) => async (transaction) => {
+      const codespaceDoc = await transaction.get(codespaceDocRef);
 
-    if (!codespaceDoc.exists) {
-      await transaction.set(codespaceDocRef, {
-        nextSituationNumber: 2
-      });
-      return 1;
-    } else {
-      let nextSituationNumber = codespaceDoc.data().nextSituationNumber;
-      await transaction.update(codespaceDocRef, {
-        nextSituationNumber: nextSituationNumber + 1
-      });
-      return nextSituationNumber;
-    }
-  };
+      if (!codespaceDoc.exists) {
+        await transaction.set(codespaceDocRef, {
+          nextSituationNumber: 2,
+        });
+        return 1;
+      } else {
+        let nextSituationNumber = codespaceDoc.data().nextSituationNumber;
+        await transaction.update(codespaceDocRef, {
+          nextSituationNumber: nextSituationNumber + 1,
+        });
+        return nextSituationNumber;
+      }
+    };
 
-  handleChangeType = event => {
+  handleChangeType = (event) => {
     this.createStops();
     if (this.state.departureSok) {
       this.setState({
-        message: undefined
+        message: undefined,
       });
     }
     this.setState({
@@ -297,46 +298,46 @@ class Register extends React.Component {
       chosenLine: undefined,
       departureSok: undefined,
       submit: undefined,
-      departure: undefined
+      departure: undefined,
     });
     if (event.target.value === 'departure') {
       this.setState({
         departure: true,
         dateFromTo: undefined,
-        message: undefined
+        message: undefined,
       });
     }
   };
 
-  handleChangeLine = event => {
+  handleChangeLine = (event) => {
     if (this.state.type === 'departure') {
       this.setState({
-        chosenLine: event.value
+        chosenLine: event.value,
       });
     } else {
       this.setState({
         chosenLine: event.value,
         dateFromTo: true,
         message: true,
-        submit: true
+        submit: true,
       });
     }
   };
 
-  handleChangeDeparture = event => {
+  handleChangeDeparture = (event) => {
     this.setState({
       datedVehicleJourney: event.value,
       message: true,
-      submit: true
+      submit: true,
     });
   };
 
-  handleChangeSpecifiedStops = event => {
+  handleChangeSpecifiedStops = (event) => {
     this.setState({
       multipleStops: event,
       dateFromTo: true,
       message: true,
-      submit: true
+      submit: true,
     });
   };
 
@@ -344,11 +345,11 @@ class Register extends React.Component {
     const checkBox = document.getElementById('gridCheck');
     if (checkBox.checked === true) {
       this.setState({
-        checkbox: true
+        checkbox: true,
       });
     } else {
       this.setState({
-        checkbox: undefined
+        checkbox: undefined,
       });
     }
   };
@@ -357,26 +358,26 @@ class Register extends React.Component {
     const checkBox = document.getElementById('gridCheck2');
     if (checkBox.checked === true) {
       this.setState({
-        checkbox2: true
+        checkbox2: true,
       });
     } else {
       this.setState({
-        checkbox2: undefined
+        checkbox2: undefined,
       });
     }
   };
 
-  handleChangeSpecifiedStopsDeparture = event => {
+  handleChangeSpecifiedStopsDeparture = (event) => {
     this.setState({ multipleStops: event });
   };
 
-  handleDepartureDateChange = dObj => {
+  handleDepartureDateChange = (dObj) => {
     this.setState({
       departureDate: dObj,
       datedVehicleJourney: undefined,
       departures: undefined,
       message: false,
-      submit: false
+      submit: false,
     });
   };
 
@@ -386,41 +387,41 @@ class Register extends React.Component {
 
     this.props.api
       .getDepartures(line, formatDate(date, { representation: 'date' }))
-      .then(response => {
+      .then((response) => {
         this.setState({
           departures: response.data.serviceJourneys,
-          departureSok: true
+          departureSok: true,
         });
       });
   };
 
-  returnMappedObjects = list => {
+  returnMappedObjects = (list) => {
     if (list[0].stopPlace) {
-      return list.map(item => ({
+      return list.map((item) => ({
         label: item.name + ' - ' + item.stopPlace.id,
-        value: item.stopPlace.id
+        value: item.stopPlace.id,
       }));
     } else {
-      return list.map(item => ({
+      return list.map((item) => ({
         label: `${item.name} (${item.publicCode}) - ${item.id}`,
-        value: item.id
+        value: item.id,
       }));
     }
   };
 
   returnSpecifiedLines = () => {
-    return this.props.lines.find(item => item.id === this.state.chosenLine);
+    return this.props.lines.find((item) => item.id === this.state.chosenLine);
   };
 
   returnSpecifiedLinesDeparture = () => {
     return this.state.departures.find(
-      item => item.id === this.state.datedVehicleJourney
+      (item) => item.id === this.state.datedVehicleJourney
     );
   };
 
   returnServiceJourney = () => {
     return this.state.departures
-      .map(item => ({
+      .map((item) => ({
         label:
           item.estimatedCalls[0].aimedDepartureTime
             .split('T')
@@ -431,7 +432,7 @@ class Register extends React.Component {
           ' (' +
           item.id +
           ')',
-        value: item.id
+        value: item.id,
       }))
       .sort((a, b) => (a.label > b.label ? 1 : -1));
   };
@@ -582,14 +583,14 @@ class Register extends React.Component {
               <div className="form-group d-flex">
                 <DatePicker
                   selectedDate={this.state.from}
-                  onChange={from => this.setState({ from })}
+                  onChange={(from) => this.setState({ from })}
                   dateFormat="yyyy-MM-dd HH:mm"
                   minDate={this.state.date}
                   showTimeInput
                 />
                 <DatePicker
                   selectedDate={this.state.to}
-                  onChange={to => {
+                  onChange={(to) => {
                     const now = new Date();
                     if (isBefore(to, now)) {
                       this.setState({ to: now });
@@ -615,7 +616,9 @@ class Register extends React.Component {
                   className="form-control"
                   name="ReportType"
                   value={this.state.reportType}
-                  onChange={e => this.setState({ reportType: e.target.value })}
+                  onChange={(e) =>
+                    this.setState({ reportType: e.target.value })
+                  }
                 >
                   <option value="incident">Incident</option>
                   <option value="general">General</option>
@@ -666,13 +669,13 @@ class Register extends React.Component {
                   className="form-control"
                   placeholder="Lenke"
                   value={this.state.infoLink?.uri}
-                  onChange={event =>
+                  onChange={(event) =>
                     this.setState({
                       ...this.state,
                       infoLink: {
                         ...this.state.infoLink,
-                        uri: event.target.value
-                      }
+                        uri: event.target.value,
+                      },
                     })
                   }
                 />
@@ -680,13 +683,13 @@ class Register extends React.Component {
                   className="form-control"
                   placeholder="Tekst til lenken"
                   value={this.state.infoLink?.label}
-                  onChange={event =>
+                  onChange={(event) =>
                     this.setState({
                       ...this.state,
                       infoLink: {
                         ...this.state.infoLink,
-                        label: event.target.value
-                      }
+                        label: event.target.value,
+                      },
                     })
                   }
                 />

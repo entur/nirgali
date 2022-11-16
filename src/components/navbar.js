@@ -5,7 +5,7 @@ import { PrimaryButton } from '@entur/button';
 import { Contrast } from '@entur/layout';
 
 class NavBar extends React.Component {
-  handleChange = event => {
+  handleChange = (event) => {
     this.props.onSelectOrganization(event.value);
     this.props.history.push('/');
   };
@@ -15,7 +15,7 @@ class NavBar extends React.Component {
     for (let i = 0; i < this.props.user.length; i++) {
       selectValues.push({
         label: this.props.name[i],
-        value: this.props.user[i]
+        value: this.props.user[i],
       });
     }
     return selectValues;

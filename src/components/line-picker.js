@@ -13,16 +13,16 @@ const LinePicker = ({ lines, onChange }) => {
   );
 };
 
-const getLineOptions = lines => {
+const getLineOptions = (lines) => {
   return lines
     .sort((a, b) => {
       if (a.publicCode > b.publicCode) return 1;
       else if (b.publicCode > a.publicCode) return -1;
       else return 0;
     })
-    .map(item => ({
+    .map((item) => ({
       label: `${item.publicCode} ${item.name} (${item.id})`,
-      value: item.id
+      value: item.id,
     }));
 };
 

@@ -65,10 +65,10 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "husky": "4.3.8",
-    "lint-staged": "10.5.4",
+    "husky": "8.0.2",
+    "lint-staged": "13.0.3",
     "npm-run-all": "4.1.5",
-    "prettier": "1.19.1",
+    "prettier": "2.7.1",
     "react-scripts": "4.0.3",
     "sass": "1.56.1"
   },

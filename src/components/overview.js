@@ -12,14 +12,14 @@ import format from 'date-fns/format';
 class Overview extends React.Component {
   state = {
     date: new Date(),
-    showExpiredMessages: false
+    showExpiredMessages: false,
   };
 
   handleClick = () => {
     this.props.history.push('/register');
   };
 
-  returnRedOrGreenIcon = param => {
+  returnRedOrGreenIcon = (param) => {
     if (
       Date.parse(param.ValidityPeriod.EndTime) < this.state.date ||
       param.Progress === 'closed'
@@ -30,7 +30,7 @@ class Overview extends React.Component {
     }
   };
 
-  getType = param => {
+  getType = (param) => {
     if (param != null) {
       if (Object.keys(param)[0] === 'Networks') {
         return 'Linje';
@@ -48,11 +48,11 @@ class Overview extends React.Component {
     }
   };
 
-  getDate = param => {
+  getDate = (param) => {
     return param ? format(new Date(param), 'HH:mm dd.MM.yyyy') : 'Ikke oppgitt';
   };
 
-  edit = id => {
+  edit = (id) => {
     this.props.history.push(`/edit/${id}`);
   };
 
@@ -88,7 +88,7 @@ class Overview extends React.Component {
                 checked={this.state.showExpiredMessages}
                 onChange={() =>
                   this.setState({
-                    showExpiredMessages: !this.state.showExpiredMessages
+                    showExpiredMessages: !this.state.showExpiredMessages,
                   })
                 }
               >
