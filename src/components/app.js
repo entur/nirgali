@@ -122,9 +122,7 @@ export default class App extends React.Component {
             <Route
               path="/"
               exact
-              element={
-                <Overview messages={this.state.messages} />
-              }
+              element={<Overview messages={this.state.messages} />}
             />
             <Route
               path="/edit/:id"
@@ -142,11 +140,11 @@ export default class App extends React.Component {
               path="/register"
               element={
                 <Register
-                api={this.props.api}
-                firebase={this.db}
-                lines={this.state.lines}
-                organization={this.state.selectedOrganization}
-              />
+                  api={this.props.api}
+                  firebase={this.db}
+                  lines={this.state.lines}
+                  organization={this.state.selectedOrganization}
+                />
               }
             />
           </Routes>
