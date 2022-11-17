@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, BrowserRouter as Router } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Overview from './overview';
 import Register from './register';
 import Edit from './edit';
@@ -112,34 +112,36 @@ export default class App extends React.Component {
       <Router>
         <div>
           <img className="background-image" src={Background} alt="" />
-          <Route path="/">
-            <NavBar
-              onSelectOrganization={this.updateOrganization}
-              user={this.state.organizations}
-              name={this.state.organizationsName}
-              logout={() => this.logout()}
-            />
-          </Route>
-          <Route exact path="/">
-            <Overview messages={this.state.messages} />
-          </Route>
-          <Route path="/edit/:id?">
-            <Edit
-              messages={this.state.messages}
-              lines={this.state.lines}
-              firebase={this.db}
-              api={this.props.api}
-              organization={this.state.selectedOrganization}
-            />
-          </Route>
-          <Route path="/register">
-            <Register
-              api={this.props.api}
-              firebase={this.db}
-              lines={this.state.lines}
-              organization={this.state.selectedOrganization}
-            />
-          </Route>
+          <Routes>
+            <Route path="/">
+              <NavBar
+                onSelectOrganization={this.updateOrganization}
+                user={this.state.organizations}
+                name={this.state.organizationsName}
+                logout={() => this.logout()}
+              />
+            </Route>
+            <Route exact path="/">
+              <Overview messages={this.state.messages} />
+            </Route>
+            <Route path="/edit/:id?">
+              <Edit
+                messages={this.state.messages}
+                lines={this.state.lines}
+                firebase={this.db}
+                api={this.props.api}
+                organization={this.state.selectedOrganization}
+              />
+            </Route>
+            <Route path="/register">
+              <Register
+                api={this.props.api}
+                firebase={this.db}
+                lines={this.state.lines}
+                organization={this.state.selectedOrganization}
+              />
+            </Route>
+          </Routes>
         </div>
       </Router>
     );

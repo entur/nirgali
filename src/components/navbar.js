@@ -3,14 +3,14 @@ import logo from '../img/entur_logo.jpg';
 import Select from 'react-select';
 import { PrimaryButton } from '@entur/button';
 import { Contrast } from '@entur/layout';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const NavBar = ({ onSelectOrganization, user, name, logout }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleChange = (event) => {
     onSelectOrganization(event.value);
-    history.push('/');
+    navigate('/');
   };
 
   const returnOptions = () => {

@@ -8,7 +8,7 @@ import { Switch } from '@entur/form';
 import { Contrast } from '@entur/layout';
 import { sortBySituationNumber } from '../util/sort';
 import format from 'date-fns/format';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const returnRedOrGreenIcon = (param, date) => {
   if (
@@ -46,14 +46,14 @@ const getDate = (param) => {
 const Overview = ({ messages }) => {
   const date = useMemo(() => Date.now(), []);
   const [showExpiredMessages, setShowExpiredMessages] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleClick = () => {
-    history.push('/register');
+    navigate('/register');
   };
 
   const edit = (id) => {
-    history.push(`/edit/${id}`);
+    navigate(`/edit/${id}`);
   };
 
   let messagesToRender = showExpiredMessages

@@ -18,7 +18,7 @@
     "firebase": "9.14.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-router-dom": "5.3.4",
+    "react-router-dom": "6.4.3",
     "react-select": "3.2.0",
     "react-super-responsive-table": "5.2.1",
     "react-windowed-select": "2.0.5"

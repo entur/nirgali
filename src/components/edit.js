@@ -10,10 +10,10 @@ import { Contrast } from '@entur/layout';
 import addHours from 'date-fns/addHours';
 import Select from 'react-select';
 import { isBefore } from 'date-fns';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const Edit = ({ messages, firebase, organization, lines, api }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { id: issueId } = useParams();
 
   const issue = useMemo(
@@ -92,11 +92,11 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
     firebase
       .doc(`codespaces/${codespace}/authorities/${authority}/messages/${id}`)
       .set(issue.data)
-      .then(() => history.push('/'));
+      .then(() => navigate('/'));
   };
 
   const handleClick = () => {
-    history.push('/');
+    navigate('/');
   };
 
   const setProgressToClosed = () => {
@@ -114,7 +114,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
       .set(update, {
         mergeFields: ['Progress', 'ValidityPeriod.EndTime'],
       })
-      .then(() => history.push('/'));
+      .then(() => navigate('/'));
   };
 
   const checkStatus = (param) => {
