@@ -4,10 +4,10 @@ const functions = require('firebase-functions');
 const convert = require('xml-js');
 const {
   transformSituationData,
-  filterOpenExpiredMessages
+  filterOpenExpiredMessages,
 } = require('./utils');
 
-exports.xml = function() {
+exports.xml = function () {
   return functions
     .region('europe-west1')
     .https.onRequest(async (request, response) => {
@@ -20,9 +20,44 @@ exports.xml = function() {
           .send(xmlString);
       }
 
+      let serviceRequestType;
+
+      try {
+        const requestBody = convert.xml2js(request.body, { compact: true });
+
+        if (requestBody.Siri.ServiceRequest.SituationExchangeRequest) {
+          serviceRequestType = 'SituationExchangeRequest';
+        } else if (requestBody.Siri.ServiceRequest.EstimatedTimetableRequest) {
+          serviceRequestType = 'EstimatedTimetableRequest';
+        } else {
+          const xmlString =
+            '<?xml version="1.0" encoding="UTF-8"?><Response><Message><Body>Invalid ServiceRequest</Body></Message></Response>';
+          response
+            .set('Content-Type', 'text/xml; charset=utf8')
+            .status(200)
+            .send(xmlString);
+        }
+      } catch (_) {
+        const xmlString =
+          '<?xml version="1.0" encoding="UTF-8"?><Response><Message><Body>Invalid XML</Body></Message></Response>';
+        response
+          .set('Content-Type', 'text/xml; charset=utf8')
+          .status(200)
+          .send(xmlString);
+      }
+
+      if (!serviceRequestType) {
+        return;
+      }
+
       const dateTime = new Date().toISOString();
 
-      console.info('XML request received - dateTime=' + dateTime);
+      console.info(
+        'XML request received - dateTime=' +
+          dateTime +
+          ' serviceRequestType=' +
+          serviceRequestType
+      );
 
       const db = getFirestore();
 
@@ -33,58 +68,31 @@ exports.xml = function() {
             xmlns: 'http://www.siri.org.uk/siri',
             'xmlns:ns2': 'http://www.ifopt.org.uk/acsb',
             'xmlns:ns3': 'http://www.ifopt.org.uk/ifopt',
-            'xmlns:ns4': 'http://datex2.eu/schema/2_0RC1/2_0'
-          }
-        }
+            'xmlns:ns4': 'http://datex2.eu/schema/2_0RC1/2_0',
+          },
+        },
       };
 
       const array = {
         ResponseTimestamp: dateTime,
         ProducerRef: 'ENT',
-        SituationExchangeDelivery: {
-          ResponseTimestamp: dateTime,
-          Situations: []
-        }
       };
 
-      const open = db
-        .collectionGroup('messages')
-        .where('Progress', '==', 'open')
-        .get();
-
-      const closed = db
-        .collectionGroup('messages')
-        .where('Progress', '==', 'closed')
-        .where('ValidityPeriod.EndTime', '>', dateTime)
-        .get();
-
       try {
-        const [openSnapshot, closedSnapshot] = await Promise.all([
-          open,
-          closed
-        ]);
+        if (serviceRequestType === 'SituationExchangeRequest') {
+          const SituationExchangeDelivery =
+            await produceSituationExchangeDelivery(db, dateTime);
+          array.SituationExchangeDelivery = SituationExchangeDelivery;
+        } else if (serviceRequestType === 'EstimatedTimetableRequest') {
+          const EstimatedTimetableDelivery =
+            await produceEstimatedTimetableDelivery(db, dateTime);
+          array.EstimatedTimetableDelivery = EstimatedTimetableDelivery;
+        }
 
-        const allDocs = openSnapshot.docs.concat(closedSnapshot.docs);
-        const situations = { PtSituationElement: [] };
-
-        situations.PtSituationElement = allDocs
-          .map(doc => transformSituationData(doc.data()))
-          .filter(filterOpenExpiredMessages(dateTime));
-
-        array.SituationExchangeDelivery.Situations.push(situations);
         siri.Siri.ServiceDelivery = array;
-
         const result = convert.js2xml(siri, { compact: true, spaces: 4 });
 
-        console.log(
-          'Returning number of situations: ' +
-            situations.PtSituationElement.length
-        );
-
-        response
-          .set('Content-Type', 'text/xml')
-          .status(200)
-          .send(result);
+        response.set('Content-Type', 'text/xml').status(200).send(result);
       } catch (error) {
         console.error('Error in XML requeest: ', error);
         response.status(500);
@@ -92,11 +100,52 @@ exports.xml = function() {
     });
 };
 
-exports.closeOpenExpiredMessages = function() {
+const produceSituationExchangeDelivery = async (db, dateTime) => {
+  const open = db
+    .collectionGroup('messages')
+    .where('Progress', '==', 'open')
+    .get();
+
+  const closed = db
+    .collectionGroup('messages')
+    .where('Progress', '==', 'closed')
+    .where('ValidityPeriod.EndTime', '>', dateTime)
+    .get();
+
+  const [openSnapshot, closedSnapshot] = await Promise.all([open, closed]);
+
+  const allDocs = openSnapshot.docs.concat(closedSnapshot.docs);
+  const situations = { PtSituationElement: [] };
+
+  situations.PtSituationElement = allDocs
+    .map((doc) => transformSituationData(doc.data()))
+    .filter(filterOpenExpiredMessages(dateTime));
+
+  console.log(
+    'Returning number of situations: ' + situations.PtSituationElement.length
+  );
+
+  return {
+    ResponseTimestamp: dateTime,
+    Situations: situations,
+  };
+};
+
+const produceEstimatedTimetableDelivery = async (db, dateTime) => {
+  return {
+    _attributes: { version: '2.0' },
+    ResponseTimestamp: dateTime,
+    EstimatedJourneyVersionFrame: {
+      RecordedAtTime: dateTime,
+    },
+  };
+};
+
+exports.closeOpenExpiredMessages = function () {
   return functions
     .region('europe-west1')
     .pubsub.schedule('every 30 minutes')
-    .onRun(async _ => {
+    .onRun(async (_) => {
       const dateTime = new Date().toISOString();
       console.info('closeOpenExpiredMessages started - dateTime=' + dateTime);
       const db = getFirestore();
@@ -107,11 +156,11 @@ exports.closeOpenExpiredMessages = function() {
           .where('Progress', '==', 'open')
           .get();
 
-        openSnapshot.docs.forEach(docSnapshot => {
-          db.runTransaction(transaction => {
+        openSnapshot.docs.forEach((docSnapshot) => {
+          db.runTransaction((transaction) => {
             return transaction
               .get(docSnapshot.ref)
-              .then(doc => {
+              .then((doc) => {
                 if (
                   doc.data().ValidityPeriod.EndTime &&
                   dateTime > doc.data().ValidityPeriod.EndTime
@@ -129,15 +178,15 @@ exports.closeOpenExpiredMessages = function() {
                     Progress: 'closed',
                     ValidityPeriod: {
                       StartTime: doc.data().ValidityPeriod.StartTime,
-                      EndTime: endTime
-                    }
+                      EndTime: endTime,
+                    },
                   });
                 }
               })
-              .then(function() {
+              .then(function () {
                 console.debug('Transaction successfully committed!');
               })
-              .catch(function(error) {
+              .catch(function (error) {
                 console.log('Transaction failed: ', error);
               });
           });
@@ -148,7 +197,7 @@ exports.closeOpenExpiredMessages = function() {
     });
 };
 
-exports.logDbWrites = function() {
+exports.logDbWrites = function () {
   return functions
     .region('europe-west1')
     .firestore.document(

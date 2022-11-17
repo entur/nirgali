@@ -1,4 +1,4 @@
-const {initializeApp} = require('firebase-admin/app');
+const { initializeApp } = require('firebase-admin/app');
 
 const auth = require('./auth');
 const xml = require('./xml');

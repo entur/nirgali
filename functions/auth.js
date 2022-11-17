@@ -1,12 +1,12 @@
 const functions = require('firebase-functions');
-const {expressjwt: jwt} = require('express-jwt');
+const { expressjwt: jwt } = require('express-jwt');
 const jwks = require('jwks-rsa');
 const express = require('express');
 const bodyParser = require('body-parser');
 const { getAuth } = require('firebase-admin/auth');
 
-const getAuth0ClaimsNamespace = () => functions.config().auth.firebase.auth0
-  .claims_namespace;
+const getAuth0ClaimsNamespace = () =>
+  functions.config().auth.firebase.auth0.claims_namespace;
 
 const transformRoles = (roles, claim) =>
   roles
@@ -17,7 +17,7 @@ const transformRoles = (roles, claim) =>
       return acc;
     }, {});
 
-exports.auth = function() {
+exports.auth = function () {
   const app = express();
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
@@ -27,10 +27,10 @@ exports.auth = function() {
       cache: true,
       rateLimit: true,
       jwksRequestsPerMinute: 5,
-      jwksUri: functions.config().auth.firebase['auth0'].auth_jwks_uri
+      jwksUri: functions.config().auth.firebase['auth0'].auth_jwks_uri,
     }),
     issuer: functions.config().auth.firebase['auth0'].auth_issuer,
-    algorithms: ['RS256']
+    algorithms: ['RS256'],
   });
 
   const authenticate = (req, res) => {
@@ -39,17 +39,17 @@ exports.auth = function() {
     let roles = req.auth[auth0ClaimsNamespace];
 
     const additionalClaims = {
-      editSX: transformRoles(roles, 'editSX')
+      editSX: transformRoles(roles, 'editSX'),
     };
 
     getAuth()
       .createCustomToken(uid, additionalClaims)
-      .then(customToken => res.json({ firebaseToken: customToken }))
-      .catch(err => {
+      .then((customToken) => res.json({ firebaseToken: customToken }))
+      .catch((err) => {
         console.warn(err);
         res.status(500).send({
           message: 'Something went wrong acquiring a Firebase token.',
-          error: err
+          error: err,
         });
       });
   };

@@ -14,7 +14,7 @@
  * and have specific serializers that provide a more deterministic method.
  *
  */
-const transformSituationData = data => {
+const transformSituationData = (data) => {
   const {
     CreationTime,
     ParticipantRef,
@@ -28,7 +28,7 @@ const transformSituationData = data => {
     Description,
     Advice,
     Affects,
-    InfoLinks
+    InfoLinks,
   } = data;
 
   const transformedData = {
@@ -41,7 +41,7 @@ const transformSituationData = data => {
     UndefinedReason: {},
     Severity,
     ReportType,
-    Summary
+    Summary,
   };
 
   if (Description) {
@@ -65,7 +65,7 @@ const transformAffects = ({
   Networks,
   StopPlaces,
   StopPoints,
-  VehicleJourneys
+  VehicleJourneys,
 }) => {
   const transformedAffects = {};
 
@@ -82,46 +82,45 @@ const transformAffects = ({
   }
 
   if (VehicleJourneys) {
-    transformedAffects.VehicleJourneys = transformVehicleJourneys(
-      VehicleJourneys
-    );
+    transformedAffects.VehicleJourneys =
+      transformVehicleJourneys(VehicleJourneys);
   }
 
   return transformedAffects;
 };
 
-const transformVehicleJourneys = VehicleJourneys => {
+const transformVehicleJourneys = (VehicleJourneys) => {
   const {
     AffectedVehicleJourney: {
       FramedVehicleJourneyRef: { DataFrameRef, DatedVehicleJourneyRef },
-      Route
-    }
+      Route,
+    },
   } = VehicleJourneys;
 
   return {
     AffectedVehicleJourney: {
       FramedVehicleJourneyRef: {
         DataFrameRef,
-        DatedVehicleJourneyRef
+        DatedVehicleJourneyRef,
       },
-      Route
-    }
+      Route,
+    },
   };
 };
 
-const transformNetworks = Networks => {
+const transformNetworks = (Networks) => {
   const {
     AffectedNetwork: {
-      AffectedLine: { Routes, LineRef }
-    }
+      AffectedLine: { Routes, LineRef },
+    },
   } = Networks;
 
   const transformedNetworks = {
     AffectedNetwork: {
       AffectedLine: {
-        LineRef
-      }
-    }
+        LineRef,
+      },
+    },
   };
 
   if (Routes) {
@@ -133,7 +132,7 @@ const transformNetworks = Networks => {
 
 const transformValidityPeriod = ({ StartTime, EndTime }) => {
   const transformedValidityPeriod = {
-    StartTime
+    StartTime,
   };
 
   if (EndTime) {
@@ -145,7 +144,7 @@ const transformValidityPeriod = ({ StartTime, EndTime }) => {
 
 exports.transformSituationData = transformSituationData;
 
-const filterOpenExpiredMessages = dateTime => data => {
+const filterOpenExpiredMessages = (dateTime) => (data) => {
   if (data.Progress === 'open' && data.ValidityPeriod.EndTime) {
     return data.ValidityPeriod.EndTime > dateTime;
   }

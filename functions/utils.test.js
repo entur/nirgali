@@ -15,8 +15,8 @@ describe('transformSituationData', () => {
       Severity: 'normal',
       Affects: {
         Networks: {
-          AffectedNetwork: { AffectedLine: { LineRef: 'SOF:Line:3501_69' } }
-        }
+          AffectedNetwork: { AffectedLine: { LineRef: 'SOF:Line:3501_69' } },
+        },
       },
       Summary: { _attributes: { 'xml:lang': 'NO' }, _text: 'Test5' },
       Source: { SourceType: 'directReport' },
@@ -25,7 +25,7 @@ describe('transformSituationData', () => {
       SituationNumber: 'SOF:SituationNumber:5',
       ReportType: 'incident',
       CreationTime: '2020-02-27T12:28:23.000+02:00',
-      Progress: 'open'
+      Progress: 'open',
     };
 
     const expected = {
@@ -41,9 +41,9 @@ describe('transformSituationData', () => {
       Summary: { _attributes: { 'xml:lang': 'NO' }, _text: 'Test5' },
       Affects: {
         Networks: {
-          AffectedNetwork: { AffectedLine: { LineRef: 'SOF:Line:3501_69' } }
-        }
-      }
+          AffectedNetwork: { AffectedLine: { LineRef: 'SOF:Line:3501_69' } },
+        },
+      },
     };
 
     const actual = transformSituationData(raw);
@@ -63,19 +63,19 @@ describe('transformSituationData', () => {
                   StopPoints: {
                     AffectedStopPoint: [
                       { StopPointRef: 'NSR:StopPlace:36682' },
-                      { StopPointRef: 'NSR:StopPlace:36779' }
-                    ]
-                  }
-                }
+                      { StopPointRef: 'NSR:StopPlace:36779' },
+                    ],
+                  },
+                },
               },
-              LineRef: 'SOF:Line:1069_69'
-            }
-          }
-        }
+              LineRef: 'SOF:Line:1069_69',
+            },
+          },
+        },
       },
       Summary: {
         _attributes: { 'xml:lang': 'NO' },
-        _text: 'Test linje med flere stopp v3'
+        _text: 'Test linje med flere stopp v3',
       },
       Source: { SourceType: 'directReport' },
       ValidityPeriod: { StartTime: '2020-03-03T11:54:59.824Z' },
@@ -83,7 +83,7 @@ describe('transformSituationData', () => {
       SituationNumber: 'SOF:SituationNumber:30',
       ReportType: 'incident',
       CreationTime: '2020-03-03T11:54:59.824Z',
-      Progress: 'open'
+      Progress: 'open',
     };
 
     const expected = {
@@ -98,7 +98,7 @@ describe('transformSituationData', () => {
       ReportType: 'incident',
       Summary: {
         _attributes: { 'xml:lang': 'NO' },
-        _text: 'Test linje med flere stopp v3'
+        _text: 'Test linje med flere stopp v3',
       },
       Affects: {
         Networks: {
@@ -110,15 +110,15 @@ describe('transformSituationData', () => {
                   StopPoints: {
                     AffectedStopPoint: [
                       { StopPointRef: 'NSR:StopPlace:36682' },
-                      { StopPointRef: 'NSR:StopPlace:36779' }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      { StopPointRef: 'NSR:StopPlace:36779' },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     };
 
     const actual = transformSituationData(raw);
@@ -131,8 +131,8 @@ describe('transformSituationData', () => {
       Severity: 'normal',
       Affects: {
         StopPoints: {
-          AffectedStopPoint: [{ StopPointRef: 'NSR:StopPlace:36928' }]
-        }
+          AffectedStopPoint: [{ StopPointRef: 'NSR:StopPlace:36928' }],
+        },
       },
       Summary: { _attributes: { 'xml:lang': 'NO' }, _text: 'Stopp melding' },
       SituationNumber: 'SOF:SituationNumber:23',
@@ -142,11 +142,11 @@ describe('transformSituationData', () => {
       Source: { SourceType: 'directReport' },
       ValidityPeriod: {
         StartTime: '2020-03-03T09:52:00+02:00',
-        EndTime: '2020-03-25T09:52:00+02:00'
+        EndTime: '2020-03-25T09:52:00+02:00',
       },
       ParticipantRef: 'SOF',
       CreationTime: '2020-03-03T08:52:01.505Z',
-      Description: { _attributes: { 'xml:lang': 'NO' }, _text: 'Dyper ut' }
+      Description: { _attributes: { 'xml:lang': 'NO' }, _text: 'Dyper ut' },
     };
 
     const expected = {
@@ -157,7 +157,7 @@ describe('transformSituationData', () => {
       Progress: 'open',
       ValidityPeriod: {
         StartTime: '2020-03-03T09:52:00+02:00',
-        EndTime: '2020-03-25T09:52:00+02:00'
+        EndTime: '2020-03-25T09:52:00+02:00',
       },
       UndefinedReason: {},
       Severity: 'normal',
@@ -167,9 +167,9 @@ describe('transformSituationData', () => {
       Advice: { _attributes: { 'xml:lang': 'NO' }, _text: 'Velmenende råd' },
       Affects: {
         StopPoints: {
-          AffectedStopPoint: [{ StopPointRef: 'NSR:StopPlace:36928' }]
-        }
-      }
+          AffectedStopPoint: [{ StopPointRef: 'NSR:StopPlace:36928' }],
+        },
+      },
     };
 
     const actual = transformSituationData(raw);
@@ -186,19 +186,19 @@ describe('transformSituationData', () => {
         StopPoints: {
           AffectedStopPoint: [
             { StopPointRef: 'NSR:StopPlace:36925' },
-            { StopPointRef: 'NSR:StopPlace:36824' }
-          ]
-        }
+            { StopPointRef: 'NSR:StopPlace:36824' },
+          ],
+        },
       },
       Summary: { _attributes: { 'xml:lang': 'NO' }, _text: 'Test igjen' },
       Source: { SourceType: 'directReport' },
       ValidityPeriod: {
         StartTime: '2020-03-03T10:42:02.043Z',
-        EndTime: '2020-03-03T16:42:46+02:00'
+        EndTime: '2020-03-03T16:42:46+02:00',
       },
       ParticipantRef: 'SOF',
       SituationNumber: 'SOF:SituationNumber:27',
-      ReportType: 'incident'
+      ReportType: 'incident',
     };
 
     const expected = {
@@ -209,7 +209,7 @@ describe('transformSituationData', () => {
       Progress: 'closed',
       ValidityPeriod: {
         StartTime: '2020-03-03T10:42:02.043Z',
-        EndTime: '2020-03-03T16:42:46+02:00'
+        EndTime: '2020-03-03T16:42:46+02:00',
       },
       UndefinedReason: {},
       Severity: 'normal',
@@ -219,10 +219,10 @@ describe('transformSituationData', () => {
         StopPoints: {
           AffectedStopPoint: [
             { StopPointRef: 'NSR:StopPlace:36925' },
-            { StopPointRef: 'NSR:StopPlace:36824' }
-          ]
-        }
-      }
+            { StopPointRef: 'NSR:StopPlace:36824' },
+          ],
+        },
+      },
     };
 
     const actual = transformSituationData(raw);
@@ -234,7 +234,7 @@ describe('transformSituationData', () => {
     const raw = {
       ValidityPeriod: {
         StartTime: '2020-03-18T23:00:00.000Z',
-        EndTime: '2020-03-19T22:59:59.999Z'
+        EndTime: '2020-03-19T22:59:59.999Z',
       },
       ParticipantRef: 'SOF',
       SituationNumber: 'SOF:SituationNumber:28',
@@ -247,14 +247,14 @@ describe('transformSituationData', () => {
           AffectedVehicleJourney: {
             FramedVehicleJourneyRef: {
               DataFrameRef: '2020-03-19',
-              DatedVehicleJourneyRef: 'SOF:ServiceJourney:1000_33_2004_69'
+              DatedVehicleJourneyRef: 'SOF:ServiceJourney:1000_33_2004_69',
             },
-            Route: null
-          }
-        }
+            Route: null,
+          },
+        },
       },
       Summary: { _attributes: { 'xml:lang': 'NO' }, _text: 'Test avgang' },
-      Source: { SourceType: 'directReport' }
+      Source: { SourceType: 'directReport' },
     };
 
     const expected = {
@@ -265,7 +265,7 @@ describe('transformSituationData', () => {
       Progress: 'open',
       ValidityPeriod: {
         StartTime: '2020-03-18T23:00:00.000Z',
-        EndTime: '2020-03-19T22:59:59.999Z'
+        EndTime: '2020-03-19T22:59:59.999Z',
       },
       UndefinedReason: {},
       Severity: 'normal',
@@ -276,12 +276,12 @@ describe('transformSituationData', () => {
           AffectedVehicleJourney: {
             FramedVehicleJourneyRef: {
               DataFrameRef: '2020-03-19',
-              DatedVehicleJourneyRef: 'SOF:ServiceJourney:1000_33_2004_69'
+              DatedVehicleJourneyRef: 'SOF:ServiceJourney:1000_33_2004_69',
             },
-            Route: null
-          }
-        }
-      }
+            Route: null,
+          },
+        },
+      },
     };
 
     const actual = transformSituationData(raw);
