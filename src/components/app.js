@@ -112,35 +112,43 @@ export default class App extends React.Component {
       <Router>
         <div>
           <img className="background-image" src={Background} alt="" />
+          <NavBar
+            onSelectOrganization={this.updateOrganization}
+            user={this.state.organizations}
+            name={this.state.organizationsName}
+            logout={() => this.logout()}
+          />
           <Routes>
-            <Route path="/">
-              <NavBar
-                onSelectOrganization={this.updateOrganization}
-                user={this.state.organizations}
-                name={this.state.organizationsName}
-                logout={() => this.logout()}
-              />
-            </Route>
-            <Route exact path="/">
-              <Overview messages={this.state.messages} />
-            </Route>
-            <Route path="/edit/:id?">
-              <Edit
-                messages={this.state.messages}
-                lines={this.state.lines}
-                firebase={this.db}
+            <Route
+              path="/"
+              exact
+              element={
+                <Overview messages={this.state.messages} />
+              }
+            />
+            <Route
+              path="/edit/:id"
+              element={
+                <Edit
+                  messages={this.state.messages}
+                  lines={this.state.lines}
+                  firebase={this.db}
+                  api={this.props.api}
+                  organization={this.state.selectedOrganization}
+                />
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <Register
                 api={this.props.api}
+                firebase={this.db}
+                lines={this.state.lines}
                 organization={this.state.selectedOrganization}
               />
-            </Route>
-            <Route path="/register">
-              <Register
-                api={this.props.api}
-                firebase={this.db}
-                lines={this.state.lines}
-                organization={this.state.selectedOrganization}
-              />
-            </Route>
+              }
+            />
           </Routes>
         </div>
       </Router>
