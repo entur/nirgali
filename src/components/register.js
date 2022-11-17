@@ -6,8 +6,15 @@ import { DatePicker } from '@entur/datepicker';
 import { lightFormat, isBefore } from 'date-fns';
 import LinePicker from './line-picker';
 import StopPicker from './stop-picker';
+import { useHistory } from 'react-router-dom';
 
 const formatDate = (date) => lightFormat(date, 'yyyy-MM-dd');
+
+const ConnectedRegisterComponent = (props) => {
+  const history = useHistory();
+
+  return <Register {...props} history={history} />;
+};
 
 class Register extends React.Component {
   state = {
@@ -692,4 +699,4 @@ class Register extends React.Component {
   }
 }
 
-export default Register;
+export default ConnectedRegisterComponent;

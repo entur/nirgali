@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DatePicker } from '@entur/datepicker';
 import {
   PrimaryButton as Button,
@@ -10,115 +10,124 @@ import { Contrast } from '@entur/layout';
 import addHours from 'date-fns/addHours';
 import Select from 'react-select';
 import { isBefore } from 'date-fns';
+import { useHistory, useParams } from 'react-router-dom';
 
-class Edit extends React.Component {
-  state = {
-    serviceJourney: undefined,
-    from: undefined,
-    to: undefined,
-  };
+const Edit = ({ messages, firebase, organization, lines, api }) => {
+  const history = useHistory();
+  const { id: issueId } = useParams();
 
-  componentDidUpdate(prevProps) {
-    if (
-      prevProps?.issue?.id !== this.props?.issue?.id ||
-      !this.state.serviceJourney
-    ) {
-      this.getDepartureLine();
+  const issue = useMemo(
+    () => messages.find(({ id }) => id === issueId),
+    [messages, issueId]
+  );
+
+  const [serviceJourney, setServiceJourney] = useState(undefined);
+  const [from, setFrom] = useState(undefined);
+  const [to, setTo] = useState(undefined);
+
+  useEffect(() => {
+    const Affects = issue?.data?.Affects;
+    const FramedVehicleJourneyRef =
+      Affects?.VehicleJourneys?.AffectedVehicleJourney?.FramedVehicleJourneyRef;
+    const DatedVehicleJourneyRef =
+      FramedVehicleJourneyRef?.DatedVehicleJourneyRef;
+    const DataFrameRef = FramedVehicleJourneyRef?.DataFrameRef;
+
+    if (DatedVehicleJourneyRef) {
+      api
+        .getServiceJourney(DatedVehicleJourneyRef, DataFrameRef)
+        .then(({ data }) => {
+          setServiceJourney(data.serviceJourney);
+        });
     }
-  }
+  }, [issueId, api, issue]);
 
-  componentDidMount() {
-    this.getDepartureLine();
-  }
-
-  handleSubmit = (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
-    this.props.issue.data.Progress = 'open';
-    this.props.issue.data.Summary['_text'] = event.target.oppsummering.value;
+    issue.data.Progress = 'open';
+    issue.data.Summary['_text'] = event.target.oppsummering.value;
     if (event.target.beskrivelse.value !== '') {
-      this.props.issue.data['Description'] = {
+      issue.data['Description'] = {
         _attributes: { 'xml:lang': 'NO' },
         _text: event.target.beskrivelse.value,
       };
     } else {
-      if (this.props.issue.data.Description) {
-        delete this.props.issue.data.Description;
+      if (issue.data.Description) {
+        delete issue.data.Description;
       }
     }
     if (event.target.forslag.value !== '') {
-      this.props.issue.data['Advice'] = {
+      issue.data['Advice'] = {
         _attributes: { 'xml:lang': 'NO' },
         _text: event.target.forslag.value,
       };
     } else {
-      if (this.props.issue.data.Advice) {
-        delete this.props.issue.data.Advice;
+      if (issue.data.Advice) {
+        delete issue.data.Advice;
       }
     }
-    if (this.state.from) {
-      this.props.issue.data.ValidityPeriod.StartTime =
-        this.state.from.toISOString();
+    if (from) {
+      issue.data.ValidityPeriod.StartTime = from.toISOString();
     }
-    if (this.state.to) {
-      this.props.issue.data.ValidityPeriod.EndTime =
-        this.state.to.toISOString();
+    if (to) {
+      issue.data.ValidityPeriod.EndTime = to.toISOString();
     }
-    this.props.issue.data.ReportType = event.target.reportType.value;
+    issue.data.ReportType = event.target.reportType.value;
 
     if (event.target.infoLinkUri.value !== '') {
-      this.props.issue.data.InfoLinks = {
+      issue.data.InfoLinks = {
         InfoLink: {
           Uri: event.target.infoLinkUri.value,
           Label: event.target.infoLinkLabel.value,
         },
       };
     } else {
-      delete this.props.issue.data.InfoLinks;
+      delete issue.data.InfoLinks;
     }
 
-    const codespace = this.props.organization.split(':')[0];
-    const authority = this.props.organization;
-    const id = this.props.issue.id;
+    const codespace = organization.split(':')[0];
+    const authority = organization;
+    const id = issue.id;
 
-    this.props.firebase
+    firebase
       .doc(`codespaces/${codespace}/authorities/${authority}/messages/${id}`)
-      .set(this.props.issue.data)
-      .then(() => this.props.history.push('/'));
+      .set(issue.data)
+      .then(() => history.push('/'));
   };
 
-  handleClick = () => {
-    this.props.history.push('/');
+  const handleClick = () => {
+    history.push('/');
   };
 
-  setProgressToClosed = () => {
+  const setProgressToClosed = () => {
     const update = {
       Progress: 'closed',
       ValidityPeriod: {
         EndTime: addHours(new Date(), 5).toISOString(),
       },
     };
-    const codespace = this.props.organization.split(':')[0];
-    const authority = this.props.organization;
-    const id = this.props.issue.id;
-    this.props.firebase
+    const codespace = organization.split(':')[0];
+    const authority = organization;
+    const id = issue.id;
+    firebase
       .doc(`codespaces/${codespace}/authorities/${authority}/messages/${id}`)
       .set(update, {
         mergeFields: ['Progress', 'ValidityPeriod.EndTime'],
       })
-      .then(() => this.props.history.push('/'));
+      .then(() => history.push('/'));
   };
 
-  checkStatus = (param) => {
+  const checkStatus = (param) => {
     if (param === 'open') {
       return (
         <Contrast>
           <ButtonGroup>
-            <NegativeButton type="button" onClick={this.setProgressToClosed}>
+            <NegativeButton type="button" onClick={setProgressToClosed}>
               Deaktiver
             </NegativeButton>
             <SecondaryButton type="submit">Lagre endringer</SecondaryButton>
           </ButtonGroup>
-          <Button onClick={this.handleClick} type="submit">
+          <Button onClick={handleClick} type="submit">
             Lukk uten å lagre
           </Button>
         </Contrast>
@@ -128,7 +137,7 @@ class Edit extends React.Component {
         <Contrast>
           <ButtonGroup>
             <SecondaryButton>Aktiver</SecondaryButton>
-            <Button onClick={this.handleClick} type="submit">
+            <Button onClick={handleClick} type="submit">
               Lukk uten å lagre
             </Button>
           </ButtonGroup>
@@ -137,41 +146,41 @@ class Edit extends React.Component {
     }
   };
 
-  returnValue = (type) => {
-    let issue = this.props.issue.data;
+  const returnValue = (type) => {
+    let issueData = issue.data;
 
     if (type === 'ReportType') {
-      return issue.ReportType;
+      return issueData.ReportType;
     }
     if (type === 'summary') {
-      return issue.Summary['_text'];
+      return issueData.Summary['_text'];
     }
     if (type === 'description') {
-      if (issue.Description) {
-        return issue.Description['_text'];
+      if (issueData.Description) {
+        return issueData.Description['_text'];
       } else {
         return '';
       }
     }
     if (type === 'advice') {
-      if (issue.Advice) {
-        return issue.Advice['_text'];
+      if (issueData.Advice) {
+        return issueData.Advice['_text'];
       } else {
         return '';
       }
     }
 
     if (type === 'infoLinkUri') {
-      if (issue.InfoLinks) {
-        return issue.InfoLinks.InfoLink.Uri;
+      if (issueData.InfoLinks) {
+        return issueData.InfoLinks.InfoLink.Uri;
       } else {
         return undefined;
       }
     }
 
     if (type === 'infoLinkLabel') {
-      if (issue.InfoLinks) {
-        return issue.InfoLinks.InfoLink.Label;
+      if (issueData.InfoLinks) {
+        return issueData.InfoLinks.InfoLink.Label;
       } else {
         return undefined;
       }
@@ -180,33 +189,30 @@ class Edit extends React.Component {
     return 'error';
   };
 
-  getType = () => {
-    if (
-      this.props.issue.data.Affects?.Networks?.AffectedNetwork?.AffectedLine
-        ?.LineRef
-    ) {
+  const getType = () => {
+    if (issue.data.Affects?.Networks?.AffectedNetwork?.AffectedLine?.LineRef) {
       return 'line';
     } else if (
-      this.props.issue.data.Affects?.VehicleJourneys?.AffectedVehicleJourney
+      issue.data.Affects?.VehicleJourneys?.AffectedVehicleJourney
         ?.FramedVehicleJourneyRef
     ) {
       return 'departure';
-    } else if (this.props.issue.data.Affects?.StopPoints) {
+    } else if (issue.data.Affects?.StopPoints) {
       return 'stop';
     }
 
     return '';
   };
 
-  getLine = () => {
-    const Affects = this.props.issue.data.Affects;
+  const getLine = () => {
+    const Affects = issue.data.Affects;
     const AffectedLine = Affects?.Networks?.AffectedNetwork?.AffectedLine;
     const LineRef = AffectedLine?.LineRef;
-    return this.getLineOption(LineRef);
+    return getLineOption(LineRef);
   };
 
-  getLineOption = (id) => {
-    const line = this.props.lines.find((l) => l.id === id);
+  const getLineOption = (id) => {
+    const line = lines.find((l) => l.id === id);
     return line
       ? {
           value: line.id,
@@ -217,8 +223,7 @@ class Edit extends React.Component {
         };
   };
 
-  getLineDepartureOption = () => {
-    const serviceJourney = this.state.serviceJourney;
+  const getLineDepartureOption = () => {
     const estimatedCall = serviceJourney.estimatedCalls[0];
     const quayName = estimatedCall.quay.name;
     const aimedDepartureTime = estimatedCall.aimedDepartureTime
@@ -232,52 +237,32 @@ class Edit extends React.Component {
     };
   };
 
-  getLineQuays = () => {
-    const Affects = this.props.issue.data.Affects;
+  const getLineQuays = () => {
+    const Affects = issue.data.Affects;
     const AffectedLine = Affects?.Networks?.AffectedNetwork?.AffectedLine;
     const LineRef = AffectedLine?.LineRef;
-    const line = this.props.lines.find((l) => l.id === LineRef);
+    const line = lines.find((l) => l.id === LineRef);
     const StopPoints = AffectedLine?.Routes?.AffectedRoute?.StopPoints;
-    return this.getQuayOptions(StopPoints, line?.quays);
+    return getQuayOptions(StopPoints, line?.quays);
   };
 
-  getDepartureLine = () => {
-    const Affects = this.props.issue?.data?.Affects;
-    const FramedVehicleJourneyRef =
-      Affects?.VehicleJourneys?.AffectedVehicleJourney?.FramedVehicleJourneyRef;
-    const DatedVehicleJourneyRef =
-      FramedVehicleJourneyRef?.DatedVehicleJourneyRef;
-    const DataFrameRef = FramedVehicleJourneyRef?.DataFrameRef;
-
-    if (DatedVehicleJourneyRef) {
-      this.props.api
-        .getServiceJourney(DatedVehicleJourneyRef, DataFrameRef)
-        .then(({ data }) => {
-          this.setState({ serviceJourney: data.serviceJourney });
-        });
-    }
-  };
-
-  getDepartureQuays = () => {
-    const Affects = this.props.issue.data.Affects;
+  const getDepartureQuays = () => {
+    const Affects = issue.data.Affects;
     const Route = Affects?.VehicleJourneys?.AffectedVehicleJourney?.Route;
     const StopPoints = Route?.StopPoints;
-    const lineId = this.state.serviceJourney.line.id;
-    const line = this.props.lines.find((l) => l.id === lineId);
-    return this.getQuayOptions(StopPoints, line.quays);
+    const lineId = serviceJourney.line.id;
+    const line = lines.find((l) => l.id === lineId);
+    return getQuayOptions(StopPoints, line.quays);
   };
 
-  getStopQuays = () => {
-    const Affects = this.props.issue.data.Affects;
+  const getStopQuays = () => {
+    const Affects = issue.data.Affects;
     const StopPoints = Affects?.StopPoints;
-    const quays = this.props.lines.reduce(
-      (acc, line) => [...acc, ...line.quays],
-      []
-    );
-    return this.getQuayOptions(StopPoints, quays);
+    const quays = lines.reduce((acc, line) => [...acc, ...line.quays], []);
+    return getQuayOptions(StopPoints, quays);
   };
 
-  getQuayOptions = (StopPoints, quays) => {
+  const getQuayOptions = (StopPoints, quays) => {
     return quays
       ? StopPoints?.AffectedStopPoint?.map((AffectedStopPoint) => {
           return quays.find(
@@ -297,190 +282,178 @@ class Edit extends React.Component {
         ];
   };
 
-  render() {
-    if (!this.props.issue || !this.props.lines?.length) {
-      return null;
-    }
-
-    return (
-      <div>
-        <div className="register_box">
-          <form
-            className="register"
-            onSubmit={this.handleSubmit}
-            autoComplete="off"
-          >
-            <br></br>
-            <h2 className="text-center text-white">Endre avvik</h2>
-            <br></br>
-            {this.getType() === 'line' && (
-              <>
-                <p className="text-center text-white">Linje</p>
-                <div className="choose_type">
-                  <Select value={this.getLine()} options={[this.getLine()]} />
-                </div>
-                {this.getLineQuays() && (
-                  <>
-                    <br></br>
-                    <div>
-                      <Select
-                        isMulti
-                        value={this.getLineQuays()}
-                        options={this.getLineQuays()}
-                      />
-                      <br></br>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-
-            {this.getType() === 'departure' && (
-              <>
-                <p className="text-center text-white">Avgang</p>
-
-                {this.state.serviceJourney && (
-                  <>
-                    <div className="choose_type">
-                      <Select
-                        value={this.getLineOption(
-                          this.state.serviceJourney.line.id
-                        )}
-                        options={[
-                          this.getLineOption(this.state.serviceJourney.line.id),
-                        ]}
-                      />
-                    </div>
-                    <div className="choose_type">
-                      <Select
-                        value={this.getLineDepartureOption()}
-                        options={[this.getLineDepartureOption()]}
-                      />
-                    </div>
-                    {this.getDepartureQuays() && (
-                      <Select
-                        isMulti
-                        value={this.getDepartureQuays()}
-                        options={[this.getDepartureQuays()]}
-                      />
-                    )}
-                  </>
-                )}
-              </>
-            )}
-
-            {this.getType() === 'stop' && (
-              <>
-                <p className="text-center text-white">Stopp</p>
-                {this.getStopQuays() && (
-                  <Select
-                    isMulti
-                    value={this.getStopQuays()}
-                    options={[this.getStopQuays()]}
-                  />
-                )}
-              </>
-            )}
-
-            <br></br>
-
-            <p className="text-center text-white">Gyldighetsperiode</p>
-            <div className="form-group d-flex">
-              <DatePicker
-                selectedDate={
-                  this.state.from ||
-                  new Date(this.props.issue.data.ValidityPeriod.StartTime)
-                }
-                onChange={(from) => this.setState({ from })}
-                dateFormat="yyyy-MM-dd HH:mm"
-                minDate={new Date()}
-                showTimeInput
-              />
-              <DatePicker
-                selectedDate={
-                  this.state.to ||
-                  (this.props.issue.data.ValidityPeriod.EndTime
-                    ? new Date(this.props.issue.data.ValidityPeriod.EndTime)
-                    : undefined)
-                }
-                onChange={(to) => {
-                  const now = new Date();
-                  const from =
-                    this.state.from ||
-                    new Date(this.props.issue.data.ValidityPeriod.StartTime);
-
-                  if (isBefore(to, now)) {
-                    this.setState({ to: now });
-                  } else if (isBefore(to, from)) {
-                    this.setState({ to: from });
-                  } else {
-                    this.setState({ to });
-                  }
-                }}
-                dateFormat="yyyy-MM-dd HH:mm"
-                minDate={this.state.from}
-                showTimeInput
-                placeholder="Til-dato"
-              />
-            </div>
-            <br></br>
-            <div className="severity">
-              <p className="text-center text-white">Avvikstype</p>
-              <select
-                className="form-control"
-                id="cssmenu"
-                defaultValue={this.returnValue('ReportType')}
-                name="reportType"
-              >
-                <option value="general">General</option>
-                <option value="incident">Incident</option>
-              </select>
-              <br></br>
-            </div>
-            <p className="text-center text-white">Melding</p>
-            <input
-              type="String"
-              name="oppsummering"
-              className="form-control"
-              defaultValue={this.returnValue('summary')}
-              maxLength="160"
-              required
-            />
-            <input
-              type="String"
-              name="beskrivelse"
-              className="form-control"
-              defaultValue={this.returnValue('description')}
-            />
-            <input
-              type="String"
-              name="forslag"
-              className="form-control"
-              defaultValue={this.returnValue('advice')}
-            />
-            <br></br>
-            <p className="text-center text-white">
-              Lenke til nettside som har mer informasjon om hendelsen
-            </p>
-            <input
-              className="form-control"
-              name="infoLinkUri"
-              placeholder="Lenke"
-              defaultValue={this.returnValue('infoLinkUri')}
-            />
-            <input
-              className="form-control"
-              name="infoLinkLabel"
-              placeholder="Tekst til lenken"
-              defaultValue={this.returnValue('infoLinkLabel')}
-            />
-            <br></br>
-            {this.checkStatus(this.props.issue.data.Progress)}
-          </form>
-        </div>
-      </div>
-    );
+  if (!issue || !lines?.length) {
+    return null;
   }
-}
+
+  return (
+    <div>
+      <div className="register_box">
+        <form className="register" onSubmit={handleSubmit} autoComplete="off">
+          <br></br>
+          <h2 className="text-center text-white">Endre avvik</h2>
+          <br></br>
+          {getType() === 'line' && (
+            <>
+              <p className="text-center text-white">Linje</p>
+              <div className="choose_type">
+                <Select value={getLine()} options={[getLine()]} />
+              </div>
+              {getLineQuays() && (
+                <>
+                  <br></br>
+                  <div>
+                    <Select
+                      isMulti
+                      value={getLineQuays()}
+                      options={getLineQuays()}
+                    />
+                    <br></br>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {getType() === 'departure' && (
+            <>
+              <p className="text-center text-white">Avgang</p>
+
+              {serviceJourney && (
+                <>
+                  <div className="choose_type">
+                    <Select
+                      value={getLineOption(serviceJourney.line.id)}
+                      options={[getLineOption(serviceJourney.line.id)]}
+                    />
+                  </div>
+                  <div className="choose_type">
+                    <Select
+                      value={getLineDepartureOption()}
+                      options={[getLineDepartureOption()]}
+                    />
+                  </div>
+                  {getDepartureQuays() && (
+                    <Select
+                      isMulti
+                      value={getDepartureQuays()}
+                      options={[getDepartureQuays()]}
+                    />
+                  )}
+                </>
+              )}
+            </>
+          )}
+
+          {getType() === 'stop' && (
+            <>
+              <p className="text-center text-white">Stopp</p>
+              {getStopQuays() && (
+                <Select
+                  isMulti
+                  value={getStopQuays()}
+                  options={[getStopQuays()]}
+                />
+              )}
+            </>
+          )}
+
+          <br></br>
+
+          <p className="text-center text-white">Gyldighetsperiode</p>
+          <div className="form-group d-flex">
+            <DatePicker
+              selectedDate={
+                from || new Date(issue.data.ValidityPeriod.StartTime)
+              }
+              onChange={(from) => setFrom(from)}
+              dateFormat="yyyy-MM-dd HH:mm"
+              minDate={new Date()}
+              showTimeInput
+            />
+            <DatePicker
+              selectedDate={
+                to ||
+                (issue.data.ValidityPeriod.EndTime
+                  ? new Date(issue.data.ValidityPeriod.EndTime)
+                  : undefined)
+              }
+              onChange={(to) => {
+                const now = new Date();
+                const calculatedFrom =
+                  from || new Date(issue.data.ValidityPeriod.StartTime);
+
+                if (isBefore(to, now)) {
+                  setTo(now);
+                } else if (isBefore(to, calculatedFrom)) {
+                  setTo(calculatedFrom);
+                } else {
+                  setTo(to);
+                }
+              }}
+              dateFormat="yyyy-MM-dd HH:mm"
+              minDate={from}
+              showTimeInput
+              placeholder="Til-dato"
+            />
+          </div>
+          <br></br>
+          <div className="severity">
+            <p className="text-center text-white">Avvikstype</p>
+            <select
+              className="form-control"
+              id="cssmenu"
+              defaultValue={returnValue('ReportType')}
+              name="reportType"
+            >
+              <option value="general">General</option>
+              <option value="incident">Incident</option>
+            </select>
+            <br></br>
+          </div>
+          <p className="text-center text-white">Melding</p>
+          <input
+            type="String"
+            name="oppsummering"
+            className="form-control"
+            defaultValue={returnValue('summary')}
+            maxLength="160"
+            required
+          />
+          <input
+            type="String"
+            name="beskrivelse"
+            className="form-control"
+            defaultValue={returnValue('description')}
+          />
+          <input
+            type="String"
+            name="forslag"
+            className="form-control"
+            defaultValue={returnValue('advice')}
+          />
+          <br></br>
+          <p className="text-center text-white">
+            Lenke til nettside som har mer informasjon om hendelsen
+          </p>
+          <input
+            className="form-control"
+            name="infoLinkUri"
+            placeholder="Lenke"
+            defaultValue={returnValue('infoLinkUri')}
+          />
+          <input
+            className="form-control"
+            name="infoLinkLabel"
+            placeholder="Tekst til lenken"
+            defaultValue={returnValue('infoLinkLabel')}
+          />
+          <br></br>
+          {checkStatus(issue.data.Progress)}
+        </form>
+      </div>
+    </div>
+  );
+};
 
 export default Edit;

@@ -112,54 +112,34 @@ export default class App extends React.Component {
       <Router>
         <div>
           <img className="background-image" src={Background} alt="" />
-
-          <Route
-            path="/"
-            render={(props) => (
-              <NavBar
-                {...props}
-                NavBar
-                onSelectOrganization={this.updateOrganization}
-                user={this.state.organizations}
-                name={this.state.organizationsName}
-                logout={() => this.logout()}
-              />
-            )}
-          />
-          <Route
-            exact
-            path="/"
-            render={(props) => (
-              <Overview {...props} messages={this.state.messages} />
-            )}
-          />
-          <Route
-            path="/edit/:id?"
-            render={(props) => (
-              <Edit
-                {...props}
-                issue={this.state.messages.find(
-                  ({ id }) => id === props.match.params.id
-                )}
-                lines={this.state.lines}
-                firebase={this.db}
-                api={this.props.api}
-                organization={this.state.selectedOrganization}
-              />
-            )}
-          />
-          <Route
-            path="/register"
-            render={(props) => (
-              <Register
-                {...props}
-                api={this.props.api}
-                firebase={this.db}
-                lines={this.state.lines}
-                organization={this.state.selectedOrganization}
-              />
-            )}
-          />
+          <Route path="/">
+            <NavBar
+              onSelectOrganization={this.updateOrganization}
+              user={this.state.organizations}
+              name={this.state.organizationsName}
+              logout={() => this.logout()}
+            />
+          </Route>
+          <Route exact path="/">
+            <Overview messages={this.state.messages} />
+          </Route>
+          <Route path="/edit/:id?">
+            <Edit
+              messages={this.state.messages}
+              lines={this.state.lines}
+              firebase={this.db}
+              api={this.props.api}
+              organization={this.state.selectedOrganization}
+            />
+          </Route>
+          <Route path="/register">
+            <Register
+              api={this.props.api}
+              firebase={this.db}
+              lines={this.state.lines}
+              organization={this.state.selectedOrganization}
+            />
+          </Route>
         </div>
       </Router>
     );
