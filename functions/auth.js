@@ -5,9 +5,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { getAuth } = require('firebase-admin/auth');
 
-const getAuth0ClaimsNamespace = () =>
-  functions.config().auth.firebase.auth0.claims_namespace;
-
 const transformRoles = (roles, claim) =>
   roles
     .map(JSON.parse)
@@ -35,7 +32,7 @@ exports.auth = function () {
 
   const authenticate = (req, res) => {
     const { sub: uid } = req.auth;
-    const auth0ClaimsNamespace = getAuth0ClaimsNamespace();
+    const auth0ClaimsNamespace = functions.config().auth.firebase.auth0.claims_namespace;
     let roles = req.auth[auth0ClaimsNamespace];
 
     const additionalClaims = {
