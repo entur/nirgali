@@ -49,11 +49,11 @@ const Overview = ({ messages }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate('/register');
+    navigate('/meldinger/ny');
   };
 
   const edit = (id) => {
-    navigate(`/edit/${id}`);
+    navigate(`/meldinger/${id}`);
   };
 
   let messagesToRender = showExpiredMessages
@@ -68,99 +68,93 @@ const Overview = ({ messages }) => {
   messagesToRender = messagesToRender.sort(sortBySituationNumber);
 
   return (
-    <div>
-      <div className="register_box">
-        <h2 className="text-center text-white">Oversikt</h2>
-        <br></br>
-        <div>
-          <Contrast>
-            <SecondaryButton width="fluid" onClick={handleClick}>
-              Ny melding
-            </SecondaryButton>
-          </Contrast>
-        </div>
-        <br></br>
+    <>
+      <h2 className="text-center text-white">Oversikt</h2>
+      <br></br>
+      <div>
         <Contrast>
-          <div style={{ padding: '0 .5em' }}>
-            <Switch
-              checked={showExpiredMessages}
-              onChange={() => setShowExpiredMessages(!showExpiredMessages)}
-            >
-              Vis utløpte meldinger
-            </Switch>
-          </div>
+          <SecondaryButton width="fluid" onClick={handleClick}>
+            Ny melding
+          </SecondaryButton>
         </Contrast>
-        <br></br>
-        {messagesToRender && (
-          <div className="table-responsive-md">
-            <Table
-              id="dtOrderExample"
-              className="table table-striped table-light table-borderless table-hover"
-              bgcolor="#000000"
-            >
-              <Thead className="bg-primary">
-                <Tr bgcolor="#babbcf">
-                  <Th scope="col">
-                    <b>Status</b>
-                  </Th>
-                  <Th scope="col">
-                    <b>#</b>
-                  </Th>
-                  <Th scope="col">
-                    <b>Oppsummering</b>
-                  </Th>
-                  <Th scope="col">
-                    <b>Avvikstype</b>
-                  </Th>
-                  <Th scope="col">
-                    <b>Fra dato</b>
-                  </Th>
-                  <Th scope="col">
-                    <b>Til dato</b>
-                  </Th>
-                  <Th scope="col">
-                    <b>Type</b>
-                  </Th>
-                  <Th scope="col"></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {messagesToRender.map(({ id, data: item }, index) => (
-                  <Tr key={item.SituationNumber}>
-                    <Td className="Status">
-                      {returnRedOrGreenIcon(item, date)}
-                    </Td>
-                    <Td className="#">
-                      {item.SituationNumber.split(':').pop()}
-                    </Td>
-                    <Td className="Melding" width="25%">
-                      {item.Summary['_text']}
-                    </Td>
-                    <Td className="ReportType">{item.ReportType}</Td>
-                    <Td className="Fra-dato">
-                      {getDate(item.ValidityPeriod.StartTime)}
-                    </Td>
-                    <Td className="Til-dato">
-                      {getDate(item.ValidityPeriod.EndTime)}
-                    </Td>
-                    <Td className="Type">{getType(item.Affects)}</Td>
-                    <Td>
-                      <Button
-                        variant="secondary"
-                        value={index}
-                        onClick={() => edit(id)}
-                      >
-                        Endre
-                      </Button>
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </div>
-        )}
       </div>
-    </div>
+      <br></br>
+      <Contrast>
+        <div style={{ padding: '0 .5em' }}>
+          <Switch
+            checked={showExpiredMessages}
+            onChange={() => setShowExpiredMessages(!showExpiredMessages)}
+          >
+            Vis utløpte meldinger
+          </Switch>
+        </div>
+      </Contrast>
+      <br></br>
+      {messagesToRender && (
+        <div className="table-responsive-md">
+          <Table
+            id="dtOrderExample"
+            className="table table-striped table-light table-borderless table-hover"
+            bgcolor="#000000"
+          >
+            <Thead className="bg-primary">
+              <Tr bgcolor="#babbcf">
+                <Th scope="col">
+                  <b>Status</b>
+                </Th>
+                <Th scope="col">
+                  <b>#</b>
+                </Th>
+                <Th scope="col">
+                  <b>Oppsummering</b>
+                </Th>
+                <Th scope="col">
+                  <b>Avvikstype</b>
+                </Th>
+                <Th scope="col">
+                  <b>Fra dato</b>
+                </Th>
+                <Th scope="col">
+                  <b>Til dato</b>
+                </Th>
+                <Th scope="col">
+                  <b>Type</b>
+                </Th>
+                <Th scope="col"></Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {messagesToRender.map(({ id, data: item }, index) => (
+                <Tr key={item.SituationNumber}>
+                  <Td className="Status">{returnRedOrGreenIcon(item, date)}</Td>
+                  <Td className="#">{item.SituationNumber.split(':').pop()}</Td>
+                  <Td className="Melding" width="25%">
+                    {item.Summary['_text']}
+                  </Td>
+                  <Td className="ReportType">{item.ReportType}</Td>
+                  <Td className="Fra-dato">
+                    {getDate(item.ValidityPeriod.StartTime)}
+                  </Td>
+                  <Td className="Til-dato">
+                    {getDate(item.ValidityPeriod.EndTime)}
+                  </Td>
+                  <Td className="Type">{getType(item.Affects)}</Td>
+                  <Td>
+                    <Button
+                      variant="secondary"
+                      value={index}
+                      onClick={() => edit(id)}
+                    >
+                      Endre
+                    </Button>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </div>
+      )}
+    </>
   );
 };
 

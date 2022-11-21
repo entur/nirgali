@@ -287,172 +287,168 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
   }
 
   return (
-    <div>
-      <div className="register_box">
-        <form className="register" onSubmit={handleSubmit} autoComplete="off">
-          <br></br>
-          <h2 className="text-center text-white">Endre avvik</h2>
-          <br></br>
-          {getType() === 'line' && (
-            <>
-              <p className="text-center text-white">Linje</p>
-              <div className="choose_type">
-                <Select value={getLine()} options={[getLine()]} />
-              </div>
-              {getLineQuays() && (
-                <>
+    <>
+      <form className="register" onSubmit={handleSubmit} autoComplete="off">
+        <br></br>
+        <h2 className="text-center text-white">Endre avvik</h2>
+        <br></br>
+        {getType() === 'line' && (
+          <>
+            <p className="text-center text-white">Linje</p>
+            <div className="choose_type">
+              <Select value={getLine()} options={[getLine()]} />
+            </div>
+            {getLineQuays() && (
+              <>
+                <br></br>
+                <div>
+                  <Select
+                    isMulti
+                    value={getLineQuays()}
+                    options={getLineQuays()}
+                  />
                   <br></br>
-                  <div>
-                    <Select
-                      isMulti
-                      value={getLineQuays()}
-                      options={getLineQuays()}
-                    />
-                    <br></br>
-                  </div>
-                </>
-              )}
-            </>
-          )}
+                </div>
+              </>
+            )}
+          </>
+        )}
 
-          {getType() === 'departure' && (
-            <>
-              <p className="text-center text-white">Avgang</p>
+        {getType() === 'departure' && (
+          <>
+            <p className="text-center text-white">Avgang</p>
 
-              {serviceJourney && (
-                <>
-                  <div className="choose_type">
-                    <Select
-                      value={getLineOption(serviceJourney.line.id)}
-                      options={[getLineOption(serviceJourney.line.id)]}
-                    />
-                  </div>
-                  <div className="choose_type">
-                    <Select
-                      value={getLineDepartureOption()}
-                      options={[getLineDepartureOption()]}
-                    />
-                  </div>
-                  {getDepartureQuays() && (
-                    <Select
-                      isMulti
-                      value={getDepartureQuays()}
-                      options={[getDepartureQuays()]}
-                    />
-                  )}
-                </>
-              )}
-            </>
-          )}
+            {serviceJourney && (
+              <>
+                <div className="choose_type">
+                  <Select
+                    value={getLineOption(serviceJourney.line.id)}
+                    options={[getLineOption(serviceJourney.line.id)]}
+                  />
+                </div>
+                <div className="choose_type">
+                  <Select
+                    value={getLineDepartureOption()}
+                    options={[getLineDepartureOption()]}
+                  />
+                </div>
+                {getDepartureQuays() && (
+                  <Select
+                    isMulti
+                    value={getDepartureQuays()}
+                    options={[getDepartureQuays()]}
+                  />
+                )}
+              </>
+            )}
+          </>
+        )}
 
-          {getType() === 'stop' && (
-            <>
-              <p className="text-center text-white">Stopp</p>
-              {getStopQuays() && (
-                <Select
-                  isMulti
-                  value={getStopQuays()}
-                  options={[getStopQuays()]}
-                />
-              )}
-            </>
-          )}
+        {getType() === 'stop' && (
+          <>
+            <p className="text-center text-white">Stopp</p>
+            {getStopQuays() && (
+              <Select
+                isMulti
+                value={getStopQuays()}
+                options={[getStopQuays()]}
+              />
+            )}
+          </>
+        )}
 
-          <br></br>
+        <br></br>
 
-          <p className="text-center text-white">Gyldighetsperiode</p>
-          <div className="form-group d-flex">
-            <DatePicker
-              selectedDate={
-                from || new Date(issue.data.ValidityPeriod.StartTime)
+        <p className="text-center text-white">Gyldighetsperiode</p>
+        <div className="form-group d-flex">
+          <DatePicker
+            selectedDate={from || new Date(issue.data.ValidityPeriod.StartTime)}
+            onChange={(from) => setFrom(from)}
+            dateFormat="yyyy-MM-dd HH:mm"
+            minDate={new Date()}
+            showTimeInput
+          />
+          <DatePicker
+            selectedDate={
+              to ||
+              (issue.data.ValidityPeriod.EndTime
+                ? new Date(issue.data.ValidityPeriod.EndTime)
+                : undefined)
+            }
+            onChange={(to) => {
+              const now = new Date();
+              const calculatedFrom =
+                from || new Date(issue.data.ValidityPeriod.StartTime);
+
+              if (isBefore(to, now)) {
+                setTo(now);
+              } else if (isBefore(to, calculatedFrom)) {
+                setTo(calculatedFrom);
+              } else {
+                setTo(to);
               }
-              onChange={(from) => setFrom(from)}
-              dateFormat="yyyy-MM-dd HH:mm"
-              minDate={new Date()}
-              showTimeInput
-            />
-            <DatePicker
-              selectedDate={
-                to ||
-                (issue.data.ValidityPeriod.EndTime
-                  ? new Date(issue.data.ValidityPeriod.EndTime)
-                  : undefined)
-              }
-              onChange={(to) => {
-                const now = new Date();
-                const calculatedFrom =
-                  from || new Date(issue.data.ValidityPeriod.StartTime);
-
-                if (isBefore(to, now)) {
-                  setTo(now);
-                } else if (isBefore(to, calculatedFrom)) {
-                  setTo(calculatedFrom);
-                } else {
-                  setTo(to);
-                }
-              }}
-              dateFormat="yyyy-MM-dd HH:mm"
-              minDate={from}
-              showTimeInput
-              placeholder="Til-dato"
-            />
-          </div>
+            }}
+            dateFormat="yyyy-MM-dd HH:mm"
+            minDate={from}
+            showTimeInput
+            placeholder="Til-dato"
+          />
+        </div>
+        <br></br>
+        <div className="severity">
+          <p className="text-center text-white">Avvikstype</p>
+          <select
+            className="form-control"
+            id="cssmenu"
+            defaultValue={returnValue('ReportType')}
+            name="reportType"
+          >
+            <option value="general">General</option>
+            <option value="incident">Incident</option>
+          </select>
           <br></br>
-          <div className="severity">
-            <p className="text-center text-white">Avvikstype</p>
-            <select
-              className="form-control"
-              id="cssmenu"
-              defaultValue={returnValue('ReportType')}
-              name="reportType"
-            >
-              <option value="general">General</option>
-              <option value="incident">Incident</option>
-            </select>
-            <br></br>
-          </div>
-          <p className="text-center text-white">Melding</p>
-          <input
-            type="String"
-            name="oppsummering"
-            className="form-control"
-            defaultValue={returnValue('summary')}
-            maxLength="160"
-            required
-          />
-          <input
-            type="String"
-            name="beskrivelse"
-            className="form-control"
-            defaultValue={returnValue('description')}
-          />
-          <input
-            type="String"
-            name="forslag"
-            className="form-control"
-            defaultValue={returnValue('advice')}
-          />
-          <br></br>
-          <p className="text-center text-white">
-            Lenke til nettside som har mer informasjon om hendelsen
-          </p>
-          <input
-            className="form-control"
-            name="infoLinkUri"
-            placeholder="Lenke"
-            defaultValue={returnValue('infoLinkUri')}
-          />
-          <input
-            className="form-control"
-            name="infoLinkLabel"
-            placeholder="Tekst til lenken"
-            defaultValue={returnValue('infoLinkLabel')}
-          />
-          <br></br>
-          {checkStatus(issue.data.Progress)}
-        </form>
-      </div>
-    </div>
+        </div>
+        <p className="text-center text-white">Melding</p>
+        <input
+          type="String"
+          name="oppsummering"
+          className="form-control"
+          defaultValue={returnValue('summary')}
+          maxLength="160"
+          required
+        />
+        <input
+          type="String"
+          name="beskrivelse"
+          className="form-control"
+          defaultValue={returnValue('description')}
+        />
+        <input
+          type="String"
+          name="forslag"
+          className="form-control"
+          defaultValue={returnValue('advice')}
+        />
+        <br></br>
+        <p className="text-center text-white">
+          Lenke til nettside som har mer informasjon om hendelsen
+        </p>
+        <input
+          className="form-control"
+          name="infoLinkUri"
+          placeholder="Lenke"
+          defaultValue={returnValue('infoLinkUri')}
+        />
+        <input
+          className="form-control"
+          name="infoLinkLabel"
+          placeholder="Tekst til lenken"
+          defaultValue={returnValue('infoLinkLabel')}
+        />
+        <br></br>
+        {checkStatus(issue.data.Progress)}
+      </form>
+    </>
   );
 };
 

@@ -5,6 +5,8 @@ import Register from './register';
 import Edit from './edit';
 import NavBar from './navbar';
 import Background from '../img/background.jpg';
+import { TabPanel, TabPanels } from '@entur/tab';
+import { TabsContainer } from './tabs-container';
 
 export default class App extends React.Component {
   state = {
@@ -110,44 +112,52 @@ export default class App extends React.Component {
   render() {
     return (
       <Router>
+        <img className="background-image" src={Background} alt="" />
+        <NavBar
+          onSelectOrganization={this.updateOrganization}
+          user={this.state.organizations}
+          name={this.state.organizationsName}
+          logout={() => this.logout()}
+        />
         <div>
-          <img className="background-image" src={Background} alt="" />
-          <NavBar
-            onSelectOrganization={this.updateOrganization}
-            user={this.state.organizations}
-            name={this.state.organizationsName}
-            logout={() => this.logout()}
-          />
-          <Routes>
-            <Route
-              path="/"
-              exact
-              element={<Overview messages={this.state.messages} />}
-            />
-            <Route
-              path="/edit/:id"
-              element={
-                <Edit
-                  messages={this.state.messages}
-                  lines={this.state.lines}
-                  firebase={this.db}
-                  api={this.props.api}
-                  organization={this.state.selectedOrganization}
-                />
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                <Register
-                  api={this.props.api}
-                  firebase={this.db}
-                  lines={this.state.lines}
-                  organization={this.state.selectedOrganization}
-                />
-              }
-            />
-          </Routes>
+          <div className="register_box">
+            <TabsContainer>
+              <TabPanels>
+                <TabPanel>
+                  <Routes>
+                    <Route
+                      path="/meldinger"
+                      exact
+                      element={<Overview messages={this.state.messages} />}
+                    />
+                    <Route
+                      path="/meldinger/:id"
+                      element={
+                        <Edit
+                          messages={this.state.messages}
+                          lines={this.state.lines}
+                          firebase={this.db}
+                          api={this.props.api}
+                          organization={this.state.selectedOrganization}
+                        />
+                      }
+                    />
+                    <Route
+                      path="/meldinger/ny"
+                      element={
+                        <Register
+                          api={this.props.api}
+                          firebase={this.db}
+                          lines={this.state.lines}
+                          organization={this.state.selectedOrganization}
+                        />
+                      }
+                    />
+                  </Routes>
+                </TabPanel>
+              </TabPanels>
+            </TabsContainer>
+          </div>
         </div>
       </Router>
     );

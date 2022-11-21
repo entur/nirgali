@@ -6,6 +6,7 @@
 @import '~@entur/datepicker/dist/styles.css';
 @import '~@entur/tooltip/dist/styles.css';
 @import '~@entur/loader/dist/styles.css';
+@import '~@entur/tab/dist/styles.css';
 
 .hidden {
   opacity: 0;
@@ -28,7 +29,7 @@
 .select-organization {
   position: absolute;
   top: 30px;
-  left: calc(50% - 125px);
+  left: calc(15% - 125px);
   width: 250px;
 }
 
@@ -58,7 +59,7 @@ span {
   position: absolute;
   left: 22.5%;
   top: 130px;
-  background-color: rgba(23, 28, 86, 0.9);
+  background-color: rgba(23, 28, 86, 1);
   min-width: 55%;
   min-height: 40;
   padding: 3%;
