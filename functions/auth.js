@@ -32,7 +32,8 @@ exports.auth = function () {
 
   const authenticate = (req, res) => {
     const { sub: uid } = req.auth;
-    const auth0ClaimsNamespace = functions.config().auth.firebase.auth0.claims_namespace;
+    const auth0ClaimsNamespace =
+      functions.config().auth.firebase.auth0.claims_namespace;
     let roles = req.auth[auth0ClaimsNamespace];
 
     const additionalClaims = {

@@ -1,23 +1,27 @@
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Navigate,
+  Route,
+  Routes,
+} from 'react-router-dom';
 import NavBar from './navbar';
 import Background from '../img/background.jpg';
 import { TabPanel, TabPanels } from '@entur/tab';
 import { TabsContainer } from './tabs-container';
 import { Messages } from './messages/messages';
+import { Cancellations } from './cancellations/cancellations';
 
 export default class App extends React.Component {
   state = {
     organizations: [],
     organizationsName: [],
     selectedOrganization: '',
-    messages: [],
     lines: [],
   };
 
   componentDidMount() {
     this.setOrganizations();
-    this.db = this.props.firebase.firestore();
   }
 
   logout = () => {
@@ -53,7 +57,7 @@ export default class App extends React.Component {
         organizationsName: organizations.map(({ name }) => name),
         selectedOrganization: organizations[0].id,
       },
-      () => this.getMessagesAndLines()
+      () => this.getLines()
     );
   };
 
@@ -62,36 +66,8 @@ export default class App extends React.Component {
       {
         selectedOrganization: selectedOrg,
       },
-      () => this.getMessagesAndLines()
+      () => this.getLines()
     );
-  };
-
-  getMessagesAndLines = async () => {
-    await this.getMessages();
-    await this.getLines();
-  };
-
-  getMessages = async () => {
-    if (this.unsubscribeSnapshotListener) {
-      this.unsubscribeSnapshotListener();
-    }
-    const codespace = this.state.selectedOrganization.split(':')[0];
-    const authority = this.state.selectedOrganization;
-    this.unsubscribeSnapshotListener = this.db
-      .collection(`codespaces/${codespace}/authorities/${authority}/messages`)
-      .onSnapshot(this.onMessagesUpdate);
-  };
-
-  onMessagesUpdate = (querySnapshot) => {
-    this.setState({
-      messages:
-        querySnapshot.size > 0
-          ? querySnapshot.docs.map((doc) => ({
-              id: doc.id,
-              data: doc.data(),
-            }))
-          : [],
-    });
   };
 
   getLines = async () => {
@@ -119,19 +95,45 @@ export default class App extends React.Component {
         />
         <div>
           <div className="register_box">
-            <TabsContainer>
-              <TabPanels>
-                <TabPanel>
-                  <Messages
-                    messages={this.state.messages}
-                    selectedOrganization={this.state.selectedOrganization}
-                    lines={this.props.lines}
-                    api={this.props.api}
-                    db={this.db}
-                  />
-                </TabPanel>
-              </TabPanels>
-            </TabsContainer>
+            <Routes>
+              <Route path="/" element={<Navigate to="/meldinger" />} />
+              <Route
+                path="/:tab/*"
+                element={
+                  <TabsContainer>
+                    {(selectedTab) => (
+                      <TabPanels>
+                        <TabPanel>
+                          {selectedTab == 0 && (
+                            <Messages
+                              selectedOrganization={
+                                this.state.selectedOrganization
+                              }
+                              lines={this.state.lines}
+                              api={this.props.api}
+                              db={this.db}
+                            />
+                          )}
+                        </TabPanel>
+
+                        <TabPanel>
+                          {selectedTab === 1 && (
+                            <Cancellations
+                              selectedOrganization={
+                                this.state.selectedOrganization
+                              }
+                              lines={this.state.lines}
+                              api={this.props.api}
+                              db={this.db}
+                            />
+                          )}
+                        </TabPanel>
+                      </TabPanels>
+                    )}
+                  </TabsContainer>
+                }
+              />
+            </Routes>
           </div>
         </div>
       </Router>
