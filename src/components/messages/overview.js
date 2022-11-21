@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import red from '../img/red.png';
-import green from '../img/green.png';
+import red from '../../img/red.png';
+import green from '../../img/green.png';
 import { PrimaryButton as Button, SecondaryButton } from '@entur/button';
 import { Table, Thead, Tbody, Tr, Th, Td } from 'react-super-responsive-table';
 import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import { Switch } from '@entur/form';
 import { Contrast } from '@entur/layout';
-import { sortBySituationNumber } from '../util/sort';
+import { sortBySituationNumber } from '../../util/sort';
 import format from 'date-fns/format';
 import { useNavigate } from 'react-router-dom';
 

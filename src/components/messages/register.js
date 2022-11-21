@@ -4,8 +4,8 @@ import { PrimaryButton as Button, SecondaryButton } from '@entur/button';
 import { Contrast } from '@entur/layout';
 import { DatePicker } from '@entur/datepicker';
 import { lightFormat, isBefore } from 'date-fns';
-import LinePicker from './line-picker';
-import StopPicker from './stop-picker';
+import LinePicker from '../line-picker';
+import StopPicker from '../stop-picker';
 import { useNavigate } from 'react-router-dom';
 
 const formatDate = (date) => lightFormat(date, 'yyyy-MM-dd');

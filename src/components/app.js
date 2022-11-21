@@ -1,12 +1,10 @@
 import React from 'react';
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import Overview from './overview';
-import Register from './register';
-import Edit from './edit';
+import { BrowserRouter as Router } from 'react-router-dom';
 import NavBar from './navbar';
 import Background from '../img/background.jpg';
 import { TabPanel, TabPanels } from '@entur/tab';
 import { TabsContainer } from './tabs-container';
+import { Messages } from './messages/messages';
 
 export default class App extends React.Component {
   state = {
@@ -124,36 +122,13 @@ export default class App extends React.Component {
             <TabsContainer>
               <TabPanels>
                 <TabPanel>
-                  <Routes>
-                    <Route
-                      path="/meldinger"
-                      exact
-                      element={<Overview messages={this.state.messages} />}
-                    />
-                    <Route
-                      path="/meldinger/:id"
-                      element={
-                        <Edit
-                          messages={this.state.messages}
-                          lines={this.state.lines}
-                          firebase={this.db}
-                          api={this.props.api}
-                          organization={this.state.selectedOrganization}
-                        />
-                      }
-                    />
-                    <Route
-                      path="/meldinger/ny"
-                      element={
-                        <Register
-                          api={this.props.api}
-                          firebase={this.db}
-                          lines={this.state.lines}
-                          organization={this.state.selectedOrganization}
-                        />
-                      }
-                    />
-                  </Routes>
+                  <Messages
+                    messages={this.state.messages}
+                    selectedOrganization={this.state.selectedOrganization}
+                    lines={this.props.lines}
+                    api={this.props.api}
+                    db={this.db}
+                  />
                 </TabPanel>
               </TabPanels>
             </TabsContainer>
