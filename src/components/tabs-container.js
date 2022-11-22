@@ -13,7 +13,7 @@ export const TabsContainer = ({ children }) => {
 
   return (
     <Tabs
-      value={tabsMap[tab]}
+      index={tabsMap[tab]}
       onChange={(newIndex) => navigate('/' + Object.keys(tabsMap)[newIndex])}
     >
       <Contrast>
