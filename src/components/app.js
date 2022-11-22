@@ -104,7 +104,7 @@ export default class App extends React.Component {
                     {(selectedTab) => (
                       <TabPanels>
                         <TabPanel>
-                          {selectedTab == 0 && (
+                          {selectedTab === 0 && (
                             <Messages
                               selectedOrganization={
                                 this.state.selectedOrganization

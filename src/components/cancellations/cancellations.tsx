@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import firebase from 'firebase/compat/app';
+import Overview from './overview';
 
 export const Cancellations = ({ selectedOrganization }: any) => {
   const [cancellations, setCancellations] = useState([]);
@@ -33,13 +34,10 @@ export const Cancellations = ({ selectedOrganization }: any) => {
         unsubscribeSnapshotListener();
       }
     };
-  }, [selectedOrganization]);
+  }, [selectedOrganization, db]);
   return (
     <Routes>
-      <Route
-        path="/"
-        element={<h1 style={{ color: 'white' }}>Hello world</h1>}
-      />
+      <Route path="/" element={<Overview cancellations={cancellations} />} />
     </Routes>
   );
 };

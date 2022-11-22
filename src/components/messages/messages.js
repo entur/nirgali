@@ -34,7 +34,7 @@ export const Messages = ({ selectedOrganization, lines, api }) => {
         unsubscribeSnapshotListener();
       }
     };
-  }, [selectedOrganization]);
+  }, [selectedOrganization, db]);
 
   return (
     <Routes>
