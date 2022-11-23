@@ -97,6 +97,9 @@ const Overview = ({ cancellations, lines }) => {
                 <Th scope="col">
                   <b>Dato</b>
                 </Th>
+                <Th scope="col">
+                  <b>Kansellert</b>
+                </Th>
                 <Th></Th>
               </Tr>
             </Thead>
@@ -140,10 +143,19 @@ const Overview = ({ cancellations, lines }) => {
                     }
                   </Td>
                   <Td>
+                    {item.EstimatedVehicleJourney.Cancellation ? 'Ja' : 'Nei'}
+                  </Td>
+                  <Td>
                     <Button
                       variant="secondary"
                       value={index}
                       onClick={() => edit(id)}
+                      disabled={
+                        !(
+                          item.EstimatedVehicleJourney.ExpiresAtEpochMs >
+                          addMinutes(new Date(), 10).getTime()
+                        )
+                      }
                     >
                       Endre
                     </Button>

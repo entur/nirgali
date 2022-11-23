@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import firebase from 'firebase/compat/app';
 import Overview from './overview';
 import { Register } from './register';
+import Edit from './edit';
 
 export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
   const [cancellations, setCancellations] = useState([]);
@@ -42,6 +43,17 @@ export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
       <Route
         path="/"
         element={<Overview cancellations={cancellations} lines={lines} />}
+      />
+      <Route
+        path="/:id"
+        element={
+          <Edit
+            cancellations={cancellations}
+            lines={lines}
+            api={api}
+            organization={selectedOrganization}
+          />
+        }
       />
       <Route
         path="/ny"

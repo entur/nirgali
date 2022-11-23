@@ -195,6 +195,8 @@ const transformEstimatedCall = (estimatedCall) => {
     ExpectedArrivalTime,
     AimedDepartureTime,
     ExpectedDepartureTime,
+    ArrivalStatus,
+    ArrivalBoardingActivity,
     DepartureStatus,
     DepartureBoardingActivity,
   } = estimatedCall;
@@ -223,9 +225,21 @@ const transformEstimatedCall = (estimatedCall) => {
     transformedData.ExpectedDepartureTime = ExpectedDepartureTime;
   }
 
-  return {
-    ...transformedData,
-    DepartureStatus,
-    DepartureBoardingActivity,
-  };
+  if (ArrivalStatus) {
+    transformedData.ArrivalStatus = ArrivalStatus;
+  }
+
+  if (ArrivalBoardingActivity) {
+    transformedData.ArrivalBoardingActivity = ArrivalBoardingActivity;
+  }
+
+  if (DepartureStatus) {
+    transformedData.DepartureStatus = DepartureStatus;
+  }
+
+  if (DepartureBoardingActivity) {
+    transformedData.DepartureBoardingActivity = DepartureBoardingActivity;
+  }
+
+  return transformedData;
 };
