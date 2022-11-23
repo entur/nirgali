@@ -29,7 +29,7 @@
 .select-organization {
   position: absolute;
   top: 30px;
-  left: calc(15% - 125px);
+  left: calc(50% - 125px);
   width: 250px;
 }
 
