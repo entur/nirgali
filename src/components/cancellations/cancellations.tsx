@@ -36,9 +36,14 @@ export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
       }
     };
   }, [selectedOrganization, db]);
+
+  console.log({ cancellations });
   return (
     <Routes>
-      <Route path="/" element={<Overview cancellations={cancellations} />} />
+      <Route
+        path="/"
+        element={<Overview cancellations={cancellations} lines={lines} />}
+      />
       <Route
         path="/ny"
         element={

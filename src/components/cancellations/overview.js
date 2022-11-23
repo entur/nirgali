@@ -5,13 +5,17 @@ import { PrimaryButton as Button, SecondaryButton } from '@entur/button';
 import { Table, Thead, Tbody, Tr, Th, Td } from 'react-super-responsive-table';
 import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import { Contrast } from '@entur/layout';
-import format from 'date-fns/format';
 import { useNavigate } from 'react-router-dom';
+import { lightFormat } from 'date-fns';
 
 const returnRedOrGreenIcon = (param, date) => {
+  console.log({ param });
   if (
-    Date.parse(param.ValidityPeriod.EndTime) < date ||
-    param.Progress === 'closed'
+    Date.parse(
+      param.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall[
+        param.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.length - 1
+      ].AimedArrivalTime
+    ) < date
   ) {
     return <img src={red} id="not_active" alt="" height="30" width="30" />;
   } else {
@@ -19,13 +23,8 @@ const returnRedOrGreenIcon = (param, date) => {
   }
 };
 
-const getDate = (param) => {
-  return param ? format(new Date(param), 'HH:mm dd.MM.yyyy') : 'Ikke oppgitt';
-};
-
-const Overview = ({ cancellations }) => {
+const Overview = ({ cancellations, lines }) => {
   const date = useMemo(() => Date.now(), []);
-  //const [showExpiredMessages, setShowExpiredMessages] = useState(false);
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -35,17 +34,6 @@ const Overview = ({ cancellations }) => {
   const edit = (id) => {
     navigate(`/kanselleringer/${id}`);
   };
-
-  // let messagesToRender = showExpiredMessages
-  //   ? messages
-  //   : messages.filter(({ data: message }) => {
-  //       return (
-  //         !message.ValidityPeriod.EndTime ||
-  //         Date.parse(message.ValidityPeriod.EndTime) > Date.parse(date)
-  //       );
-  //     });
-
-  // messagesToRender = messagesToRender.sort(sortBySituationNumber);
 
   return (
     <>
@@ -58,17 +46,6 @@ const Overview = ({ cancellations }) => {
           </SecondaryButton>
         </Contrast>
       </div>
-      {/* <br></br>
-      <Contrast>
-        <div style={{ padding: '0 .5em' }}>
-          <Switch
-            checked={showExpiredMessages}
-            onChange={() => setShowExpiredMessages(!showExpiredMessages)}
-          >
-            Vis utløpte meldinger
-          </Switch>
-        </div>
-      </Contrast> */}
       <br></br>
       {cancellations && (
         <div className="table-responsive-md">
@@ -97,34 +74,48 @@ const Overview = ({ cancellations }) => {
                 <Th scope="col">
                   <b>Dato</b>
                 </Th>
+                <Th></Th>
               </Tr>
             </Thead>
             <Tbody>
-              <Tr>
-                <Td>
-                  <img src={green} id="active" alt="" height="30" width="30" />
-                </Td>
-                <Td>R20 (NSB:Line:1)</Td>
-                <Td>NSB:ServiceJourney:1</Td>
-                <Td>Oslo S</Td>
-                <Td>19:33</Td>
-                <Td>2022-11-22</Td>
-              </Tr>
               {cancellations.map(({ id, data: item }, index) => (
-                <Tr key={item.SituationNumber}>
+                <Tr key={item.RecordedAtTime}>
                   <Td className="Status">{returnRedOrGreenIcon(item, date)}</Td>
-                  <Td className="#">{item.SituationNumber.split(':').pop()}</Td>
-                  <Td className="Melding" width="25%">
-                    {item.Summary['_text']}
+                  <Td className="#">
+                    {
+                      lines.find(
+                        (l) => l.id === item.EstimatedVehicleJourney.LineRef
+                      ).publicCode
+                    }{' '}
+                    ({item.EstimatedVehicleJourney.LineRef})
                   </Td>
-                  <Td className="ReportType">{item.ReportType}</Td>
-                  <Td className="Fra-dato">
-                    {getDate(item.ValidityPeriod.StartTime)}
+                  <Td>
+                    {
+                      item.EstimatedVehicleJourney.FramedVehicleJourneyRef
+                        .DatedVehicleJourneyRef
+                    }
                   </Td>
-                  <Td className="Til-dato">
-                    {getDate(item.ValidityPeriod.EndTime)}
+                  <Td>
+                    {
+                      item.EstimatedVehicleJourney.EstimatedCalls
+                        .EstimatedCall[0].StopPointName
+                    }
                   </Td>
-                  {/* <Td className="Type">{getType(item.Affects)}</Td> */}
+                  <Td>
+                    {lightFormat(
+                      Date.parse(
+                        item.EstimatedVehicleJourney.EstimatedCalls
+                          .EstimatedCall[0].AimedDepartureTime
+                      ),
+                      'HH:mm'
+                    )}
+                  </Td>
+                  <Td>
+                    {
+                      item.EstimatedVehicleJourney.FramedVehicleJourneyRef
+                        .DataFrameRef
+                    }
+                  </Td>
                   <Td>
                     <Button
                       variant="secondary"
