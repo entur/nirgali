@@ -6,7 +6,7 @@ import { Table, Thead, Tbody, Tr, Th, Td } from 'react-super-responsive-table';
 import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import { Contrast } from '@entur/layout';
 import { useNavigate } from 'react-router-dom';
-import { addMinutes, lightFormat, subMinutes } from 'date-fns';
+import { addMinutes, lightFormat } from 'date-fns';
 
 const returnRedOrGreenIcon = (param) => {
   console.log({ param });
