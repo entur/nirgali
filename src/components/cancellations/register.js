@@ -79,9 +79,9 @@ export const Register = ({ lines, api, organization }) => {
       )
       .doc()
       .set(newCancellation);
-    navigate('/cancellations');
+    navigate('/kanselleringer');
   };
-  const handleCancel = () => navigate('/cancellations');
+  const handleCancel = () => navigate('/kanselleringer');
 
   const serviceJourneyOptions = useMemo(() => {
     return departures

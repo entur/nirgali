@@ -79,13 +79,13 @@ const Overview = ({ cancellations, lines }) => {
             </Thead>
             <Tbody>
               {cancellations.map(({ id, data: item }, index) => (
-                <Tr key={item.RecordedAtTime}>
+                <Tr key={item.EstimatedVehicleJourney.RecordedAtTime}>
                   <Td className="Status">{returnRedOrGreenIcon(item, date)}</Td>
                   <Td className="#">
                     {
                       lines.find(
                         (l) => l.id === item.EstimatedVehicleJourney.LineRef
-                      ).publicCode
+                      )?.publicCode
                     }{' '}
                     ({item.EstimatedVehicleJourney.LineRef})
                   </Td>

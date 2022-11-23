@@ -10,7 +10,6 @@ const NavBar = ({ onSelectOrganization, user, name, logout }) => {
 
   const handleChange = (event) => {
     onSelectOrganization(event.value);
-    navigate('/');
   };
 
   const returnOptions = () => {
