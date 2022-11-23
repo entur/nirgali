@@ -1,6 +1,10 @@
 import React from 'react';
 import Select from 'react-select';
-import { PrimaryButton as Button, SecondaryButton } from '@entur/button';
+import {
+  ButtonGroup,
+  PrimaryButton as Button,
+  SecondaryButton,
+} from '@entur/button';
 import { Contrast } from '@entur/layout';
 import { DatePicker } from '@entur/datepicker';
 import { lightFormat, isBefore } from 'date-fns';
@@ -682,12 +686,14 @@ class Register extends React.Component {
         <br></br>
         <div className="submit justify-content-center">
           <Contrast>
-            {this.state.submit && (
-              <Button onClick={this.handleSubmit}>Registrer</Button>
-            )}
-            <SecondaryButton onClick={this.handleClick}>
-              Tilbake
-            </SecondaryButton>
+            <ButtonGroup>
+              {this.state.submit && (
+                <Button onClick={this.handleSubmit}>Registrer</Button>
+              )}
+              <SecondaryButton onClick={this.handleClick}>
+                Tilbake
+              </SecondaryButton>
+            </ButtonGroup>
           </Contrast>
         </div>
       </>

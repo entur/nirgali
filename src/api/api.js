@@ -65,7 +65,13 @@ const getDepartures = (URI) => (line, date) => {
           id
           estimatedCalls(date:"${date}") {
             aimedDepartureTime
+            aimedArrivalTime
+            expectedDepartureTime
+            expectedArrivalTime
+            stopPositionInPattern
+            requestStop
             quay {
+              id
               name
               stopPlace {
                 id

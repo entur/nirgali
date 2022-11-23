@@ -2,8 +2,9 @@ import { Route, Routes } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import firebase from 'firebase/compat/app';
 import Overview from './overview';
+import { Register } from './register';
 
-export const Cancellations = ({ selectedOrganization }: any) => {
+export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
   const [cancellations, setCancellations] = useState([]);
   const db = firebase.firestore();
   useEffect(() => {
@@ -38,6 +39,16 @@ export const Cancellations = ({ selectedOrganization }: any) => {
   return (
     <Routes>
       <Route path="/" element={<Overview cancellations={cancellations} />} />
+      <Route
+        path="/ny"
+        element={
+          <Register
+            lines={lines}
+            api={api}
+            organization={selectedOrganization}
+          />
+        }
+      />
     </Routes>
   );
 };

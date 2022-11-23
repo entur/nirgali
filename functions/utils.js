@@ -152,3 +152,77 @@ const filterOpenExpiredMessages = (dateTime) => (data) => {
 };
 
 exports.filterOpenExpiredMessages = filterOpenExpiredMessages;
+
+const transformCancellationData = (data) => {
+  const {
+    RecordedAtTime,
+    LineRef,
+    DirectionRef,
+    FramedVehicleJourneyRef,
+    Cancellation,
+    DataSource,
+    EstimatedCalls,
+    IsCompleteStopSequence,
+  } = data;
+
+  return {
+    RecordedAtTime,
+    LineRef,
+    DirectionRef,
+    FramedVehicleJourneyRef,
+    Cancellation,
+    DataSource,
+    EstimatedCalls: {
+      EstimatedCall: EstimatedCalls.EstimatedCall.map(transformEstimatedCall),
+    },
+    IsCompleteStopSequence,
+  };
+};
+
+exports.transformCancellationData = transformCancellationData;
+
+const transformEstimatedCall = (estimatedCall) => {
+  const {
+    StopPointRef,
+    Order,
+    StopPointName,
+    Cancellation,
+    RequestStop,
+    AimedArrivalTime,
+    ExpectedArrivalTime,
+    AimedDepartureTime,
+    ExpectedDepartureTime,
+    DepartureStatus,
+    DepartureBoardingActivity,
+  } = estimatedCall;
+
+  const transformedData = {
+    StopPointRef,
+    Order,
+    StopPointName,
+    Cancellation,
+    RequestStop,
+  };
+
+  if (AimedArrivalTime) {
+    transformedData.AimedArrivalTime = AimedArrivalTime;
+  }
+
+  if (ExpectedArrivalTime) {
+    transformedData.ExpectedArrivalTime = ExpectedArrivalTime;
+  }
+
+  if (AimedDepartureTime) {
+    transformedData.AimedDepartureTime = AimedDepartureTime;
+  }
+
+  if (ExpectedDepartureTime) {
+    transformedData.ExpectedDepartureTime = ExpectedDepartureTime;
+  }
+
+  return {
+    ...transformedData,
+    DepartureStatus,
+    DepartureBoardingActivity,
+  };
+};
