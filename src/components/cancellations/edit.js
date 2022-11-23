@@ -84,11 +84,11 @@ const Edit = ({ cancellations, organization, lines, api }) => {
       `codespaces/${codespace}/authorities/${authority}/cancellations/${id}`
     )
       .set(cancellation.data)
-      .then(() => navigate('/'));
+      .then(() => navigate('/kanselleringer'));
   };
 
   const handleCancel = () => {
-    navigate('/');
+    navigate('/kanselleringer');
   };
 
   const getLineOption = (id) => {
