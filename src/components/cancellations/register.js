@@ -112,7 +112,7 @@ export const Register = ({ lines, api, organization }) => {
     if (chosenLine !== null && departureDate !== null) {
       fetchServiceJourneys();
     }
-  }, [chosenLine, departureDate]);
+  }, [chosenLine, departureDate, api]);
 
   return (
     <>
