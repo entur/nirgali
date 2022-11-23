@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import red from '../../img/red.png';
 import green from '../../img/green.png';
 import { PrimaryButton as Button, SecondaryButton } from '@entur/button';
@@ -7,6 +7,7 @@ import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import { Contrast } from '@entur/layout';
 import { useNavigate } from 'react-router-dom';
 import { addMinutes, lightFormat } from 'date-fns';
+import { Switch } from '@entur/form';
 
 const returnRedOrGreenIcon = (param) => {
   console.log({ param });
@@ -23,6 +24,7 @@ const returnRedOrGreenIcon = (param) => {
 const Overview = ({ cancellations, lines }) => {
   const date = useMemo(() => Date.now(), []);
   const navigate = useNavigate();
+  const [showExpiredCancellations, setShowExpiredCancellations] = useState(false);
 
   const handleClick = () => {
     navigate('/kanselleringer/ny');
@@ -31,6 +33,17 @@ const Overview = ({ cancellations, lines }) => {
   const edit = (id) => {
     navigate(`/kanselleringer/${id}`);
   };
+
+  const cancellationsToShow = useMemo(() => {
+    console.log({cancellations})
+    return showExpiredCancellations
+      ? cancellations
+      : cancellations.filter((cancellation) => {
+        return (
+          cancellation.data.EstimatedVehicleJourney.ExpiresAtEpochMs > Date.now() + 600000
+        )
+    });
+  }, [showExpiredCancellations, cancellations]);
 
   return (
     <>
@@ -44,7 +57,18 @@ const Overview = ({ cancellations, lines }) => {
         </Contrast>
       </div>
       <br></br>
-      {cancellations && (
+      <Contrast>
+        <div style={{ padding: '0 .5em' }}>
+          <Switch
+            checked={showExpiredCancellations}
+            onChange={() => setShowExpiredCancellations(!showExpiredCancellations)}
+          >
+            Vis utløpte kanselleringer
+          </Switch>
+        </div>
+      </Contrast>
+      <br></br>
+      {cancellationsToShow && (
         <div className="table-responsive-md">
           <Table
             id="dtOrderExample"
@@ -75,7 +99,7 @@ const Overview = ({ cancellations, lines }) => {
               </Tr>
             </Thead>
             <Tbody>
-              {cancellations.map(({ id, data: item }, index) => (
+              {cancellationsToShow.map(({ id, data: item }, index) => (
                 <Tr key={item.EstimatedVehicleJourney.RecordedAtTime}>
                   <Td className="Status">{returnRedOrGreenIcon(item, date)}</Td>
                   <Td className="#">
