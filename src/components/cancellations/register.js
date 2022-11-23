@@ -67,6 +67,13 @@ export const Register = ({ lines, api, organization }) => {
           ),
         },
         IsCompleteStopSequence: true,
+        ExpiresAtEpochMs:
+          Date.parse(
+            departureData.estimatedCalls[
+              departureData.estimatedCalls.length - 1
+            ].aimedArrivalTime
+          ) +
+          600 * 1000,
       },
     };
 

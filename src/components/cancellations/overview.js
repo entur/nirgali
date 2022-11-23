@@ -6,20 +6,17 @@ import { Table, Thead, Tbody, Tr, Th, Td } from 'react-super-responsive-table';
 import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import { Contrast } from '@entur/layout';
 import { useNavigate } from 'react-router-dom';
-import { lightFormat } from 'date-fns';
+import { addMinutes, lightFormat, subMinutes } from 'date-fns';
 
-const returnRedOrGreenIcon = (param, date) => {
+const returnRedOrGreenIcon = (param) => {
   console.log({ param });
   if (
-    Date.parse(
-      param.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall[
-        param.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.length - 1
-      ].AimedArrivalTime
-    ) < date
+    param.EstimatedVehicleJourney.ExpiresAtEpochMs >
+    addMinutes(new Date(), 10).getTime()
   ) {
-    return <img src={red} id="not_active" alt="" height="30" width="30" />;
-  } else {
     return <img src={green} id="active" alt="" height="30" width="30" />;
+  } else {
+    return <img src={red} id="not_active" alt="" height="30" width="30" />;
   }
 };
 

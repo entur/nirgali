@@ -1,4 +1,4 @@
-const { addHours, parseISO } = require('date-fns');
+const { addHours, parseISO, addMinutes } = require('date-fns');
 const { getFirestore } = require('firebase-admin/firestore');
 const functions = require('firebase-functions');
 const convert = require('xml-js');
@@ -133,7 +133,14 @@ const produceSituationExchangeDelivery = async (db, dateTime) => {
 };
 
 const produceEstimatedTimetableDelivery = async (db, dateTime) => {
-  const cancellations = await db.collectionGroup('cancellations').get();
+  const cancellations = await db
+    .collectionGroup('cancellations')
+    .where(
+      'EstimatedVehicleJourney.ExpiresAtEpochMs',
+      '>',
+      addMinutes(new Date(), 10).getTime()
+    )
+    .get();
 
   return {
     _attributes: { version: '2.0' },
