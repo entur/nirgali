@@ -10,7 +10,6 @@ import { addMinutes, lightFormat } from 'date-fns';
 import { Switch } from '@entur/form';
 
 const returnRedOrGreenIcon = (param) => {
-  console.log({ param });
   if (
     param.EstimatedVehicleJourney.ExpiresAtEpochMs >
     addMinutes(new Date(), 10).getTime()
@@ -36,7 +35,6 @@ const Overview = ({ cancellations, lines }) => {
   };
 
   const cancellationsToShow = useMemo(() => {
-    console.log({ cancellations });
     return showExpiredCancellations
       ? cancellations
       : cancellations.filter((cancellation) => {

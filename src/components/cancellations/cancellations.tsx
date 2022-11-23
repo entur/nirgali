@@ -37,7 +37,6 @@ export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
     };
   }, [selectedOrganization, db]);
 
-  console.log({ cancellations });
   return (
     <Routes>
       <Route
