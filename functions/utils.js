@@ -169,7 +169,10 @@ const transformCancellationData = (data) => {
     RecordedAtTime,
     LineRef,
     DirectionRef,
-    FramedVehicleJourneyRef,
+    FramedVehicleJourneyRef: {
+      DataFrameRef: FramedVehicleJourneyRef.DataFrameRef,
+      DatedVehicleJourneyRef: FramedVehicleJourneyRef.DatedVehicleJourneyRef,
+    },
     Cancellation,
     DataSource,
     EstimatedCalls: {
