@@ -217,20 +217,20 @@ const transformEstimatedCall = (estimatedCall) => {
     transformedData.ExpectedArrivalTime = ExpectedArrivalTime;
   }
 
-  if (AimedDepartureTime) {
-    transformedData.AimedDepartureTime = AimedDepartureTime;
-  }
-
-  if (ExpectedDepartureTime) {
-    transformedData.ExpectedDepartureTime = ExpectedDepartureTime;
-  }
-
   if (ArrivalStatus) {
     transformedData.ArrivalStatus = ArrivalStatus;
   }
 
   if (ArrivalBoardingActivity) {
     transformedData.ArrivalBoardingActivity = ArrivalBoardingActivity;
+  }
+
+  if (AimedDepartureTime) {
+    transformedData.AimedDepartureTime = AimedDepartureTime;
+  }
+
+  if (ExpectedDepartureTime) {
+    transformedData.ExpectedDepartureTime = ExpectedDepartureTime;
   }
 
   if (DepartureStatus) {
