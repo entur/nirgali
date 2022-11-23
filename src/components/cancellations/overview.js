@@ -24,7 +24,8 @@ const returnRedOrGreenIcon = (param) => {
 const Overview = ({ cancellations, lines }) => {
   const date = useMemo(() => Date.now(), []);
   const navigate = useNavigate();
-  const [showExpiredCancellations, setShowExpiredCancellations] = useState(false);
+  const [showExpiredCancellations, setShowExpiredCancellations] =
+    useState(false);
 
   const handleClick = () => {
     navigate('/kanselleringer/ny');
@@ -35,14 +36,15 @@ const Overview = ({ cancellations, lines }) => {
   };
 
   const cancellationsToShow = useMemo(() => {
-    console.log({cancellations})
+    console.log({ cancellations });
     return showExpiredCancellations
       ? cancellations
       : cancellations.filter((cancellation) => {
-        return (
-          cancellation.data.EstimatedVehicleJourney.ExpiresAtEpochMs > Date.now() + 600000
-        )
-    });
+          return (
+            cancellation.data.EstimatedVehicleJourney.ExpiresAtEpochMs >
+            Date.now() + 600000
+          );
+        });
   }, [showExpiredCancellations, cancellations]);
 
   return (
@@ -61,7 +63,9 @@ const Overview = ({ cancellations, lines }) => {
         <div style={{ padding: '0 .5em' }}>
           <Switch
             checked={showExpiredCancellations}
-            onChange={() => setShowExpiredCancellations(!showExpiredCancellations)}
+            onChange={() =>
+              setShowExpiredCancellations(!showExpiredCancellations)
+            }
           >
             Vis utløpte kanselleringer
           </Switch>
