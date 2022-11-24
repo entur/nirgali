@@ -33,7 +33,6 @@ const Edit = ({ cancellations, organization, lines, api }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log('submit');
 
     const newCancellation =
       !cancellation.data.EstimatedVehicleJourney.Cancellation;

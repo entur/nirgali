@@ -70,6 +70,7 @@ const getDepartures = (URI) => (line, date) => {
             expectedArrivalTime
             stopPositionInPattern
             requestStop
+            forAlighting
             forBoarding
             quay {
               id
@@ -102,6 +103,7 @@ const getServiceJourney = (URI) => (id, date) => {
           expectedArrivalTime
           stopPositionInPattern
           requestStop
+          forAlighting
           forBoarding
           quay {
             id
