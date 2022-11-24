@@ -50,11 +50,9 @@ const Edit = ({ cancellations, organization, lines, api }) => {
         }
 
         if (call.ArrivalBoardingActivity) {
-          call.ArrivalBoardingActivity = newCancellation
-            ? 'noAlighting'
-            : serviceJourney.estimatedCalls.find(
-                ({ quay }) => quay.id === call.StopPointRef
-              ).forAlighting
+          call.ArrivalBoardingActivity = serviceJourney.estimatedCalls.find(
+            ({ quay }) => quay.id === call.StopPointRef
+          ).forAlighting
             ? 'alighting'
             : 'noAlighting';
         }
@@ -62,12 +60,11 @@ const Edit = ({ cancellations, organization, lines, api }) => {
         if (call.DepartureStatus) {
           call.DepartureStatus = newDepartureStatus;
         }
+
         if (call.DepartureBoardingActivity) {
-          call.DepartureBoardingActivity = newCancellation
-            ? 'noBoarding'
-            : serviceJourney.estimatedCalls.find(
-                ({ quay }) => quay.id === call.StopPointRef
-              ).forBoarding
+          call.DepartureBoardingActivity = serviceJourney.estimatedCalls.find(
+            ({ quay }) => quay.id === call.StopPointRef
+          ).forBoarding
             ? 'boarding'
             : 'noBoarding';
         }

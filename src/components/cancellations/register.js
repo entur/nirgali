@@ -62,15 +62,16 @@ export const Register = ({ lines, api, organization }) => {
                   ? estimatedCall.expectedDepartureTime
                   : null,
               ArrivalStatus: i > 0 ? 'cancelled' : null,
-              ArrivalBoardingActivity: i > 0 ? 'noAlighting' : null,
+              ArrivalBoardingActivity: estimatedCall.forAlighting
+                ? 'alighting'
+                : 'noAlighting',
               DepartureStatus:
                 i < departureData.estimatedCalls.length - 1
                   ? 'cancelled'
                   : null,
-              DepartureBoardingActivity:
-                i < departureData.estimatedCalls.length - 1
-                  ? 'noBoarding'
-                  : null,
+              DepartureBoardingActivity: estimatedCall.forBoarding
+                ? 'boarding'
+                : 'noBoarding',
             })
           ),
         },
