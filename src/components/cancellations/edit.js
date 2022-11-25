@@ -8,6 +8,7 @@ import { Contrast } from '@entur/layout';
 import Select from 'react-select';
 import { useNavigate, useParams } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
+import { DatePicker } from '@entur/datepicker';
 
 const Edit = ({ cancellations, organization, lines, api }) => {
   const db = firebase.firestore();
@@ -22,13 +23,15 @@ const Edit = ({ cancellations, organization, lines, api }) => {
   const [serviceJourney, setServiceJourney] = useState(undefined);
 
   useEffect(() => {
-    const { DatedVehicleJourneyRef, DataFrameRef } =
-      cancellation.data.EstimatedVehicleJourney.FramedVehicleJourneyRef;
-    api
-      .getServiceJourney(DatedVehicleJourneyRef, DataFrameRef)
-      .then(({ data }) => {
-        setServiceJourney(data.serviceJourney);
-      });
+    if (cancellation) {
+      const { DatedVehicleJourneyRef, DataFrameRef } =
+        cancellation.data.EstimatedVehicleJourney.FramedVehicleJourneyRef;
+      api
+        .getServiceJourney(DatedVehicleJourneyRef, DataFrameRef)
+        .then(({ data }) => {
+          setServiceJourney(data.serviceJourney);
+        });
+    }
   }, [cancellationId, api, cancellation]);
 
   const handleSubmit = (event) => {
@@ -124,12 +127,6 @@ const Edit = ({ cancellations, organization, lines, api }) => {
         <h2 className="text-center text-white">Endre kansellering</h2>
         <br></br>
         <p className="text-center text-white">Avgang</p>
-        <div className="text-white">
-          {
-            cancellation.data.EstimatedVehicleJourney.FramedVehicleJourneyRef
-              .DataFrameRef
-          }
-        </div>
 
         {serviceJourney && (
           <>
@@ -140,6 +137,21 @@ const Edit = ({ cancellations, organization, lines, api }) => {
               />
             </div>
 
+            <div>
+              <br></br>
+              <p className="text-center text-white">Dato (driftsdøgn)</p>
+              <DatePicker
+                placeholder={
+                  cancellation.data.EstimatedVehicleJourney
+                    .FramedVehicleJourneyRef.DataFrameRef
+                }
+                disabled
+                dateFormat="yyyy-MM-dd"
+                minDate={new Date()}
+              />
+            </div>
+
+            <br></br>
             <div className="choose_type">
               <Select
                 value={getLineDepartureOption()}

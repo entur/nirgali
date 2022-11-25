@@ -144,7 +144,7 @@ export const Register = ({ lines, api, organization }) => {
       {chosenLine && (
         <div>
           <br></br>
-          <p className="text-center text-white">Gyldighetsperiode</p>
+          <p className="text-center text-white">Dato (driftsdøgn)</p>
           <DatePicker
             selectedDate={departureDate}
             onChange={handleDepartureDateChange}
