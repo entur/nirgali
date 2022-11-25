@@ -482,6 +482,7 @@ class Register extends React.Component {
               this.state.checkbox && (
                 <div>
                   <StopPicker
+                    sort
                     isMulti
                     api={this.props.api}
                     stops={this.returnSpecifiedLines().quays}
@@ -494,6 +495,7 @@ class Register extends React.Component {
             {this.state.type === 'stop' && this.state.stops && (
               <div>
                 <StopPicker
+                  sort
                   isMulti
                   api={this.props.api}
                   stops={this.state.stops}

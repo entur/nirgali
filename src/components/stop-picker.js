@@ -56,12 +56,12 @@ const useTopographicPlaces = (stops, api) => {
   };
 };
 
-const useOptions = (stops, api) => {
+const useOptions = (stops, api, sort = false) => {
   const { stopPlaceTopographicPlaceIndex, topographicPlaces, stopPlaces } =
     useTopographicPlaces(stops, api);
 
   const options = useMemo(() => {
-    return stops
+    const stopOptins = stops
       .filter(
         (item, i, list) =>
           i ===
@@ -72,11 +72,6 @@ const useOptions = (stops, api) => {
               j.stopPlace.id === item.stopPlace.id
           )
       )
-      .sort((a, b) => {
-        if (a.name > b.name) return 1;
-        if (b.name > a.name) return -1;
-        return 0;
-      })
       .map((item) => {
         const topographicPlace =
           topographicPlaces[stopPlaceTopographicPlaceIndex[item.stopPlace.id]];
@@ -92,14 +87,17 @@ const useOptions = (stops, api) => {
             (stopPlace ? ' - ' + stopPlace.transportMode : ''),
           value: item.stopPlace.id,
         };
-      })
-      .sort((a, b) => a.label.localeCompare(b.label));
+      });
+
+    return sort
+      ? stopOptins.sort((a, b) => a.label.localeCompare(b.label))
+      : stopOptins;
   }, [stops, stopPlaceTopographicPlaceIndex, topographicPlaces, stopPlaces]);
   return options;
 };
 
-const StopPicker = ({ stops, isMulti, onChange, api }) => {
-  const options = useOptions(stops, api);
+const StopPicker = ({ stops, isMulti, onChange, api, sort }) => {
+  const options = useOptions(stops, api, sort);
 
   return (
     <Select
