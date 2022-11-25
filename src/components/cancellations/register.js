@@ -7,10 +7,11 @@ import {
 } from '@entur/button';
 import { Contrast } from '@entur/layout';
 import { DatePicker } from '@entur/datepicker';
-import { lightFormat } from 'date-fns';
+import { addMinutes, lightFormat } from 'date-fns';
 import LinePicker from '../line-picker';
 import { useNavigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
+import { sortServiceJourneyByDepartureTime } from '../../util/sort';
 
 const formatDate = (date) => lightFormat(date, 'yyyy-MM-dd');
 
@@ -103,6 +104,15 @@ export const Register = ({ lines, api, organization }) => {
 
   const serviceJourneyOptions = useMemo(() => {
     return departures
+      .filter(
+        (serviceJourney) =>
+          Date.parse(
+            serviceJourney.estimatedCalls[
+              serviceJourney.estimatedCalls.length - 1
+            ].aimedArrivalTime
+          ) > addMinutes(Date.now(), 10).getTime()
+      )
+      .sort(sortServiceJourneyByDepartureTime)
       .map((item) => ({
         label:
           item.estimatedCalls[0].aimedDepartureTime
@@ -115,8 +125,7 @@ export const Register = ({ lines, api, organization }) => {
           item.id +
           ')',
         value: item.id,
-      }))
-      .sort((a, b) => (a.label > b.label ? 1 : -1));
+      }));
   }, [departures]);
 
   const callApiDeparture = useCallback(() => {

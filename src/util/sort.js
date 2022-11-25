@@ -17,3 +17,7 @@ export const sortCancellationByExpiry = (a, b) => {
     a.data.EstimatedVehicleJourney.ExpiresAtEpochMs
   );
 };
+
+export const sortServiceJourneyByDepartureTime = (a, b) =>
+  Date.parse(a.estimatedCalls[0].aimedDepartureTime) -
+  Date.parse(b.estimatedCalls[0].aimedDepartureTime);

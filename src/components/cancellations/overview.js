@@ -38,13 +38,14 @@ const Overview = ({ cancellations, lines }) => {
   const cancellationsToShow = useMemo(() => {
     return showExpiredCancellations
       ? cancellations.sort(sortCancellationByExpiry)
-      : cancellations.filter((cancellation) => {
-          return (
-            cancellation.data.EstimatedVehicleJourney.ExpiresAtEpochMs >
-            Date.now() + 600000
-          );
-        })
-        .sort(sortCancellationByExpiry);
+      : cancellations
+          .filter((cancellation) => {
+            return (
+              cancellation.data.EstimatedVehicleJourney.ExpiresAtEpochMs >
+              Date.now() + 600000
+            );
+          })
+          .sort(sortCancellationByExpiry);
   }, [showExpiredCancellations, cancellations]);
 
   return (

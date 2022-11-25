@@ -11,6 +11,7 @@ import { lightFormat, isBefore } from 'date-fns';
 import LinePicker from '../line-picker';
 import StopPicker from '../stop-picker';
 import { useNavigate } from 'react-router-dom';
+import { sortServiceJourneyByDepartureTime } from '../../util/sort';
 
 const formatDate = (date) => lightFormat(date, 'yyyy-MM-dd');
 
@@ -411,6 +412,7 @@ class Register extends React.Component {
 
   returnServiceJourney = () => {
     return this.state.departures
+      .sort(sortServiceJourneyByDepartureTime)
       .map((item) => ({
         label:
           item.estimatedCalls[0].aimedDepartureTime
@@ -423,8 +425,7 @@ class Register extends React.Component {
           item.id +
           ')',
         value: item.id,
-      }))
-      .sort((a, b) => (a.label > b.label ? 1 : -1));
+      }));
   };
 
   render() {
