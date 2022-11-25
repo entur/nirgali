@@ -49,7 +49,7 @@ export const Register = ({ lines, api, organization }) => {
               Order: estimatedCall.stopPositionInPattern + 1,
               StopPointName: estimatedCall.quay.name,
               Cancellation: true,
-              RequestStop: estimatedCall.requestStop,
+              RequestStop: departureData.passingTimes[i].requestStop,
               AimedArrivalTime: i > 0 ? estimatedCall.aimedArrivalTime : null,
               ExpectedArrivalTime:
                 i > 0 ? estimatedCall.expectedArrivalTime : null,
@@ -62,14 +62,16 @@ export const Register = ({ lines, api, organization }) => {
                   ? estimatedCall.expectedDepartureTime
                   : null,
               ArrivalStatus: i > 0 ? 'cancelled' : null,
-              ArrivalBoardingActivity: estimatedCall.forAlighting
+              ArrivalBoardingActivity: departureData.passingTimes[i]
+                .forAlighting
                 ? 'alighting'
                 : 'noAlighting',
               DepartureStatus:
                 i < departureData.estimatedCalls.length - 1
                   ? 'cancelled'
                   : null,
-              DepartureBoardingActivity: estimatedCall.forBoarding
+              DepartureBoardingActivity: departureData.passingTimes[i]
+                .forBoarding
                 ? 'boarding'
                 : 'noBoarding',
             })

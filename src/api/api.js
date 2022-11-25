@@ -63,15 +63,20 @@ const getDepartures = (URI) => (line, date) => {
       {
         serviceJourneys(lines: "${line}", activeDates: "${date}") {
           id
+          passingTimes {
+            quay {
+              id
+            }
+            forBoarding
+            forAlighting
+            requestStop
+          }
           estimatedCalls(date:"${date}") {
             aimedDepartureTime
             aimedArrivalTime
             expectedDepartureTime
             expectedArrivalTime
             stopPositionInPattern
-            requestStop
-            forAlighting
-            forBoarding
             quay {
               id
               name
@@ -96,15 +101,20 @@ const getServiceJourney = (URI) => (id, date) => {
       serviceJourney(id: "${id}") {
         id
         line {id}
+        passingTimes {
+          quay {
+            id
+          }
+          forBoarding
+          forAlighting
+          requestStop
+        }
         estimatedCalls(date:"${date}") {
           aimedDepartureTime
           aimedArrivalTime
           expectedDepartureTime
           expectedArrivalTime
           stopPositionInPattern
-          requestStop
-          forAlighting
-          forBoarding
           quay {
             id
             name

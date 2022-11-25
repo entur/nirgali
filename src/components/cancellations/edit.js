@@ -49,7 +49,7 @@ const Edit = ({ cancellations, organization, lines, api }) => {
         }
 
         if (call.ArrivalBoardingActivity) {
-          call.ArrivalBoardingActivity = serviceJourney.estimatedCalls.find(
+          call.ArrivalBoardingActivity = serviceJourney.passingTimes.find(
             ({ quay }) => quay.id === call.StopPointRef
           ).forAlighting
             ? 'alighting'
@@ -61,7 +61,7 @@ const Edit = ({ cancellations, organization, lines, api }) => {
         }
 
         if (call.DepartureBoardingActivity) {
-          call.DepartureBoardingActivity = serviceJourney.estimatedCalls.find(
+          call.DepartureBoardingActivity = serviceJourney.passingTimes.find(
             ({ quay }) => quay.id === call.StopPointRef
           ).forBoarding
             ? 'boarding'
