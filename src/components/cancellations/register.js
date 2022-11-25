@@ -146,9 +146,10 @@ export const Register = ({ lines, api, organization }) => {
           <br></br>
           <p className="text-center text-white">Dato (driftsdøgn)</p>
           <DatePicker
+            label="Velg dato"
             selectedDate={departureDate}
             onChange={handleDepartureDateChange}
-            dateFormat="yyyy-MM-dd"
+            dateFormats={["yyyy-MM-dd"]}
             minDate={new Date()}
           />
           <Contrast>

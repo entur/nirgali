@@ -508,9 +508,10 @@ class Register extends React.Component {
             <br></br>
             <p className="text-center text-white">Gyldighetsperiode</p>
             <DatePicker
+              label="Dato"
               selectedDate={this.state.departureDate}
               onChange={this.handleDepartureDateChange}
-              dateFormat="yyyy-MM-dd"
+              dateFormats={["yyyy-MM-dd"]}
               minDate={this.state.date}
             />
             <Contrast>
@@ -571,13 +572,15 @@ class Register extends React.Component {
             <p className="text-center text-white">Gyldighetsperiode</p>
             <div className="form-group d-flex">
               <DatePicker
+                label="Fra"
                 selectedDate={this.state.from}
                 onChange={(from) => this.setState({ from })}
-                dateFormat="yyyy-MM-dd HH:mm"
+                dateFormats={["yyyy-MM-dd HH:mm"]}
                 minDate={this.state.date}
                 showTimeInput
               />
               <DatePicker
+                label="Til"
                 selectedDate={this.state.to}
                 onChange={(to) => {
                   const now = new Date();
@@ -589,7 +592,7 @@ class Register extends React.Component {
                     this.setState({ to });
                   }
                 }}
-                dateFormat="yyyy-MM-dd HH:mm"
+                dateFormats={["yyyy-MM-dd HH:mm"]}
                 minDate={this.state.from}
                 showTimeInput
               />

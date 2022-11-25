@@ -141,12 +141,13 @@ const Edit = ({ cancellations, organization, lines, api }) => {
               <br></br>
               <p className="text-center text-white">Dato (driftsdøgn)</p>
               <DatePicker
+                label="Dato"
                 placeholder={
                   cancellation.data.EstimatedVehicleJourney
                     .FramedVehicleJourneyRef.DataFrameRef
                 }
                 disabled
-                dateFormat="yyyy-MM-dd"
+                dateFormats={["yyyy-MM-dd"]}
                 minDate={new Date()}
               />
             </div>

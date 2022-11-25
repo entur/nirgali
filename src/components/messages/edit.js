@@ -362,13 +362,15 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
         <p className="text-center text-white">Gyldighetsperiode</p>
         <div className="form-group d-flex">
           <DatePicker
+            label="Fra"
             selectedDate={from || new Date(issue.data.ValidityPeriod.StartTime)}
             onChange={(from) => setFrom(from)}
-            dateFormat="yyyy-MM-dd HH:mm"
+            dateFormats={["yyyy-MM-dd HH:mm"]}
             minDate={new Date()}
             showTimeInput
           />
           <DatePicker
+            label="Til"
             selectedDate={
               to ||
               (issue.data.ValidityPeriod.EndTime
@@ -388,7 +390,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
                 setTo(to);
               }
             }}
-            dateFormat="yyyy-MM-dd HH:mm"
+            dateFormats={["yyyy-MM-dd HH:mm"]}
             minDate={from}
             showTimeInput
             placeholder="Til-dato"
