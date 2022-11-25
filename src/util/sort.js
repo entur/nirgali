@@ -10,3 +10,10 @@ const sortAsc = (a, b) => a - b;
 const getSituationNumberSequence = (SituationNumber) => {
   return parseInt(SituationNumber.split(':').pop());
 };
+
+export const sortCancellationByExpiry = (a, b) => {
+  return (
+    b.data.EstimatedVehicleJourney.ExpiresAtEpochMs -
+    a.data.EstimatedVehicleJourney.ExpiresAtEpochMs
+  );
+};

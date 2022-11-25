@@ -8,6 +8,7 @@ import { Contrast } from '@entur/layout';
 import { useNavigate } from 'react-router-dom';
 import { addMinutes, lightFormat } from 'date-fns';
 import { Switch } from '@entur/form';
+import { sortCancellationByExpiry } from '../../util/sort';
 
 const returnRedOrGreenIcon = (param) => {
   if (
@@ -36,13 +37,14 @@ const Overview = ({ cancellations, lines }) => {
 
   const cancellationsToShow = useMemo(() => {
     return showExpiredCancellations
-      ? cancellations
+      ? cancellations.sort(sortCancellationByExpiry)
       : cancellations.filter((cancellation) => {
           return (
             cancellation.data.EstimatedVehicleJourney.ExpiresAtEpochMs >
             Date.now() + 600000
           );
-        });
+        })
+        .sort(sortCancellationByExpiry);
   }, [showExpiredCancellations, cancellations]);
 
   return (
