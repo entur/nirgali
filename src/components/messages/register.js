@@ -511,7 +511,7 @@ class Register extends React.Component {
               label="Dato"
               selectedDate={this.state.departureDate}
               onChange={this.handleDepartureDateChange}
-              dateFormats={["yyyy-MM-dd"]}
+              dateFormats={['yyyy-MM-dd']}
               minDate={this.state.date}
             />
             <Contrast>
@@ -575,7 +575,7 @@ class Register extends React.Component {
                 label="Fra"
                 selectedDate={this.state.from}
                 onChange={(from) => this.setState({ from })}
-                dateFormats={["yyyy-MM-dd HH:mm"]}
+                dateFormats={['yyyy-MM-dd HH:mm']}
                 minDate={this.state.date}
                 showTimeInput
               />
@@ -592,7 +592,7 @@ class Register extends React.Component {
                     this.setState({ to });
                   }
                 }}
-                dateFormats={["yyyy-MM-dd HH:mm"]}
+                dateFormats={['yyyy-MM-dd HH:mm']}
                 minDate={this.state.from}
                 showTimeInput
               />

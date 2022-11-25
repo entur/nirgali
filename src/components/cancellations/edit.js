@@ -147,7 +147,7 @@ const Edit = ({ cancellations, organization, lines, api }) => {
                     .FramedVehicleJourneyRef.DataFrameRef
                 }
                 disabled
-                dateFormats={["yyyy-MM-dd"]}
+                dateFormats={['yyyy-MM-dd']}
                 minDate={new Date()}
               />
             </div>

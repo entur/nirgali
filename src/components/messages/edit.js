@@ -365,7 +365,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
             label="Fra"
             selectedDate={from || new Date(issue.data.ValidityPeriod.StartTime)}
             onChange={(from) => setFrom(from)}
-            dateFormats={["yyyy-MM-dd HH:mm"]}
+            dateFormats={['yyyy-MM-dd HH:mm']}
             minDate={new Date()}
             showTimeInput
           />
@@ -390,7 +390,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
                 setTo(to);
               }
             }}
-            dateFormats={["yyyy-MM-dd HH:mm"]}
+            dateFormats={['yyyy-MM-dd HH:mm']}
             minDate={from}
             showTimeInput
             placeholder="Til-dato"

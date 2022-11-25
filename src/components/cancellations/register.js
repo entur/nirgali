@@ -149,7 +149,7 @@ export const Register = ({ lines, api, organization }) => {
             label="Velg dato"
             selectedDate={departureDate}
             onChange={handleDepartureDateChange}
-            dateFormats={["yyyy-MM-dd"]}
+            dateFormats={['yyyy-MM-dd']}
             minDate={new Date()}
           />
           <Contrast>
