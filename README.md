@@ -1,11 +1,6 @@
-# deviations-messages (avviksmeldinger)
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# nirgali
 
-Background: https://enturas.atlassian.net/wiki/spaces/ROR/pages/835813469/Beskrivelse+-+system+for+avviksmeldinger
-
-## Functional description
-
-Frontend application to manage deviation messages, and serverless function to serve them in the SIRI-SX xml format.
+Frontend application to manage deviation messages and cancellations, and serverless function to serve them in the SIRI xml format.
 
 ### Frontend application
 
@@ -15,7 +10,9 @@ Frontend application assumes user has editSX role associated with one or more pr
 
 ### How to fetch XML
 
-Send POST request to `/api/xml` -  in production https://avvik.entur.org/api/xml. In the future, the request body could be subject to validation:
+Send POST request to `/api/xml` -  in production https://avvik.entur.org/api/xml.
+
+Request for SIRI-SX (SituationExchangeRequest):
 
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <Siri version="2.0" xmlns="http://www.siri.org.uk/siri" xmlns:ns2="http://www.ifopt.org.uk/acsb" xmlns:ns3="http://www.ifopt.org.uk/ifopt" xmlns:ns4="http://datex2.eu/schema/2_0RC1/2_0">
@@ -30,7 +27,21 @@ Send POST request to `/api/xml` -  in production https://avvik.entur.org/api/xml
       </ServiceRequest>
     </Siri>
 
-At Entur, the Anshar application is responsible for consuming this endpoint and adding messages to the real time updates of the journey planner.
+Request for SIRI-ET (EstimatedTimetableRequest):
+
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <Siri version="2.0" xmlns="http://www.siri.org.uk/siri" xmlns:ns2="http://www.ifopt.org.uk/acsb" xmlns:ns3="http://www.ifopt.org.uk/ifopt" xmlns:ns4="http://datex2.eu/schema/2_0RC1/2_0">
+      <ServiceRequest>
+        <RequestTimestamp>2019-11-06T14:45:00+01:00</RequestTimestamp>
+        <RequestorRef>ENTUR_DEV-1</RequestorRef>
+        <EstimatedTimetableRequest version="2.0">
+          <RequestTimestamp>2019-11-06T14:45:00+01:00</RequestTimestamp>
+          <MessageIdentifier>e11d9efb-ee7b-4a67-847a-a254e813f0da</MessageIdentifier>
+        </EstimatedTimetableRequest>
+      </ServiceRequest>
+    </Siri>
+
+At Entur, the Anshar application is responsible for consuming this endpoint and adding messages and cancellations to the real time updates of the journey planner.
 
 ### Custom tokens
 
@@ -64,9 +75,11 @@ Each codespace document has an authorities collection and a nextSituationNumber 
 
 Each authority document has a messages collection. Message documents have auto generated IDs. The schema of each document is modelled after SIRI-SX.
 
+Each authority document may also have a cancellations collection. Cancellation documents have auto generated IDs. The schema of each document is modelled after SIRI-ET.
+
 ### Indexes
 
-Indexes have been added for efficient querying on the `Progress` and `ValidityPeriod.EndTime` properties from the xml function. The indexes are defined in `firestore.indexes.json`, but are easier to read in the firebase console.
+Indexes have been added for efficient querying from the xml function. The indexes are defined in `firestore.indexes.json`, but are easier to read in the firebase console.
 
 ### Rules
 
@@ -114,18 +127,3 @@ Configuration for the frontend app is located in the `config/` folder.
 * The default service account for the firebase project requires Token Creator role
 * The firebase database needs to be set to native mode
 * The firebase project needs to have the IAM api enabled
-
-## Tech debt:
-
-* No integration tests
-* "No" unit tests
-* Database model is coupled to SIRI-SX xml format
-* XML serialization is unstable
-* Validate request payload / xml
-* Add support for aliased imports
-* Clean up CSS or switch to CSS-in-JS
-* Clean up props and components
-
-## Functional todos
-
-* Add modification timestamp?
