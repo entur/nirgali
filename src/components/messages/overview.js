@@ -61,7 +61,7 @@ const Overview = ({ messages }) => {
     : messages.filter(({ data: message }) => {
         return (
           !message.ValidityPeriod.EndTime ||
-          Date.parse(message.ValidityPeriod.EndTime) > Date.parse(date)
+          Date.parse(message.ValidityPeriod.EndTime) > date
         );
       });
 
