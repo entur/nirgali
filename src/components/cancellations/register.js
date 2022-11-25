@@ -12,15 +12,61 @@ import LinePicker from '../line-picker';
 import { useNavigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { sortServiceJourneyByDepartureTime } from '../../util/sort';
+import StopPicker from '../stop-picker';
 
 const formatDate = (date) => lightFormat(date, 'yyyy-MM-dd');
+
+const mapEstimatedCall = (estimatedCall, departureData, departureStops) => {
+  const i = estimatedCall.stopPositionInPattern;
+
+  const call = {
+    StopPointRef: estimatedCall.quay.id,
+    Order: estimatedCall.stopPositionInPattern + 1,
+    StopPointName: estimatedCall.quay.name,
+    Cancellation: true,
+    RequestStop: departureData.passingTimes[i].requestStop,
+    AimedArrivalTime: i > 0 ? estimatedCall.aimedArrivalTime : null,
+    ExpectedArrivalTime: i > 0 ? estimatedCall.expectedArrivalTime : null,
+    AimedDepartureTime:
+      i < departureData.estimatedCalls.length - 1
+        ? estimatedCall.aimedDepartureTime
+        : null,
+    ExpectedDepartureTime:
+      i < departureData.estimatedCalls.length - 1
+        ? estimatedCall.expectedDepartureTime
+        : null,
+    ArrivalStatus: i > 0 ? 'cancelled' : null,
+    ArrivalBoardingActivity: departureData.passingTimes[i].forAlighting
+      ? 'alighting'
+      : 'noAlighting',
+    DepartureStatus:
+      i < departureData.estimatedCalls.length - 1 ? 'cancelled' : null,
+    DepartureBoardingActivity: departureData.passingTimes[i].forBoarding
+      ? 'boarding'
+      : 'noBoarding',
+  };
+
+  if (
+    departureStops.length > 0 &&
+    !departureStops.some((stopId) => stopId === estimatedCall.quay.stopPlace.id)
+  ) {
+    call.Cancellation = false;
+    call.ArrivalStatus = i > 0 ? 'onTime' : null;
+    call.DepartureStatus =
+      i < departureData.estimatedCalls.length - 1 ? 'onTime' : null;
+  }
+
+  return call;
+};
 
 export const Register = ({ lines, api, organization }) => {
   const navigate = useNavigate();
   const [chosenLine, setChosenLine] = React.useState(null);
-  const [departureDate, setDepartureDate] = React.useState(null);
+  const [departureDate, setDepartureDate] = React.useState(new Date());
   const [departures, setDepartures] = React.useState([]);
   const [chosenDeparture, setChosenDeparture] = React.useState(null);
+  const [isDepartureStops, setIsDepartureStops] = React.useState(false);
+  const [departureStops, setDepartureStops] = React.useState([]);
 
   const handleChangeLine = (line) => setChosenLine(line.value);
   const handleDepartureDateChange = (chosenDate) =>
@@ -41,41 +87,11 @@ export const Register = ({ lines, api, organization }) => {
           DataFrameRef: formatDate(departureDate),
           DatedVehicleJourneyRef: chosenDeparture,
         },
-        Cancellation: true,
+        Cancellation: !isDepartureStops && departureStops.length === 0,
         DataSource: organization.split(':')[0],
         EstimatedCalls: {
-          EstimatedCall: departureData.estimatedCalls.map(
-            (estimatedCall, i) => ({
-              StopPointRef: estimatedCall.quay.id,
-              Order: estimatedCall.stopPositionInPattern + 1,
-              StopPointName: estimatedCall.quay.name,
-              Cancellation: true,
-              RequestStop: departureData.passingTimes[i].requestStop,
-              AimedArrivalTime: i > 0 ? estimatedCall.aimedArrivalTime : null,
-              ExpectedArrivalTime:
-                i > 0 ? estimatedCall.expectedArrivalTime : null,
-              AimedDepartureTime:
-                i < departureData.estimatedCalls.length - 1
-                  ? estimatedCall.aimedDepartureTime
-                  : null,
-              ExpectedDepartureTime:
-                i < departureData.estimatedCalls.length - 1
-                  ? estimatedCall.expectedDepartureTime
-                  : null,
-              ArrivalStatus: i > 0 ? 'cancelled' : null,
-              ArrivalBoardingActivity: departureData.passingTimes[i]
-                .forAlighting
-                ? 'alighting'
-                : 'noAlighting',
-              DepartureStatus:
-                i < departureData.estimatedCalls.length - 1
-                  ? 'cancelled'
-                  : null,
-              DepartureBoardingActivity: departureData.passingTimes[i]
-                .forBoarding
-                ? 'boarding'
-                : 'noBoarding',
-            })
+          EstimatedCall: departureData.estimatedCalls.map((estimatedCall) =>
+            mapEstimatedCall(estimatedCall, departureData, departureStops)
           ),
         },
         IsCompleteStopSequence: true,
@@ -178,6 +194,46 @@ export const Register = ({ lines, api, organization }) => {
             onChange={handleChangeDeparture}
             options={serviceJourneyOptions}
           />
+        </div>
+      )}
+
+      {chosenDeparture && (
+        <div className="form-check d-flex">
+          <label className="form-check-label" htmlFor="gridCheck2">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              checked={isDepartureStops}
+              onChange={() => {
+                setIsDepartureStops(!isDepartureStops);
+              }}
+            />
+            <p className="text-center text-white">
+              Gjelder kanselleringen for spesifikke stopp?
+            </p>
+          </label>
+        </div>
+      )}
+
+      {chosenDeparture && isDepartureStops && (
+        <div>
+          <StopPicker
+            isMulti
+            api={api}
+            stops={
+              departures
+                .find(({ id }) => id === chosenDeparture)
+                ?.estimatedCalls.map(({ quay }) => quay) || []
+            }
+            onChange={(e) => {
+              if (e) {
+                setDepartureStops(e.map(({ value }) => value));
+              } else {
+                setDepartureStops([]);
+              }
+            }}
+          />
+          <br></br>
         </div>
       )}
 
