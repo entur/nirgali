@@ -91,7 +91,7 @@ export default class App extends React.Component {
           onSelectOrganization={this.updateOrganization}
           user={this.state.organizations}
           name={this.state.organizationsName}
-          logout={() => this.logout()}
+          logout={this.logout}
         />
         <div>
           <div className="register_box">

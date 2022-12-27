@@ -22,7 +22,6 @@ const returnRedOrGreenIcon = (param) => {
 };
 
 const Overview = ({ cancellations, lines }) => {
-  const date = useMemo(() => Date.now(), []);
   const navigate = useNavigate();
   const [showExpiredCancellations, setShowExpiredCancellations] =
     useState(false);
@@ -109,7 +108,7 @@ const Overview = ({ cancellations, lines }) => {
             <Tbody>
               {cancellationsToShow.map(({ id, data: item }, index) => (
                 <Tr key={item.EstimatedVehicleJourney.RecordedAtTime}>
-                  <Td className="Status">{returnRedOrGreenIcon(item, date)}</Td>
+                  <Td className="Status">{returnRedOrGreenIcon(item)}</Td>
                   <Td className="#">
                     {
                       lines.find(
