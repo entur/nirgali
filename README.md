@@ -127,3 +127,4 @@ Configuration for the frontend app is located in the `config/` folder.
 * The default service account for the firebase project requires Token Creator role
 * The firebase database needs to be set to native mode
 * The firebase project needs to have the IAM api enabled
+
