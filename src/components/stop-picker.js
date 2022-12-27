@@ -92,7 +92,7 @@ const useOptions = (stops, api, sort = false) => {
     return sort
       ? stopOptins.sort((a, b) => a.label.localeCompare(b.label))
       : stopOptins;
-  }, [stops, stopPlaceTopographicPlaceIndex, topographicPlaces, stopPlaces]);
+  }, [stops, stopPlaceTopographicPlaceIndex, topographicPlaces, stopPlaces, sort]);
   return options;
 };
 
