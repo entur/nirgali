@@ -146,7 +146,13 @@ const Overview = ({ cancellations, lines }) => {
                     }
                   </Td>
                   <Td>
-                    {item.EstimatedVehicleJourney.Cancellation ? 'Ja' : item.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.some(call => call.Cancellation) ? 'Delvis' : 'Nei'}
+                    {item.EstimatedVehicleJourney.Cancellation
+                      ? 'Ja'
+                      : item.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.some(
+                          (call) => call.Cancellation
+                        )
+                      ? 'Delvis'
+                      : 'Nei'}
                     {}
                   </Td>
                   <Td>
