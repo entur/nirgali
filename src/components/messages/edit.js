@@ -11,6 +11,7 @@ import addHours from 'date-fns/addHours';
 import Select from 'react-select';
 import { isBefore } from 'date-fns';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getLineOption } from '../../util/getLineOption';
 
 const Edit = ({ messages, firebase, organization, lines, api }) => {
   const navigate = useNavigate();
@@ -208,19 +209,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
     const Affects = issue.data.Affects;
     const AffectedLine = Affects?.Networks?.AffectedNetwork?.AffectedLine;
     const LineRef = AffectedLine?.LineRef;
-    return getLineOption(LineRef);
-  };
-
-  const getLineOption = (id) => {
-    const line = lines.find((l) => l.id === id);
-    return line
-      ? {
-          value: line.id,
-          label: `${line.name} (${line.publicCode}) - ${line.id}`,
-        }
-      : {
-          label: 'Ukjent linje',
-        };
+    return getLineOption(lines, LineRef);
   };
 
   const getLineDepartureOption = () => {
@@ -322,8 +311,8 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
               <>
                 <div className="choose_type">
                   <Select
-                    value={getLineOption(serviceJourney.line.id)}
-                    options={[getLineOption(serviceJourney.line.id)]}
+                    value={getLineOption(lines, serviceJourney.line.id)}
+                    options={[getLineOption(lines, serviceJourney.line.id)]}
                   />
                 </div>
                 <div className="choose_type">

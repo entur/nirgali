@@ -11,6 +11,7 @@ import firebase from 'firebase/compat/app';
 import { DatePicker } from '@entur/datepicker';
 import StopPicker from '../stop-picker';
 import { mapEstimatedCall } from './mapEstimatedCall';
+import { getLineOption } from '../../util/getLineOption';
 
 const Edit = ({ cancellations, organization, lines, api }) => {
   const db = firebase.firestore();
@@ -116,18 +117,6 @@ const Edit = ({ cancellations, organization, lines, api }) => {
     navigate('/kanselleringer');
   };
 
-  const getLineOption = (id) => {
-    const line = lines.find((l) => l.id === id);
-    return line
-      ? {
-          value: line.id,
-          label: `${line.name} (${line.publicCode}) - ${line.id}`,
-        }
-      : {
-          label: 'Ukjent linje',
-        };
-  };
-
   const getLineDepartureOption = () => {
     const estimatedCall = serviceJourney.estimatedCalls[0];
     const quayName = estimatedCall.quay.name;
@@ -175,8 +164,8 @@ const Edit = ({ cancellations, organization, lines, api }) => {
           <>
             <div className="choose_type">
               <Select
-                value={getLineOption(serviceJourney.line.id)}
-                options={[getLineOption(serviceJourney.line.id)]}
+                value={getLineOption(lines, serviceJourney.line.id)}
+                options={[getLineOption(lines, serviceJourney.line.id)]}
               />
             </div>
 
