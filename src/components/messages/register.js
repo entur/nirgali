@@ -146,76 +146,11 @@ class Register extends React.Component {
   handleSubmit = async (event) => {
     const newIssue = await this.createNewIssue();
 
-    if (this.state.beskrivelse === '') {
-      delete newIssue.Description;
-    }
-
-    if (this.state.forslag === '') {
-      delete newIssue.Advice;
-    }
-
-    if (this.state.type === 'departure') {
-      const from = new Date(this.state.departureDate);
-      const to = new Date(this.state.departureDate);
-      from.setHours(0);
-      from.setMinutes(0);
-      from.setSeconds(0);
-      from.setMilliseconds(0);
-      to.setHours(23);
-      to.setMinutes(59);
-      to.setSeconds(59);
-      to.setMilliseconds(999);
-      newIssue.ValidityPeriod = {
-        StartTime: from.toISOString(),
-        EndTime: to.toISOString(),
-      };
-    } else {
-      if (this.state.to) {
-        newIssue.ValidityPeriod = {
-          StartTime: this.state.from.toISOString(),
-          EndTime: this.state.to.toISOString(),
-        };
-      } else {
-        newIssue.ValidityPeriod = {
-          StartTime: this.state.from.toISOString(),
-        };
-      }
-    }
-
-    if (this.state.type === 'line') {
-      if (this.state.checkbox) {
-        const newAffect = this.createNewSpecifiedStops();
-        newIssue.Affects = newAffect;
-      } else {
-        const newAffect = this.createNewLine();
-        newIssue.Affects = newAffect;
-      }
-    }
-    if (this.state.type === 'stop') {
-      const newAffect = this.createAffectedRoute();
-      newIssue.Affects = newAffect;
-    }
-    if (this.state.type === 'departure') {
-      if (this.state.checkbox2) {
-        const newAffect = this.createNewSpecifiedStopsDeparture();
-        newIssue.Affects = newAffect;
-      } else {
-        const newAffect = this.createAffectedDeparture();
-        newIssue.Affects = newAffect;
-      }
-    }
-
-    if (this.state.infoLink) {
-      newIssue.InfoLinks = {
-        InfoLink: {
-          Uri: this.state.infoLink.uri,
-        },
-      };
-
-      if (this.state.infoLink.label) {
-        newIssue.InfoLinks.InfoLink.Label = this.state.infoLink.label;
-      }
-    }
+    this.handleEmptyDescription(newIssue);
+    this.handleEmptyAdvice(newIssue);
+    this.handleValidityPeriod(newIssue);
+    this.handleAffects(newIssue);
+    this.handleInfoLink(newIssue);
 
     this.props.firebase
       .collection(
@@ -440,6 +375,88 @@ class Register extends React.Component {
       this.setState({ to });
     }
   };
+
+  handleAffects(newIssue) {
+    if (this.state.type === 'line') {
+      if (this.state.checkbox) {
+        const newAffect = this.createNewSpecifiedStops();
+        newIssue.Affects = newAffect;
+      } else {
+        const newAffect = this.createNewLine();
+        newIssue.Affects = newAffect;
+      }
+    }
+
+    if (this.state.type === 'stop') {
+      const newAffect = this.createAffectedRoute();
+      newIssue.Affects = newAffect;
+    }
+    if (this.state.type === 'departure') {
+      if (this.state.checkbox2) {
+        const newAffect = this.createNewSpecifiedStopsDeparture();
+        newIssue.Affects = newAffect;
+      } else {
+        const newAffect = this.createAffectedDeparture();
+        newIssue.Affects = newAffect;
+      }
+    }
+  }
+
+  handleValidityPeriod(newIssue) {
+    if (this.state.type === 'departure') {
+      const from = new Date(this.state.departureDate);
+      const to = new Date(this.state.departureDate);
+      from.setHours(0);
+      from.setMinutes(0);
+      from.setSeconds(0);
+      from.setMilliseconds(0);
+      to.setHours(23);
+      to.setMinutes(59);
+      to.setSeconds(59);
+      to.setMilliseconds(999);
+      newIssue.ValidityPeriod = {
+        StartTime: from.toISOString(),
+        EndTime: to.toISOString(),
+      };
+    } else {
+      if (this.state.to) {
+        newIssue.ValidityPeriod = {
+          StartTime: this.state.from.toISOString(),
+          EndTime: this.state.to.toISOString(),
+        };
+      } else {
+        newIssue.ValidityPeriod = {
+          StartTime: this.state.from.toISOString(),
+        };
+      }
+    }
+  }
+
+  handleInfoLink(newIssue) {
+    if (this.state.infoLink) {
+      newIssue.InfoLinks = {
+        InfoLink: {
+          Uri: this.state.infoLink.uri,
+        },
+      };
+
+      if (this.state.infoLink.label) {
+        newIssue.InfoLinks.InfoLink.Label = this.state.infoLink.label;
+      }
+    }
+  }
+
+  handleEmptyAdvice(newIssue) {
+    if (this.state.forslag === '') {
+      delete newIssue.Advice;
+    }
+  }
+
+  handleEmptyDescription(newIssue) {
+    if (this.state.beskrivelse === '') {
+      delete newIssue.Description;
+    }
+  }
 
   render() {
     return (
