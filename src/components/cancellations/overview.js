@@ -21,6 +21,16 @@ const returnRedOrGreenIcon = (param) => {
   }
 };
 
+const getCancellationLabel = (item) => {
+  return item.EstimatedVehicleJourney.Cancellation
+    ? 'Ja'
+    : item.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.some(
+        (call) => call.Cancellation
+      )
+    ? 'Delvis'
+    : 'Nei';
+};
+
 const Overview = ({ cancellations, lines }) => {
   const navigate = useNavigate();
   const [showExpiredCancellations, setShowExpiredCancellations] =
@@ -151,26 +161,15 @@ const Overview = ({ cancellations, lines }) => {
                         .DataFrameRef
                     }
                   </Td>
-                  <Td>
-                    {item.EstimatedVehicleJourney.Cancellation
-                      ? 'Ja'
-                      : item.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.some(
-                          (call) => call.Cancellation
-                        )
-                      ? 'Delvis'
-                      : 'Nei'}
-                    {}
-                  </Td>
+                  <Td>{getCancellationLabel(item)}</Td>
                   <Td>
                     <Button
                       variant="secondary"
                       value={index}
                       onClick={getEditCallback(id)}
                       disabled={
-                        !(
-                          item.EstimatedVehicleJourney.ExpiresAtEpochMs >
-                          addMinutes(new Date(), 10).getTime()
-                        )
+                        item.EstimatedVehicleJourney.ExpiresAtEpochMs <=
+                        addMinutes(new Date(), 10).getTime()
                       }
                     >
                       Endre
