@@ -428,6 +428,19 @@ class Register extends React.Component {
       }));
   };
 
+  onFromChange = (from) => this.setState({ from });
+
+  onToChange = (to) => {
+    const now = new Date();
+    if (isBefore(to, now)) {
+      this.setState({ to: now });
+    } else if (isBefore(to, this.state.from)) {
+      this.setState({ to: this.state.from });
+    } else {
+      this.setState({ to });
+    }
+  };
+
   render() {
     return (
       <>
@@ -577,7 +590,7 @@ class Register extends React.Component {
               <DatePicker
                 label="Fra"
                 selectedDate={this.state.from}
-                onChange={(from) => this.setState({ from })}
+                onChange={this.onFromChange}
                 dateFormats={['yyyy-MM-dd HH:mm']}
                 minDate={this.state.date}
                 showTimeInput
@@ -585,16 +598,7 @@ class Register extends React.Component {
               <DatePicker
                 label="Til"
                 selectedDate={this.state.to}
-                onChange={(to) => {
-                  const now = new Date();
-                  if (isBefore(to, now)) {
-                    this.setState({ to: now });
-                  } else if (isBefore(to, this.state.from)) {
-                    this.setState({ to: this.state.from });
-                  } else {
-                    this.setState({ to });
-                  }
-                }}
+                onChange={this.onToChange}
                 dateFormats={['yyyy-MM-dd HH:mm']}
                 minDate={this.state.from}
                 showTimeInput

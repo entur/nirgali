@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import logo from '../img/entur_logo.jpg';
 import Select from 'react-select';
 import { PrimaryButton } from '@entur/button';
 import { Contrast } from '@entur/layout';
 
 const NavBar = ({ onSelectOrganization, user, name, logout }) => {
-  const handleChange = (event) => {
-    onSelectOrganization(event.value);
-  };
+  const handleChange = useCallback(
+    (event) => {
+      onSelectOrganization(event.value);
+    },
+    [onSelectOrganization]
+  );
 
   const returnOptions = () => {
     let selectValues = [];
@@ -35,7 +38,7 @@ const NavBar = ({ onSelectOrganization, user, name, logout }) => {
         </div>
         <div className="logout">
           <Contrast>
-            <PrimaryButton onClick={() => logout()}>Logg ut</PrimaryButton>
+            <PrimaryButton onClick={logout}>Logg ut</PrimaryButton>
           </Contrast>
         </div>
       </div>

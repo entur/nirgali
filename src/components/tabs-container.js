@@ -1,5 +1,6 @@
 import { Contrast } from '@entur/layout';
 import { Tabs, TabList, Tab } from '@entur/tab';
+import { useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const tabsMap = {
@@ -10,12 +11,13 @@ const tabsMap = {
 export const TabsContainer = ({ children }) => {
   const { tab } = useParams();
   const navigate = useNavigate();
+  const onTabChange = useCallback(
+    (newIndex) => navigate('/' + Object.keys(tabsMap)[newIndex]),
+    [navigate]
+  );
 
   return (
-    <Tabs
-      index={tabsMap[tab]}
-      onChange={(newIndex) => navigate('/' + Object.keys(tabsMap)[newIndex])}
-    >
+    <Tabs index={tabsMap[tab]} onChange={onTabChange}>
       <Contrast>
         <TabList style={{ marginBottom: '1rem' }}>
           <Tab>Avviksmeldinger</Tab>
