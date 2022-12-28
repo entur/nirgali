@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import red from '../../img/red.png';
 import green from '../../img/green.png';
 import { PrimaryButton as Button, SecondaryButton } from '@entur/button';
@@ -48,24 +48,36 @@ const Overview = ({ messages }) => {
   const [showExpiredMessages, setShowExpiredMessages] = useState(false);
   const navigate = useNavigate();
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     navigate('/meldinger/ny');
-  };
+  }, [navigate]);
 
-  const edit = (id) => {
-    navigate(`/meldinger/${id}`);
-  };
+  const edit = useCallback(
+    (id) => {
+      navigate(`/meldinger/${id}`);
+    },
+    [navigate]
+  );
 
-  let messagesToRender = showExpiredMessages
-    ? messages
-    : messages.filter(({ data: message }) => {
-        return (
-          !message.ValidityPeriod.EndTime ||
-          Date.parse(message.ValidityPeriod.EndTime) > date
-        );
-      });
+  const getEditCallback = useCallback((id) => () => edit(id), [edit]);
 
-  messagesToRender = messagesToRender.sort(sortBySituationNumber);
+  const onShowExpiredMessagesChange = useCallback(
+    () => setShowExpiredMessages(!showExpiredMessages),
+    [setShowExpiredMessages, showExpiredMessages]
+  );
+
+  const messagesToRender = useMemo(() => {
+    let messagesToRender = showExpiredMessages
+      ? messages
+      : messages.filter(({ data: message }) => {
+          return (
+            !message.ValidityPeriod.EndTime ||
+            Date.parse(message.ValidityPeriod.EndTime) > date
+          );
+        });
+
+    return messagesToRender.sort(sortBySituationNumber);
+  }, [messages, showExpiredMessages, date]);
 
   return (
     <>
@@ -83,7 +95,7 @@ const Overview = ({ messages }) => {
         <div style={{ padding: '0 .5em' }}>
           <Switch
             checked={showExpiredMessages}
-            onChange={() => setShowExpiredMessages(!showExpiredMessages)}
+            onChange={onShowExpiredMessagesChange}
           >
             Vis utløpte meldinger
           </Switch>
@@ -143,7 +155,7 @@ const Overview = ({ messages }) => {
                     <Button
                       variant="secondary"
                       value={index}
-                      onClick={() => edit(id)}
+                      onClick={getEditCallback(id)}
                     >
                       Endre
                     </Button>

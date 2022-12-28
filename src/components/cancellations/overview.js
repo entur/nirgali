@@ -68,7 +68,7 @@ const Overview = ({ cancellations, lines }) => {
     setShowExpiredCancellations(!showExpiredCancellations);
   }, [showExpiredCancellations]);
 
-  const getEditCallback = useMemo((id) => () => edit(id), [edit]);
+  const getEditCallback = useCallback((id) => () => edit(id), [edit]);
 
   return (
     <>
