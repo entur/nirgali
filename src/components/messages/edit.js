@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DatePicker } from '@entur/datepicker';
 import {
   PrimaryButton as Button,
@@ -96,11 +96,11 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
       .then(() => navigate('/'));
   };
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     navigate('/');
-  };
+  }, [navigate]);
 
-  const setProgressToClosed = () => {
+  const setProgressToClosed = useCallback(() => {
     const update = {
       Progress: 'closed',
       ValidityPeriod: {
@@ -116,7 +116,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
         mergeFields: ['Progress', 'ValidityPeriod.EndTime'],
       })
       .then(() => navigate('/'));
-  };
+  }, [firebase, issue.id, navigate, organization]);
 
   const checkStatus = (param) => {
     if (param === 'open') {
@@ -147,47 +147,63 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
     }
   };
 
+  const getReportType = () => {
+    return issue.data.ReportType;
+  };
+
+  const getSummary = () => {
+    return issue.data.Summary['_text'];
+  };
+
+  const getDescription = () => {
+    if (issue.data.Description) {
+      return issue.data.Description['_text'];
+    } else {
+      return '';
+    }
+  };
+
+  const getAdvice = () => {
+    if (issue.data.Advice) {
+      return issue.data.Advice['_text'];
+    } else {
+      return '';
+    }
+  };
+
+  const getInfoLinkUri = () => {
+    if (issue.data.InfoLinks) {
+      return issue.data.InfoLinks.InfoLink.Uri;
+    } else {
+      return undefined;
+    }
+  };
+
+  const getInfoLinkLabel = () => {
+    if (issue.data.InfoLinks) {
+      return issue.data.InfoLinks.InfoLink.Label;
+    } else {
+      return undefined;
+    }
+  };
+
   const returnValue = (type) => {
-    let issueData = issue.data;
-
-    if (type === 'ReportType') {
-      return issueData.ReportType;
+    switch (type) {
+      case 'ReportType':
+        return getReportType();
+      case 'summary':
+        return getSummary();
+      case 'description':
+        return getDescription();
+      case 'advice':
+        return getAdvice();
+      case 'infoLinkUri':
+        return getInfoLinkUri();
+      case 'infoLinkLabel':
+        return getInfoLinkLabel();
+      default:
+        return 'error';
     }
-    if (type === 'summary') {
-      return issueData.Summary['_text'];
-    }
-    if (type === 'description') {
-      if (issueData.Description) {
-        return issueData.Description['_text'];
-      } else {
-        return '';
-      }
-    }
-    if (type === 'advice') {
-      if (issueData.Advice) {
-        return issueData.Advice['_text'];
-      } else {
-        return '';
-      }
-    }
-
-    if (type === 'infoLinkUri') {
-      if (issueData.InfoLinks) {
-        return issueData.InfoLinks.InfoLink.Uri;
-      } else {
-        return undefined;
-      }
-    }
-
-    if (type === 'infoLinkLabel') {
-      if (issueData.InfoLinks) {
-        return issueData.InfoLinks.InfoLink.Label;
-      } else {
-        return undefined;
-      }
-    }
-
-    return 'error';
   };
 
   const getType = () => {
@@ -271,6 +287,25 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
         ];
   };
 
+  const onFromChange = useCallback((from) => setFrom(from), [setFrom]);
+
+  const onToChange = useCallback(
+    (to) => {
+      const now = new Date();
+      const calculatedFrom =
+        from || new Date(issue.data.ValidityPeriod.StartTime);
+
+      if (isBefore(to, now)) {
+        setTo(now);
+      } else if (isBefore(to, calculatedFrom)) {
+        setTo(calculatedFrom);
+      } else {
+        setTo(to);
+      }
+    },
+    [setTo, from, issue]
+  );
+
   if (!issue || !lines?.length) {
     return null;
   }
@@ -353,7 +388,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
           <DatePicker
             label="Fra"
             selectedDate={from || new Date(issue.data.ValidityPeriod.StartTime)}
-            onChange={(from) => setFrom(from)}
+            onChange={onFromChange}
             dateFormats={['yyyy-MM-dd HH:mm']}
             minDate={new Date()}
             showTimeInput
@@ -366,19 +401,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
                 ? new Date(issue.data.ValidityPeriod.EndTime)
                 : undefined)
             }
-            onChange={(to) => {
-              const now = new Date();
-              const calculatedFrom =
-                from || new Date(issue.data.ValidityPeriod.StartTime);
-
-              if (isBefore(to, now)) {
-                setTo(now);
-              } else if (isBefore(to, calculatedFrom)) {
-                setTo(calculatedFrom);
-              } else {
-                setTo(to);
-              }
-            }}
+            onChange={onToChange}
             dateFormats={['yyyy-MM-dd HH:mm']}
             minDate={from}
             showTimeInput
