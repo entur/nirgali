@@ -10,7 +10,7 @@ Frontend application assumes user has editSX role associated with one or more pr
 
 ### How to fetch XML
 
-Send POST request to `/api/xml` -  in production https://avvik.entur.org/api/xml.
+Send POST request to `/api/xml` -  in production https://api.entur.io/deviation-messages/v1/xml.
 
 Request for SIRI-SX (SituationExchangeRequest):
 
