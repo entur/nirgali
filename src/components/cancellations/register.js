@@ -26,12 +26,21 @@ export const Register = ({ lines, api, organization }) => {
   const [isDepartureStops, setIsDepartureStops] = React.useState(false);
   const [departureStops, setDepartureStops] = React.useState([]);
 
-  const handleChangeLine = (line) => setChosenLine(line.value);
-  const handleDepartureDateChange = (chosenDate) =>
-    setDepartureDate(chosenDate);
-  const handleChangeDeparture = (departure) =>
-    setChosenDeparture(departure.value);
-  const handleSubmit = async () => {
+  const handleChangeLine = useCallback(
+    (line) => setChosenLine(line.value),
+    [setChosenLine]
+  );
+
+  const handleDepartureDateChange = useCallback(
+    (chosenDate) => setDepartureDate(chosenDate),
+    [setDepartureDate]
+  );
+
+  const handleChangeDeparture = useCallback(
+    (departure) => setChosenDeparture(departure.value),
+    [setChosenDeparture]
+  );
+  const handleSubmit = useCallback(async () => {
     const now = new Date();
     const departureData = departures.find(
       (departure) => departure.id === chosenDeparture
@@ -73,8 +82,21 @@ export const Register = ({ lines, api, organization }) => {
       .doc()
       .set(newCancellation);
     navigate('/kanselleringer');
-  };
-  const handleCancel = () => navigate('/kanselleringer');
+  }, [
+    chosenDeparture,
+    chosenLine,
+    departureDate,
+    departureStops,
+    departures,
+    isDepartureStops,
+    navigate,
+    organization,
+  ]);
+
+  const handleCancel = useCallback(
+    () => navigate('/kanselleringer'),
+    [navigate]
+  );
 
   const serviceJourneyOptions = useMemo(() => {
     return departures
@@ -114,6 +136,17 @@ export const Register = ({ lines, api, organization }) => {
       fetchServiceJourneys();
     }
   }, [chosenLine, departureDate, api]);
+
+  const onDepartureStopsChange = useCallback(
+    (e) => {
+      if (e) {
+        setDepartureStops(e.map(({ value }) => value));
+      } else {
+        setDepartureStops([]);
+      }
+    },
+    [setDepartureStops]
+  );
 
   return (
     <>
@@ -183,13 +216,7 @@ export const Register = ({ lines, api, organization }) => {
                 .find(({ id }) => id === chosenDeparture)
                 ?.estimatedCalls.map(({ quay }) => quay) || []
             }
-            onChange={(e) => {
-              if (e) {
-                setDepartureStops(e.map(({ value }) => value));
-              } else {
-                setDepartureStops([]);
-              }
-            }}
+            onChange={onDepartureStopsChange}
           />
           <br></br>
         </div>
