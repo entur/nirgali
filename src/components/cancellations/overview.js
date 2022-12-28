@@ -22,13 +22,17 @@ const returnRedOrGreenIcon = (param) => {
 };
 
 const getCancellationLabel = (item) => {
-  return item.EstimatedVehicleJourney.Cancellation
-    ? 'Ja'
-    : item.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.some(
-        (call) => call.Cancellation
-      )
-    ? 'Delvis'
-    : 'Nei';
+  if (item.EstimatedVehicleJourney.Cancellation) {
+    return 'Ja';
+  } else if (
+    item.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.some(
+      (call) => call.Cancellation
+    )
+  ) {
+    return 'Delvis';
+  } else {
+    return 'Nei';
+  }
 };
 
 const Overview = ({ cancellations, lines }) => {
