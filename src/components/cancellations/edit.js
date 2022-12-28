@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   PrimaryButton as Button,
   NegativeButton,
@@ -39,83 +39,97 @@ const Edit = ({ cancellations, organization, lines, api }) => {
     }
   }, [cancellationId, api, cancellation]);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleSubmit = useCallback(
+    (event) => {
+      event.preventDefault();
 
-    cancellation.data.EstimatedVehicleJourney.Cancellation =
-      !isDepartureStops && departureStops.length === 0;
-    cancellation.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall =
-      serviceJourney.estimatedCalls.map((call) =>
-        mapEstimatedCall(call, serviceJourney, departureStops)
+      cancellation.data.EstimatedVehicleJourney.Cancellation =
+        !isDepartureStops && departureStops.length === 0;
+      cancellation.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall =
+        serviceJourney.estimatedCalls.map((call) =>
+          mapEstimatedCall(call, serviceJourney, departureStops)
+        );
+      cancellation.data.EstimatedVehicleJourney.RecordedAtTime =
+        new Date().toISOString();
+
+      const codespace = organization.split(':')[0];
+      const authority = organization;
+      const id = cancellation.id;
+
+      db.doc(
+        `codespaces/${codespace}/authorities/${authority}/cancellations/${id}`
+      )
+        .set(cancellation.data)
+        .then(() => navigate('/kanselleringer'));
+    },
+    [
+      cancellation,
+      db,
+      departureStops,
+      isDepartureStops,
+      navigate,
+      organization,
+      serviceJourney,
+    ]
+  );
+
+  const handleRestore = useCallback(
+    (event) => {
+      event.preventDefault();
+
+      const newCancellation = false;
+      const newDepartureStatus = 'onTime';
+      const newArrivalStatus = 'onTime';
+
+      cancellation.data.EstimatedVehicleJourney.Cancellation = newCancellation;
+      cancellation.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.forEach(
+        (call) => {
+          call.Cancellation = newCancellation;
+
+          if (call.ArrivalStatus) {
+            call.ArrivalStatus = newArrivalStatus;
+          }
+
+          if (call.ArrivalBoardingActivity) {
+            call.ArrivalBoardingActivity = serviceJourney.passingTimes.find(
+              ({ quay }) => quay.id === call.StopPointRef
+            ).forAlighting
+              ? 'alighting'
+              : 'noAlighting';
+          }
+
+          if (call.DepartureStatus) {
+            call.DepartureStatus = newDepartureStatus;
+          }
+
+          if (call.DepartureBoardingActivity) {
+            call.DepartureBoardingActivity = serviceJourney.passingTimes.find(
+              ({ quay }) => quay.id === call.StopPointRef
+            ).forBoarding
+              ? 'boarding'
+              : 'noBoarding';
+          }
+        }
       );
-    cancellation.data.EstimatedVehicleJourney.RecordedAtTime =
-      new Date().toISOString();
+      cancellation.data.EstimatedVehicleJourney.RecordedAtTime =
+        new Date().toISOString();
 
-    const codespace = organization.split(':')[0];
-    const authority = organization;
-    const id = cancellation.id;
+      const codespace = organization.split(':')[0];
+      const authority = organization;
+      const id = cancellation.id;
 
-    db.doc(
-      `codespaces/${codespace}/authorities/${authority}/cancellations/${id}`
-    )
-      .set(cancellation.data)
-      .then(() => navigate('/kanselleringer'));
-  };
+      db.doc(
+        `codespaces/${codespace}/authorities/${authority}/cancellations/${id}`
+      )
+        .set(cancellation.data)
+        .then(() => navigate('/kanselleringer'));
+    },
+    [cancellation, db, navigate, organization, serviceJourney]
+  );
 
-  const handleRestore = (event) => {
-    event.preventDefault();
-
-    const newCancellation = false;
-    const newDepartureStatus = 'onTime';
-    const newArrivalStatus = 'onTime';
-
-    cancellation.data.EstimatedVehicleJourney.Cancellation = newCancellation;
-    cancellation.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.forEach(
-      (call) => {
-        call.Cancellation = newCancellation;
-
-        if (call.ArrivalStatus) {
-          call.ArrivalStatus = newArrivalStatus;
-        }
-
-        if (call.ArrivalBoardingActivity) {
-          call.ArrivalBoardingActivity = serviceJourney.passingTimes.find(
-            ({ quay }) => quay.id === call.StopPointRef
-          ).forAlighting
-            ? 'alighting'
-            : 'noAlighting';
-        }
-
-        if (call.DepartureStatus) {
-          call.DepartureStatus = newDepartureStatus;
-        }
-
-        if (call.DepartureBoardingActivity) {
-          call.DepartureBoardingActivity = serviceJourney.passingTimes.find(
-            ({ quay }) => quay.id === call.StopPointRef
-          ).forBoarding
-            ? 'boarding'
-            : 'noBoarding';
-        }
-      }
-    );
-    cancellation.data.EstimatedVehicleJourney.RecordedAtTime =
-      new Date().toISOString();
-
-    const codespace = organization.split(':')[0];
-    const authority = organization;
-    const id = cancellation.id;
-
-    db.doc(
-      `codespaces/${codespace}/authorities/${authority}/cancellations/${id}`
-    )
-      .set(cancellation.data)
-      .then(() => navigate('/kanselleringer'));
-  };
-
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     navigate('/kanselleringer');
-  };
+  }, [navigate]);
 
   const getLineDepartureOption = () => {
     const estimatedCall = serviceJourney.estimatedCalls[0];
@@ -147,6 +161,24 @@ const Edit = ({ cancellations, organization, lines, api }) => {
         label: `${quay.name} - ${quay.id}`,
       }));
   };
+
+  const onIsDepartureStopsChange = useCallback(
+    (e) => {
+      setIsDepartureStops(!isDepartureStops);
+    },
+    [isDepartureStops, setIsDepartureStops]
+  );
+
+  const onDepartureStopsChange = useCallback(
+    (e) => {
+      if (e) {
+        setDepartureStops(e.map(({ value }) => value));
+      } else {
+        setDepartureStops([]);
+      }
+    },
+    [setDepartureStops]
+  );
 
   if (!cancellation || !lines?.length) {
     return null;
@@ -220,9 +252,7 @@ const Edit = ({ cancellations, organization, lines, api }) => {
                     className="form-check-input"
                     type="checkbox"
                     checked={isDepartureStops}
-                    onChange={() => {
-                      setIsDepartureStops(!isDepartureStops);
-                    }}
+                    onChange={onIsDepartureStopsChange}
                   />
                   <p className="text-center text-white">
                     Gjelder kanselleringen for spesifikke stopp?
@@ -238,13 +268,7 @@ const Edit = ({ cancellations, organization, lines, api }) => {
                       serviceJourney?.estimatedCalls.map(({ quay }) => quay) ||
                       []
                     }
-                    onChange={(e) => {
-                      if (e) {
-                        setDepartureStops(e.map(({ value }) => value));
-                      } else {
-                        setDepartureStops([]);
-                      }
-                    }}
+                    onChange={onDepartureStopsChange}
                   />
                   <br></br>
                 </div>
