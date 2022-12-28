@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import red from '../../img/red.png';
 import green from '../../img/green.png';
 import { PrimaryButton as Button, SecondaryButton } from '@entur/button';
@@ -26,13 +26,16 @@ const Overview = ({ cancellations, lines }) => {
   const [showExpiredCancellations, setShowExpiredCancellations] =
     useState(false);
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     navigate('/kanselleringer/ny');
-  };
+  }, [navigate]);
 
-  const edit = (id) => {
-    navigate(`/kanselleringer/${id}`);
-  };
+  const edit = useCallback(
+    (id) => {
+      navigate(`/kanselleringer/${id}`);
+    },
+    [navigate]
+  );
 
   const cancellationsToShow = useMemo(() => {
     return showExpiredCancellations
@@ -46,6 +49,12 @@ const Overview = ({ cancellations, lines }) => {
           })
           .sort(sortCancellationByExpiry);
   }, [showExpiredCancellations, cancellations]);
+
+  const onShowExpiredCancellationsChange = useCallback(() => {
+    setShowExpiredCancellations(!showExpiredCancellations);
+  }, [showExpiredCancellations]);
+
+  const getEditCallback = useMemo((id) => () => edit(id), [edit]);
 
   return (
     <>
@@ -63,9 +72,7 @@ const Overview = ({ cancellations, lines }) => {
         <div style={{ padding: '0 .5em' }}>
           <Switch
             checked={showExpiredCancellations}
-            onChange={() =>
-              setShowExpiredCancellations(!showExpiredCancellations)
-            }
+            onChange={onShowExpiredCancellationsChange}
           >
             Vis utløpte kanselleringer
           </Switch>
@@ -158,7 +165,7 @@ const Overview = ({ cancellations, lines }) => {
                     <Button
                       variant="secondary"
                       value={index}
-                      onClick={() => edit(id)}
+                      onClick={getEditCallback(id)}
                       disabled={
                         !(
                           item.EstimatedVehicleJourney.ExpiresAtEpochMs >
