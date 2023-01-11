@@ -37,20 +37,20 @@ jobs:
       - run: npm run check
       - run: npm run test -- --coverage
       - run: npm run test:functions -- --coverage --coverageDirectory functions/coverage
-      # - name: SonarQube Scan
-      #   uses: sonarsource/sonarqube-scan-action@master
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.ENTUR_SONAR_PASSWORD }}
-      #     SONAR_HOST_URL: https://sonarcloud.io
-      #   with:
-      #     args: >
-      #       -Dsonar.organization=enturas-github
-      #       -Dsonar.projectKey=entur_nirgali
-      #       -Dsonar.sources=src,functions
-      #       -Dsonar.tests=src,functions
-      #       -Dsonar.test.inclusions=**/*.test.js
-      #       -Dsonar.coverage.exclusions=**/*.test.js
-      #       -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info,functions/coverage/lcov.info
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.ENTUR_SONAR_PASSWORD }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          args: >
+            -Dsonar.organization=enturas-github
+            -Dsonar.projectKey=entur_nirgali
+            -Dsonar.sources=src,functions
+            -Dsonar.tests=src,functions
+            -Dsonar.test.inclusions=**/*.test.js
+            -Dsonar.coverage.exclusions=**/*.test.js
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info,functions/coverage/lcov.info
       - run: npm run build
         env:
           REACT_APP_VERSION: ${{ github.sha }}
