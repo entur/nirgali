@@ -46,7 +46,9 @@ const useTopographicPlaces = (stops, api) => {
       );
     };
 
-    populateTopographicPlaces(stops.filter(stop => stop.stopPlace).map((stop) => stop.stopPlace.id));
+    populateTopographicPlaces(
+      stops.filter((stop) => stop.stopPlace).map((stop) => stop.stopPlace.id)
+    );
   }, [stops, api]);
 
   return {

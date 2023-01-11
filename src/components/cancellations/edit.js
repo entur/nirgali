@@ -206,8 +206,10 @@ const Edit = ({ cancellations, organization, lines, api }) => {
               <p className="text-center text-white">Dato (driftsdøgn)</p>
               <DatePicker
                 label="Dato"
-                selectedDate={Date.parse(cancellation.data.EstimatedVehicleJourney
-                  .FramedVehicleJourneyRef.DataFrameRef)}
+                selectedDate={Date.parse(
+                  cancellation.data.EstimatedVehicleJourney
+                    .FramedVehicleJourneyRef.DataFrameRef
+                )}
                 disabled
                 dateFormats={['yyyy-MM-dd']}
                 minDate={new Date()}
