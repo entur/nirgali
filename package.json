@@ -11,7 +11,7 @@
     "@entur/layout": "2.1.30",
     "@entur/tab": "0.4.47",
     "@entur/tokens": "3.8.1",
-    "@entur/tooltip": "2.6.15",
+    "@entur/tooltip": "2.6.16",
     "@entur/typography": "1.7.16",
     "apollo-fetch": "0.7.0",
     "bootstrap": "4.6.2",
