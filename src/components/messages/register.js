@@ -7,6 +7,7 @@ import {
 } from '@entur/button';
 import { Contrast } from '@entur/layout';
 import { DatePicker } from '@entur/datepicker';
+import { BannerAlertBox } from '@entur/alert';
 import { lightFormat, isBefore } from 'date-fns';
 import LinePicker from '../line-picker';
 import StopPicker from '../stop-picker';
@@ -523,7 +524,17 @@ class Register extends React.Component {
               )}
 
             {this.state.type === 'stop' && this.state.stops && (
+
               <div>
+              <br></br>
+              <BannerAlertBox 
+                  title="Trå varsomt!"
+                  variant="warning"
+                >
+                  Du er i ferd med å lage en avviksmelding som treffer all rutegående trafikk som passerer de(n) valgte holdeplassen(e)
+                  på tvers av operatører. Hvis du ønsker å lage en avviksmelding som kun treffer enkelte linjer (og stopp), velg "Linje" i stedet.
+                </BannerAlertBox>
+                <br></br>
                 <StopPicker
                   sort
                   isMulti
@@ -533,6 +544,7 @@ class Register extends React.Component {
                 />
                 <br></br>
               </div>
+
             )}
           </div>
         )}
