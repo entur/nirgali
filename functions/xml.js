@@ -57,7 +57,7 @@ exports.xml = function () {
         'XML request received - dateTime=' +
           dateTime +
           ' serviceRequestType=' +
-          serviceRequestType
+          serviceRequestType,
       );
 
       const db = getFirestore();
@@ -123,7 +123,7 @@ const produceSituationExchangeDelivery = async (db, dateTime) => {
     .filter(filterOpenExpiredMessages(dateTime));
 
   console.log(
-    'Returning number of situations: ' + situations.PtSituationElement.length
+    'Returning number of situations: ' + situations.PtSituationElement.length,
   );
 
   return {
@@ -138,7 +138,7 @@ const produceEstimatedTimetableDelivery = async (db, dateTime) => {
     .where(
       'EstimatedVehicleJourney.ExpiresAtEpochMs',
       '>',
-      addMinutes(new Date(), 10).getTime()
+      addMinutes(new Date(), 10).getTime(),
     )
     .get();
 
@@ -148,7 +148,7 @@ const produceEstimatedTimetableDelivery = async (db, dateTime) => {
     EstimatedJourneyVersionFrame: {
       RecordedAtTime: dateTime,
       EstimatedVehicleJourney: cancellations.docs.map((doc) =>
-        transformCancellationData(doc.data().EstimatedVehicleJourney)
+        transformCancellationData(doc.data().EstimatedVehicleJourney),
       ),
     },
   };
@@ -180,12 +180,12 @@ exports.closeOpenExpiredMessages = function () {
                 ) {
                   const endTime = addHours(
                     parseISO(doc.data().ValidityPeriod.EndTime),
-                    5
+                    5,
                   ).toISOString();
                   console.log(
                     `Closing message id=${doc.id} situationNumber=${
                       doc.data().SituationNumber
-                    } newEndTime=${endTime}`
+                    } newEndTime=${endTime}`,
                   );
                   transaction.update(docSnapshot.ref, {
                     Progress: 'closed',
@@ -214,15 +214,15 @@ exports.logDbWrites = function () {
   return functions
     .region('europe-west1')
     .firestore.document(
-      'codespaces/{codespace}/authorities/{authority}/messages/{messageId}'
+      'codespaces/{codespace}/authorities/{authority}/messages/{messageId}',
     )
     .onWrite((change, context) => {
       const { codespace, authority, messageId } = context.params;
 
       console.log(
         `Message written: codespace=${codespace} authority=${authority} messageId=${messageId}:\n${JSON.stringify(
-          change.after.data()
-        )}`
+          change.after.data(),
+        )}`,
       );
     });
 };
