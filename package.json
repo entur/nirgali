@@ -67,7 +67,7 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "@types/jest": "29.5.1",
+    "@types/jest": "29.5.11",
     "@types/node": "18.19.4",
     "@types/react": "18.2.6",
     "@types/react-dom": "18.2.4",
