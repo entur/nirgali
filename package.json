@@ -67,10 +67,13 @@
     "singleQuote": true
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "7.21.11",
     "@types/jest": "29.5.11",
     "@types/node": "18.19.4",
     "@types/react": "18.2.6",
     "@types/react-dom": "18.2.4",
+    "@typescript-eslint/typescript-estree": "6.17.0",
+    "fork-ts-checker-webpack-plugin": "9.0.2",
     "husky": "8.0.3",
     "lint-staged": "13.2.2",
     "npm-run-all": "4.1.5",
