@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@entur/alert": "0.14.3",
+    "@entur/alert": "0.15.14",
     "@entur/auth-provider": "1.1.1",
     "@entur/button": "2.10.15",
     "@entur/datepicker": "3.0.10",
