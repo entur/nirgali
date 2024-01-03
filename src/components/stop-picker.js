@@ -3,7 +3,7 @@ import Select from 'react-windowed-select';
 
 const chunk = (arr, size) =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
-    arr.slice(i * size, i * size + size)
+    arr.slice(i * size, i * size + size),
   );
 
 const useTopographicPlaces = (stops, api) => {
@@ -15,15 +15,15 @@ const useTopographicPlaces = (stops, api) => {
     const populateTopographicPlaces = async (stopPlaceIds) => {
       const stopPlaces = await Promise.all(
         chunk(stopPlaceIds, 200).map(
-          async (chunk) => await api.getStopPlaces(chunk)
-        )
+          async (chunk) => await api.getStopPlaces(chunk),
+        ),
       );
 
       setStopPlaces((prev) =>
         stopPlaces.flat().reduce((acc, stopPlace) => {
           acc[stopPlace.id] = stopPlace;
           return acc;
-        }, prev)
+        }, prev),
       );
 
       const topographicPlaceIds = stopPlaces.flat().map((stopPlace) => {
@@ -34,20 +34,23 @@ const useTopographicPlaces = (stops, api) => {
 
       const topographicPlacesData = await Promise.all(
         chunk(topographicPlaceIds, 200).map(
-          async (chunk) => await api.getTopographicPlaces(chunk)
-        )
+          async (chunk) => await api.getTopographicPlaces(chunk),
+        ),
       );
 
       setTopographicPlaces((prev) =>
-        topographicPlacesData.flat().reduce((acc, topographicPlace) => {
-          acc[topographicPlace.id] = topographicPlace;
-          return acc;
-        }, Object.assign({}, prev))
+        topographicPlacesData.flat().reduce(
+          (acc, topographicPlace) => {
+            acc[topographicPlace.id] = topographicPlace;
+            return acc;
+          },
+          Object.assign({}, prev),
+        ),
       );
     };
 
     populateTopographicPlaces(
-      stops.filter((stop) => stop.stopPlace).map((stop) => stop.stopPlace.id)
+      stops.filter((stop) => stop.stopPlace).map((stop) => stop.stopPlace.id),
     );
   }, [stops, api]);
 
@@ -71,8 +74,8 @@ const useOptions = (stops, api, sort = false) => {
             (j) =>
               j.stopPlace &&
               item.stopPlace &&
-              j.stopPlace.id === item.stopPlace.id
-          )
+              j.stopPlace.id === item.stopPlace.id,
+          ),
       )
       .map((item) => {
         const topographicPlace =

@@ -56,14 +56,14 @@ const Overview = ({ messages }) => {
     (id) => {
       navigate(`/meldinger/${id}`);
     },
-    [navigate]
+    [navigate],
   );
 
   const getEditCallback = useCallback((id) => () => edit(id), [edit]);
 
   const onShowExpiredMessagesChange = useCallback(
     () => setShowExpiredMessages(!showExpiredMessages),
-    [setShowExpiredMessages, showExpiredMessages]
+    [setShowExpiredMessages, showExpiredMessages],
   );
 
   const messagesToRender = useMemo(() => {

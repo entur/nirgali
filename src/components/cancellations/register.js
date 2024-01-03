@@ -28,22 +28,22 @@ export const Register = ({ lines, api, organization }) => {
 
   const handleChangeLine = useCallback(
     (line) => setChosenLine(line.value),
-    [setChosenLine]
+    [setChosenLine],
   );
 
   const handleDepartureDateChange = useCallback(
     (chosenDate) => setDepartureDate(chosenDate),
-    [setDepartureDate]
+    [setDepartureDate],
   );
 
   const handleChangeDeparture = useCallback(
     (departure) => setChosenDeparture(departure.value),
-    [setChosenDeparture]
+    [setChosenDeparture],
   );
   const handleSubmit = useCallback(async () => {
     const now = new Date();
     const departureData = departures.find(
-      (departure) => departure.id === chosenDeparture
+      (departure) => departure.id === chosenDeparture,
     );
     const newCancellation = {
       EstimatedVehicleJourney: {
@@ -58,7 +58,7 @@ export const Register = ({ lines, api, organization }) => {
         DataSource: organization.split(':')[0],
         EstimatedCalls: {
           EstimatedCall: departureData.estimatedCalls.map((estimatedCall) =>
-            mapEstimatedCall(estimatedCall, departureData, departureStops)
+            mapEstimatedCall(estimatedCall, departureData, departureStops),
           ),
         },
         IsCompleteStopSequence: true,
@@ -66,7 +66,7 @@ export const Register = ({ lines, api, organization }) => {
           Date.parse(
             departureData.estimatedCalls[
               departureData.estimatedCalls.length - 1
-            ].aimedArrivalTime
+            ].aimedArrivalTime,
           ) +
           600 * 1000,
       },
@@ -77,7 +77,7 @@ export const Register = ({ lines, api, organization }) => {
       .collection(
         `codespaces/${
           organization.split(':')[0]
-        }/authorities/${organization}/cancellations`
+        }/authorities/${organization}/cancellations`,
       )
       .doc()
       .set(newCancellation);
@@ -95,7 +95,7 @@ export const Register = ({ lines, api, organization }) => {
 
   const handleCancel = useCallback(
     () => navigate('/kanselleringer'),
-    [navigate]
+    [navigate],
   );
 
   const serviceJourneyOptions = useMemo(() => {
@@ -105,8 +105,8 @@ export const Register = ({ lines, api, organization }) => {
           Date.parse(
             serviceJourney.estimatedCalls[
               serviceJourney.estimatedCalls.length - 1
-            ].aimedArrivalTime
-          ) > addMinutes(Date.now(), 10).getTime()
+            ].aimedArrivalTime,
+          ) > addMinutes(Date.now(), 10).getTime(),
       )
       .sort(sortServiceJourneyByDepartureTime)
       .map((item) => ({
@@ -128,7 +128,7 @@ export const Register = ({ lines, api, organization }) => {
     const fetchServiceJourneys = async () => {
       const response = await api.getDepartures(
         chosenLine,
-        formatDate(departureDate)
+        formatDate(departureDate),
       );
       setDepartures(response.data.serviceJourneys);
     };
@@ -145,7 +145,7 @@ export const Register = ({ lines, api, organization }) => {
         setDepartureStops([]);
       }
     },
-    [setDepartureStops]
+    [setDepartureStops],
   );
 
   return (

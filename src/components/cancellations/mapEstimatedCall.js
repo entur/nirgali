@@ -1,7 +1,7 @@
 export const mapEstimatedCall = (
   estimatedCall,
   departureData,
-  departureStops
+  departureStops,
 ) => {
   const i = estimatedCall.stopPositionInPattern;
 
