@@ -44,7 +44,7 @@ export default class App extends React.Component {
 
     const response = await this.props.api.getAuthorities();
     const organizations = response.data.authorities.filter((authority) =>
-      allowedCodespaces.includes(authority.id.split(':')[0])
+      allowedCodespaces.includes(authority.id.split(':')[0]),
     );
 
     if (!organizations.length > 0) {
@@ -57,7 +57,7 @@ export default class App extends React.Component {
         organizationsName: organizations.map(({ name }) => name),
         selectedOrganization: organizations[0].id,
       },
-      () => this.getLines()
+      () => this.getLines(),
     );
   };
 
@@ -66,13 +66,13 @@ export default class App extends React.Component {
       {
         selectedOrganization: selectedOrg,
       },
-      () => this.getLines()
+      () => this.getLines(),
     );
   };
 
   getLines = async () => {
     const response = await this.props.api.getLines(
-      this.state.selectedOrganization
+      this.state.selectedOrganization,
     );
     if (response.data) {
       this.setState({

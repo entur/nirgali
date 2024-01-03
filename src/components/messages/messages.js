@@ -25,8 +25,8 @@ export const Messages = ({ selectedOrganization, lines, api }) => {
                 id: doc.id,
                 data: doc.data(),
               }))
-            : []
-        )
+            : [],
+        ),
       );
 
     return () => {

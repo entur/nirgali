@@ -26,7 +26,7 @@ const getCancellationLabel = (item) => {
     return 'Ja';
   } else if (
     item.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.some(
-      (call) => call.Cancellation
+      (call) => call.Cancellation,
     )
   ) {
     return 'Delvis';
@@ -48,7 +48,7 @@ const Overview = ({ cancellations, lines }) => {
     (id) => {
       navigate(`/kanselleringer/${id}`);
     },
-    [navigate]
+    [navigate],
   );
 
   const cancellationsToShow = useMemo(() => {
@@ -133,7 +133,7 @@ const Overview = ({ cancellations, lines }) => {
                   <Td className="#">
                     {
                       lines.find(
-                        (l) => l.id === item.EstimatedVehicleJourney.LineRef
+                        (l) => l.id === item.EstimatedVehicleJourney.LineRef,
                       )?.publicCode
                     }{' '}
                     ({item.EstimatedVehicleJourney.LineRef})
@@ -154,9 +154,9 @@ const Overview = ({ cancellations, lines }) => {
                     {lightFormat(
                       Date.parse(
                         item.EstimatedVehicleJourney.EstimatedCalls
-                          .EstimatedCall[0].AimedDepartureTime
+                          .EstimatedCall[0].AimedDepartureTime,
                       ),
-                      'HH:mm'
+                      'HH:mm',
                     )}
                   </Td>
                   <Td>

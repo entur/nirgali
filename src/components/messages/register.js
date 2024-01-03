@@ -63,7 +63,7 @@ class Register extends React.Component {
   createStops = () => {
     const stops = this.props.lines.reduce(
       (acc, line) => [...acc, ...line.quays],
-      []
+      [],
     );
 
     this.setState({
@@ -157,7 +157,7 @@ class Register extends React.Component {
       .collection(
         `codespaces/${this.props.organization.split(':')[0]}/authorities/${
           this.props.organization
-        }/messages`
+        }/messages`,
       )
       .doc()
       .set(newIssue);
@@ -205,7 +205,7 @@ class Register extends React.Component {
     const codespace = this.props.organization.split(':')[0];
     const codespaceDocRef = this.props.firebase.doc(`codespaces/${codespace}`);
     return this.props.firebase.runTransaction(
-      this.getNextSituationNumberTransaction(codespaceDocRef)
+      this.getNextSituationNumberTransaction(codespaceDocRef),
     );
   };
 
@@ -342,7 +342,7 @@ class Register extends React.Component {
 
   returnSpecifiedLinesDeparture = () => {
     return this.state.departures.find(
-      (item) => item.id === this.state.datedVehicleJourney
+      (item) => item.id === this.state.datedVehicleJourney,
     );
   };
 
@@ -602,7 +602,7 @@ class Register extends React.Component {
               isMulti
               api={this.props.api}
               stops={this.returnSpecifiedLinesDeparture().estimatedCalls.map(
-                ({ quay }) => quay
+                ({ quay }) => quay,
               )}
               onChange={this.handleChangeSpecifiedStopsDeparture}
             />

@@ -18,7 +18,7 @@ export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
 
     const unsubscribeSnapshotListener = db
       .collection(
-        `codespaces/${codespace}/authorities/${authority}/cancellations`
+        `codespaces/${codespace}/authorities/${authority}/cancellations`,
       )
       .onSnapshot((querySnapshot: any) =>
         setCancellations(
@@ -27,8 +27,8 @@ export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
                 id: doc.id,
                 data: doc.data(),
               }))
-            : []
-        )
+            : [],
+        ),
       );
 
     return () => {
