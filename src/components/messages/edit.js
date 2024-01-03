@@ -19,7 +19,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
 
   const issue = useMemo(
     () => messages.find(({ id }) => id === issueId),
-    [messages, issueId]
+    [messages, issueId],
   );
 
   const [serviceJourney, setServiceJourney] = useState(undefined);
@@ -272,7 +272,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
       ? StopPoints?.AffectedStopPoint?.map((AffectedStopPoint) => {
           return quays.find(
             (q) =>
-              q.stopPlace && q.stopPlace.id === AffectedStopPoint.StopPointRef
+              q.stopPlace && q.stopPlace.id === AffectedStopPoint.StopPointRef,
           );
         })
           ?.filter((v) => v !== undefined)
@@ -303,7 +303,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
         setTo(to);
       }
     },
-    [setTo, from, issue]
+    [setTo, from, issue],
   );
 
   if (!issue || !lines?.length) {

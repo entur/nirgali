@@ -13,7 +13,7 @@ export const TabsContainer = ({ children }) => {
   const navigate = useNavigate();
   const onTabChange = useCallback(
     (newIndex) => navigate('/' + Object.keys(tabsMap)[newIndex]),
-    [navigate]
+    [navigate],
   );
 
   return (

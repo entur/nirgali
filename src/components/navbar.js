@@ -9,7 +9,7 @@ const NavBar = ({ onSelectOrganization, user, name, logout }) => {
     (event) => {
       onSelectOrganization(event.value);
     },
-    [onSelectOrganization]
+    [onSelectOrganization],
   );
 
   const returnOptions = () => {

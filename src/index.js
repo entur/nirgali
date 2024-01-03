@@ -65,7 +65,7 @@ const renderApp = (config) => {
       auth0ClaimsNamespace={config.auth0.claimsNamespace}
     >
       <AuthenticatedApp config={config} />
-    </AuthProvider>
+    </AuthProvider>,
   );
 };
 

@@ -7,7 +7,7 @@ test('sortBySituationNumber', () => {
       { data: { SituationNumber: 'COD:SituationNumber:1' } },
       { data: { SituationNumber: 'COD:SituationNumber:5' } },
       { data: { SituationNumber: 'COD:SituationNumber:3' } },
-    ].sort(sortBySituationNumber)
+    ].sort(sortBySituationNumber),
   ).toEqual([
     { data: { SituationNumber: 'COD:SituationNumber:1' } },
     { data: { SituationNumber: 'COD:SituationNumber:3' } },
