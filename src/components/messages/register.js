@@ -227,7 +227,7 @@ class Register extends React.Component {
       }
     };
 
-  handleChangeType = (event) => {
+  handleChangeType = (value) => {
     this.createStops();
     if (this.state.departureSok) {
       this.setState({
@@ -235,7 +235,7 @@ class Register extends React.Component {
       });
     }
     this.setState({
-      type: event.target.value,
+      type: value,
       checkbox: undefined,
       checkbox2: undefined,
       chosenLine: undefined,
@@ -243,7 +243,7 @@ class Register extends React.Component {
       submit: undefined,
       departure: undefined,
     });
-    if (event.target.value === 'departure') {
+    if (value === 'departure') {
       this.setState({
         departure: true,
         dateFromTo: undefined,
@@ -468,18 +468,24 @@ class Register extends React.Component {
           <p className="text-center text-white">
             Velg linje, stopp eller avgang
           </p>
-          <select
-            className="browser-default custom-select"
-            defaultValue={'default'}
-            onChange={this.handleChangeType}
-          >
-            <option value="default" disabled>
-              {' '}
-            </option>
-            <option value="line">Linje</option>
-            <option value="stop">Stopp</option>
-            <option value="departure">Avgang</option>
-          </select>
+          <Select
+            placeholder=""
+            options={[
+              {
+                label: 'Linje',
+                value: 'line',
+              },
+              {
+                label: 'Stopp',
+                value: 'stop',
+              },
+              {
+                label: 'Avgang',
+                value: 'departure',
+              },
+            ]}
+            onChange={(newValue) => this.handleChangeType(newValue.value)}
+          />
         </div>
         {this.props.lines && (
           <div className="choose_type">
