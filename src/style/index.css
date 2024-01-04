@@ -7,7 +7,10 @@
 @import '~@entur/tooltip/dist/styles.css';
 @import '~@entur/loader/dist/styles.css';
 @import '~@entur/tab/dist/styles.css';
-@import '@entur/alert/dist/styles.css';
+@import '~@entur/alert/dist/styles.css';
+@import '~@entur/a11y/dist/styles.css';
+@import '~@entur/expand/dist/styles.css';
+@import '~@entur/modal/dist/styles.css';
 
 .hidden {
   opacity: 0;

@@ -6,15 +6,19 @@ import {
   SecondaryButton,
 } from '@entur/button';
 import { Contrast } from '@entur/layout';
-import { DatePicker } from '@entur/datepicker';
+import { DatePicker, Time } from '@entur/datepicker';
 import { BannerAlertBox } from '@entur/alert';
-import { lightFormat, isBefore } from 'date-fns';
 import LinePicker from '../line-picker';
 import StopPicker from '../stop-picker';
 import { useNavigate } from 'react-router-dom';
 import { sortServiceJourneyByDepartureTime } from '../../util/sort';
-
-const formatDate = (date) => lightFormat(date, 'yyyy-MM-dd');
+import {
+  getLocalTimeZone,
+  now,
+  toCalendarDate,
+  toCalendarDateTime,
+  toZoned,
+} from '@internationalized/date';
 
 const ConnectedRegisterComponent = (props) => {
   const navigate = useNavigate();
@@ -52,11 +56,10 @@ class Register extends React.Component {
   };
 
   componentDidMount() {
-    const now = new Date();
     this.setState({
-      date: now,
-      from: now,
-      departureDate: now,
+      date: now(getLocalTimeZone()),
+      from: now(getLocalTimeZone()),
+      departureDate: now(getLocalTimeZone()),
     });
   }
 
@@ -117,7 +120,7 @@ class Register extends React.Component {
       VehicleJourneys: {
         AffectedVehicleJourney: {
           FramedVehicleJourneyRef: {
-            DataFrameRef: formatDate(this.state.departureDate),
+            DataFrameRef: toCalendarDate(this.state.departureDate).toString(),
             DatedVehicleJourneyRef: this.state.datedVehicleJourney,
           },
           Route: null,
@@ -131,7 +134,7 @@ class Register extends React.Component {
       VehicleJourneys: {
         AffectedVehicleJourney: {
           FramedVehicleJourneyRef: {
-            DataFrameRef: formatDate(this.state.departureDate),
+            DataFrameRef: toCalendarDate(this.state.departureDate).toString(),
             DatedVehicleJourneyRef: this.state.datedVehicleJourney,
           },
           Route: this.createAffectedRoute(),
@@ -168,7 +171,7 @@ class Register extends React.Component {
     const count = await this.getNextSituationNumber();
 
     return {
-      CreationTime: this.state.date.toISOString(),
+      CreationTime: this.state.date.toAbsoluteString(),
       ParticipantRef: this.props.organization.split(':')[0],
       SituationNumber:
         this.props.organization.split(':')[0] + ':SituationNumber:' + count,
@@ -328,12 +331,14 @@ class Register extends React.Component {
     const date = this.state.departureDate;
     const line = this.state.chosenLine;
 
-    this.props.api.getDepartures(line, formatDate(date)).then((response) => {
-      this.setState({
-        departures: response.data.serviceJourneys,
-        departureSok: true,
+    this.props.api
+      .getDepartures(line, toCalendarDate(date).toString())
+      .then((response) => {
+        this.setState({
+          departures: response.data.serviceJourneys,
+          departureSok: true,
+        });
       });
-    });
   };
 
   returnSpecifiedLines = () => {
@@ -367,13 +372,22 @@ class Register extends React.Component {
   onFromChange = (from) => this.setState({ from });
 
   onToChange = (to) => {
-    const now = new Date();
-    if (isBefore(to, now)) {
-      this.setState({ to: now });
-    } else if (isBefore(to, this.state.from)) {
+    if (to.compare(now(getLocalTimeZone())) < 0) {
+      this.setState({ to: now(getLocalTimeZone()) });
+    } else if (to.compare(this.state.from) < 0) {
       this.setState({ to: this.state.from });
     } else {
-      this.setState({ to });
+      let copy = to.copy();
+      if (!copy.hour || !copy.minute) {
+        copy = toZoned(
+          toCalendarDateTime(
+            copy,
+            new Time(this.state.from.hour, this.state.from.minute),
+          ),
+          getLocalTimeZone(),
+        );
+      }
+      this.setState({ to: copy });
     }
   };
 
@@ -405,29 +419,27 @@ class Register extends React.Component {
 
   handleValidityPeriod(newIssue) {
     if (this.state.type === 'departure') {
-      const from = new Date(this.state.departureDate);
-      const to = new Date(this.state.departureDate);
-      from.setHours(0);
-      from.setMinutes(0);
-      from.setSeconds(0);
-      from.setMilliseconds(0);
-      to.setHours(23);
-      to.setMinutes(59);
-      to.setSeconds(59);
-      to.setMilliseconds(999);
+      const from = toZoned(
+        toCalendarDateTime(this.state.departureDate, new Time(0, 0, 0, 0)),
+        getLocalTimeZone(),
+      );
+      const to = toZoned(
+        toCalendarDateTime(this.state.departureDate, new Time(23, 59, 59, 999)),
+        getLocalTimeZone(),
+      );
       newIssue.ValidityPeriod = {
-        StartTime: from.toISOString(),
-        EndTime: to.toISOString(),
+        StartTime: from.toAbsoluteString(),
+        EndTime: to.toAbsoluteString(),
       };
     } else {
       if (this.state.to) {
         newIssue.ValidityPeriod = {
-          StartTime: this.state.from.toISOString(),
-          EndTime: this.state.to.toISOString(),
+          StartTime: this.state.from.toAbsoluteString(),
+          EndTime: this.state.to.toAbsoluteString(),
         };
       } else {
         newIssue.ValidityPeriod = {
-          StartTime: this.state.from.toISOString(),
+          StartTime: this.state.from.toAbsoluteString(),
         };
       }
     }
@@ -624,17 +636,15 @@ class Register extends React.Component {
                 label="Fra"
                 selectedDate={this.state.from}
                 onChange={this.onFromChange}
-                dateFormats={['yyyy-MM-dd HH:mm']}
                 minDate={this.state.date}
-                showTimeInput
+                showTime
               />
               <DatePicker
                 label="Til"
                 selectedDate={this.state.to}
                 onChange={this.onToChange}
-                dateFormats={['yyyy-MM-dd HH:mm']}
                 minDate={this.state.from}
-                showTimeInput
+                showTime
               />
             </div>
           </div>
