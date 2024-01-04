@@ -472,16 +472,16 @@ class Register extends React.Component {
             placeholder=""
             options={[
               {
-                label: "Linje",
-                value: "line"
+                label: 'Linje',
+                value: 'line',
               },
               {
-                label: "Stopp",
-                value: "stop"
+                label: 'Stopp',
+                value: 'stop',
               },
               {
-                label: "Avgang",
-                value: "departure"
+                label: 'Avgang',
+                value: 'departure',
               },
             ]}
             onChange={(newValue) => this.handleChangeType(newValue.value)}
