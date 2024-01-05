@@ -20,13 +20,15 @@ import {
   parseDate,
   parseZonedDateTime,
   toCalendarDate,
-  today
+  today,
 } from '@internationalized/date';
 
 export const Register = ({ lines, api, organization }) => {
   const navigate = useNavigate();
   const [chosenLine, setChosenLine] = React.useState(null);
-  const [departureDate, setDepartureDate] = React.useState(now(getLocalTimeZone()));
+  const [departureDate, setDepartureDate] = React.useState(
+    now(getLocalTimeZone()),
+  );
   const [departures, setDepartures] = React.useState([]);
   const [chosenDeparture, setChosenDeparture] = React.useState(null);
   const [isDepartureStops, setIsDepartureStops] = React.useState(false);
@@ -117,7 +119,9 @@ export const Register = ({ lines, api, organization }) => {
       .sort(sortServiceJourneyByDepartureTime)
       .map((item) => ({
         label:
-          new Date(Date.parse(item.estimatedCalls[0].aimedDepartureTime)).toLocaleTimeString(navigator.language, {
+          new Date(
+            Date.parse(item.estimatedCalls[0].aimedDepartureTime),
+          ).toLocaleTimeString(navigator.language, {
             hour: '2-digit',
             minute: '2-digit',
           }) +
