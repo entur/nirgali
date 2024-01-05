@@ -12,6 +12,7 @@ import { DatePicker } from '@entur/datepicker';
 import StopPicker from '../stop-picker';
 import { mapEstimatedCall } from './mapEstimatedCall';
 import { getLineOption } from '../../util/getLineOption';
+import { now, parseDate } from '@internationalized/date';
 
 const Edit = ({ cancellations, organization, lines, api }) => {
   const db = firebase.firestore();
@@ -93,7 +94,7 @@ const Edit = ({ cancellations, organization, lines, api }) => {
           if (call.ArrivalBoardingActivity) {
             call.ArrivalBoardingActivity = serviceJourney.passingTimes.find(
               ({ quay }) => quay.id === call.StopPointRef,
-            ).forAlighting
+            )?.forAlighting
               ? 'alighting'
               : 'noAlighting';
           }
@@ -105,7 +106,7 @@ const Edit = ({ cancellations, organization, lines, api }) => {
           if (call.DepartureBoardingActivity) {
             call.DepartureBoardingActivity = serviceJourney.passingTimes.find(
               ({ quay }) => quay.id === call.StopPointRef,
-            ).forBoarding
+            )?.forBoarding
               ? 'boarding'
               : 'noBoarding';
           }
@@ -206,13 +207,14 @@ const Edit = ({ cancellations, organization, lines, api }) => {
               <p className="text-center text-white">Dato (driftsdøgn)</p>
               <DatePicker
                 label="Dato"
-                selectedDate={Date.parse(
+                selectedDate={parseDate(
                   cancellation.data.EstimatedVehicleJourney
                     .FramedVehicleJourneyRef.DataFrameRef,
                 )}
                 disabled
                 dateFormats={['yyyy-MM-dd']}
-                minDate={new Date()}
+                minDate={now()}
+                onChange={() => {}}
               />
             </div>
 

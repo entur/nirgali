@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { DatePicker } from '@entur/datepicker';
+import { DatePicker, Time } from '@entur/datepicker';
 import {
   PrimaryButton as Button,
   NegativeButton,
@@ -7,11 +7,16 @@ import {
   ButtonGroup,
 } from '@entur/button';
 import { Contrast } from '@entur/layout';
-import addHours from 'date-fns/addHours';
 import Select from 'react-select';
-import { isBefore } from 'date-fns';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getLineOption } from '../../util/getLineOption';
+import {
+  getLocalTimeZone,
+  now,
+  parseAbsoluteToLocal,
+  toCalendarDateTime,
+  toZoned,
+} from '@internationalized/date';
 
 const Edit = ({ messages, firebase, organization, lines, api }) => {
   const navigate = useNavigate();
@@ -23,7 +28,9 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
   );
 
   const [serviceJourney, setServiceJourney] = useState(undefined);
-  const [from, setFrom] = useState(undefined);
+  const [from, setFrom] = useState(
+    parseAbsoluteToLocal(issue.data.ValidityPeriod.StartTime),
+  );
   const [to, setTo] = useState(undefined);
 
   useEffect(() => {
@@ -68,10 +75,10 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
       }
     }
     if (from) {
-      issue.data.ValidityPeriod.StartTime = from.toISOString();
+      issue.data.ValidityPeriod.StartTime = from.toAbsoluteString();
     }
     if (to) {
-      issue.data.ValidityPeriod.EndTime = to.toISOString();
+      issue.data.ValidityPeriod.EndTime = to.toAbsoluteString();
     }
     issue.data.ReportType = event.target.reportType.value;
 
@@ -104,7 +111,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
     const update = {
       Progress: 'closed',
       ValidityPeriod: {
-        EndTime: addHours(new Date(), 5).toISOString(),
+        EndTime: now(getLocalTimeZone()).add({ hours: 5 }).toAbsoluteString(),
       },
     };
     const codespace = organization.split(':')[0];
@@ -291,16 +298,25 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
 
   const onToChange = useCallback(
     (to) => {
-      const now = new Date();
       const calculatedFrom =
-        from || new Date(issue.data.ValidityPeriod.StartTime);
+        from || parseAbsoluteToLocal(issue.data.ValidityPeriod.StartTime);
 
-      if (isBefore(to, now)) {
-        setTo(now);
-      } else if (isBefore(to, calculatedFrom)) {
+      if (to.compare(now(getLocalTimeZone())) < 0) {
+        setTo(now(getLocalTimeZone()));
+      } else if (to.compare(calculatedFrom) < 0) {
         setTo(calculatedFrom);
       } else {
-        setTo(to);
+        let copy = to.copy();
+        if (!to.hour || !to.minute) {
+          copy = toZoned(
+            toCalendarDateTime(
+              copy,
+              new Time(calculatedFrom.hour, calculatedFrom.minute),
+            ),
+            getLocalTimeZone(),
+          );
+        }
+        setTo(copy);
       }
     },
     [setTo, from, issue],
@@ -387,24 +403,24 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
         <div className="form-group d-flex">
           <DatePicker
             label="Fra"
-            selectedDate={from || new Date(issue.data.ValidityPeriod.StartTime)}
+            selectedDate={
+              from || parseAbsoluteToLocal(issue.data.ValidityPeriod.StartTime)
+            }
             onChange={onFromChange}
-            dateFormats={['yyyy-MM-dd HH:mm']}
-            minDate={new Date()}
-            showTimeInput
+            minDate={now(getLocalTimeZone())}
+            showTime
           />
           <DatePicker
             label="Til"
             selectedDate={
               to ||
               (issue.data.ValidityPeriod.EndTime
-                ? new Date(issue.data.ValidityPeriod.EndTime)
+                ? parseAbsoluteToLocal(issue.data.ValidityPeriod.EndTime)
                 : undefined)
             }
             onChange={onToChange}
-            dateFormats={['yyyy-MM-dd HH:mm']}
             minDate={from}
-            showTimeInput
+            showTime
             placeholder="Til-dato"
           />
         </div>

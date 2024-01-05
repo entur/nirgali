@@ -7,8 +7,8 @@ import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import { Switch } from '@entur/form';
 import { Contrast } from '@entur/layout';
 import { sortBySituationNumber } from '../../util/sort';
-import format from 'date-fns/format';
 import { useNavigate } from 'react-router-dom';
+import { DateFormatter } from '@internationalized/date';
 
 const returnRedOrGreenIcon = (param, date) => {
   if (
@@ -40,7 +40,8 @@ const getType = (param) => {
 };
 
 const getDate = (param) => {
-  return param ? format(new Date(param), 'HH:mm dd.MM.yyyy') : 'Ikke oppgitt';
+  const formatter = new DateFormatter('nb-NO');
+  return param ? formatter.format(new Date(param)) : 'Ikke oppgitt';
 };
 
 const Overview = ({ messages }) => {
