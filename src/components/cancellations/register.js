@@ -7,20 +7,26 @@ import {
 } from '@entur/button';
 import { Contrast } from '@entur/layout';
 import { DatePicker } from '@entur/datepicker';
-import { addMinutes, lightFormat } from 'date-fns';
 import LinePicker from '../line-picker';
 import { useNavigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { sortServiceJourneyByDepartureTime } from '../../util/sort';
 import StopPicker from '../stop-picker';
 import { mapEstimatedCall } from './mapEstimatedCall';
-
-const formatDate = (date) => lightFormat(date, 'yyyy-MM-dd');
+import {
+  getLocalTimeZone,
+  now,
+  parseAbsoluteToLocal,
+  parseDate,
+  parseZonedDateTime,
+  toCalendarDate,
+  today
+} from '@internationalized/date';
 
 export const Register = ({ lines, api, organization }) => {
   const navigate = useNavigate();
   const [chosenLine, setChosenLine] = React.useState(null);
-  const [departureDate, setDepartureDate] = React.useState(new Date());
+  const [departureDate, setDepartureDate] = React.useState(now(getLocalTimeZone()));
   const [departures, setDepartures] = React.useState([]);
   const [chosenDeparture, setChosenDeparture] = React.useState(null);
   const [isDepartureStops, setIsDepartureStops] = React.useState(false);
@@ -51,7 +57,7 @@ export const Register = ({ lines, api, organization }) => {
         LineRef: chosenLine,
         DirectionRef: 0,
         FramedVehicleJourneyRef: {
-          DataFrameRef: formatDate(departureDate),
+          DataFrameRef: toCalendarDate(departureDate).toString(),
           DatedVehicleJourneyRef: chosenDeparture,
         },
         Cancellation: !isDepartureStops && departureStops.length === 0,
@@ -106,15 +112,15 @@ export const Register = ({ lines, api, organization }) => {
             serviceJourney.estimatedCalls[
               serviceJourney.estimatedCalls.length - 1
             ].aimedArrivalTime,
-          ) > addMinutes(Date.now(), 10).getTime(),
+          ) > now(getLocalTimeZone()).add({ minutes: 10 }).toDate().getTime(),
       )
       .sort(sortServiceJourneyByDepartureTime)
       .map((item) => ({
         label:
-          item.estimatedCalls[0].aimedDepartureTime
-            .split('T')
-            .pop()
-            .split(':00+')[0] +
+          new Date(Date.parse(item.estimatedCalls[0].aimedDepartureTime)).toLocaleTimeString(navigator.language, {
+            hour: '2-digit',
+            minute: '2-digit',
+          }) +
           ' fra ' +
           item.estimatedCalls[0].quay.name +
           ' (' +
@@ -128,7 +134,7 @@ export const Register = ({ lines, api, organization }) => {
     const fetchServiceJourneys = async () => {
       const response = await api.getDepartures(
         chosenLine,
-        formatDate(departureDate),
+        toCalendarDate(departureDate).toString(),
       );
       setDepartures(response.data.serviceJourneys);
     };
@@ -165,8 +171,7 @@ export const Register = ({ lines, api, organization }) => {
             label="Velg dato"
             selectedDate={departureDate}
             onChange={handleDepartureDateChange}
-            dateFormats={['yyyy-MM-dd']}
-            minDate={new Date()}
+            minDate={today(getLocalTimeZone())}
           />
           <Contrast>
             <Button width="fluid" onClick={callApiDeparture}>
