@@ -7,7 +7,6 @@ import {
   ButtonGroup,
 } from '@entur/button';
 import { Contrast } from '@entur/layout';
-import addHours from 'date-fns/addHours';
 import Select from 'react-select';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getLineOption } from '../../util/getLineOption';
@@ -112,7 +111,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
     const update = {
       Progress: 'closed',
       ValidityPeriod: {
-        EndTime: addHours(new Date(), 5).toISOString(),
+        EndTime: now(getLocalTimeZone()).add({ hours: 5 }).toAbsoluteString()
       },
     };
     const codespace = organization.split(':')[0];
