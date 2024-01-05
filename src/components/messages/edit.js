@@ -111,7 +111,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
     const update = {
       Progress: 'closed',
       ValidityPeriod: {
-        EndTime: now(getLocalTimeZone()).add({ hours: 5 }).toAbsoluteString()
+        EndTime: now(getLocalTimeZone()).add({ hours: 5 }).toAbsoluteString(),
       },
     };
     const codespace = organization.split(':')[0];

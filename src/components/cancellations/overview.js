@@ -6,14 +6,14 @@ import { Table, Thead, Tbody, Tr, Th, Td } from 'react-super-responsive-table';
 import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css';
 import { Contrast } from '@entur/layout';
 import { useNavigate } from 'react-router-dom';
-import { addMinutes, lightFormat } from 'date-fns';
 import { Switch } from '@entur/form';
 import { sortCancellationByExpiry } from '../../util/sort';
+import { getLocalTimeZone, now } from '@internationalized/date';
 
 const returnRedOrGreenIcon = (param) => {
   if (
     param.EstimatedVehicleJourney.ExpiresAtEpochMs >
-    addMinutes(new Date(), 10).getTime()
+    now(getLocalTimeZone()).add({ minutes: 10 }).toDate().getTime()
   ) {
     return <img src={green} id="active" alt="" height="30" width="30" />;
   } else {
@@ -151,13 +151,15 @@ const Overview = ({ cancellations, lines }) => {
                     }
                   </Td>
                   <Td>
-                    {lightFormat(
+                    {new Date(
                       Date.parse(
                         item.EstimatedVehicleJourney.EstimatedCalls
                           .EstimatedCall[0].AimedDepartureTime,
                       ),
-                      'HH:mm',
-                    )}
+                    ).toLocaleTimeString(navigator.language, {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </Td>
                   <Td>
                     {
@@ -173,7 +175,10 @@ const Overview = ({ cancellations, lines }) => {
                       onClick={getEditCallback(id)}
                       disabled={
                         item.EstimatedVehicleJourney.ExpiresAtEpochMs <=
-                        addMinutes(new Date(), 10).getTime()
+                        now(getLocalTimeZone())
+                          .add({ minutes: 10 })
+                          .toDate()
+                          .getTime()
                       }
                     >
                       Endre
