@@ -1,4 +1,5 @@
-const transformSituationData = require('./utils').transformSituationData;
+const transformSituationData =
+  require('./transformSituationData').transformSituationData;
 
 const assertKeyOrder = (expected, actual) => {
   Object.keys(expected).forEach((key, i) => {

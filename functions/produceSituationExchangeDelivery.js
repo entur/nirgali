@@ -1,7 +1,7 @@
 const {
   transformSituationData,
   filterOpenExpiredMessages,
-} = require('./utils');
+} = require('./transformSituationData');
 
 exports.produceSituationExchangeDelivery = async (db, dateTime) => {
   const open = db

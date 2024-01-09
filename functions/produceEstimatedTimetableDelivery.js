@@ -1,5 +1,5 @@
 const { addMinutes } = require('date-fns');
-const { transformCancellationData } = require('./utils');
+const { transformCancellationData } = require('./transformCancellationData');
 
 exports.produceEstimatedTimetableDelivery = async (db, dateTime) => {
   const cancellations = await db
