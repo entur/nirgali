@@ -11,6 +11,7 @@ import { TabPanel, TabPanels } from '@entur/tab';
 import { TabsContainer } from './tabs-container';
 import { Messages } from './messages/messages';
 import { Cancellations } from './cancellations/cancellations';
+import { ExtraJourneys } from './extrajourneys/extra-journeys';
 
 export default class App extends React.Component {
   state = {
@@ -127,6 +128,10 @@ export default class App extends React.Component {
                               db={this.db}
                             />
                           )}
+                        </TabPanel>
+
+                        <TabPanel>
+                          {selectedTab === 2 && <ExtraJourneys />}
                         </TabPanel>
                       </TabPanels>
                     )}
