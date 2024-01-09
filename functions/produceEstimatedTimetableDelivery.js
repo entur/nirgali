@@ -1,5 +1,6 @@
 const { addMinutes } = require('date-fns');
 const { transformCancellationData } = require('./transformCancellationData');
+const { transformExtraJourneysData } = require('./transformExtraJourneysData');
 
 exports.produceEstimatedTimetableDelivery = async (db, dateTime) => {
   const cancellations = await db
@@ -11,14 +12,22 @@ exports.produceEstimatedTimetableDelivery = async (db, dateTime) => {
     )
     .get();
 
+  const extraJourneys = await db.collectionGroup('extraJourneys').get();
+
+  const cancellationData = cancellations.docs.map((doc) =>
+    transformCancellationData(doc.data().EstimatedVehicleJourney),
+  );
+
+  const extraJourneysData = extraJourneys.docs.map((doc) =>
+    transformExtraJourneysData(doc.data().EstimatedVehicleJourney),
+  );
+
   return {
     _attributes: { version: '2.0' },
     ResponseTimestamp: dateTime,
     EstimatedJourneyVersionFrame: {
       RecordedAtTime: dateTime,
-      EstimatedVehicleJourney: cancellations.docs.map((doc) =>
-        transformCancellationData(doc.data().EstimatedVehicleJourney),
-      ),
+      EstimatedVehicleJourney: [...cancellationData, ...extraJourneysData],
     },
   };
 };
