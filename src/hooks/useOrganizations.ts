@@ -46,7 +46,7 @@ export const useOrganizations: () => Organization[] = () => {
     };
 
     fetchAuthorities();
-  }, []);
+  }, [auth, config]);
 
   return organizations;
 };

@@ -18,18 +18,17 @@ export const App = ({ selectedOrganization }) => {
 
   const [lines, setLines] = useState();
 
-  const getLines = async () => {
-    const response = await api(config).getLines(selectedOrganization);
-    if (response.data) {
-      setLines(response.data.lines);
-    } else {
-      console.log('Could not find any lines for this organization');
-    }
-  };
-
   useEffect(() => {
+    const getLines = async () => {
+      const response = await api(config).getLines(selectedOrganization);
+      if (response.data) {
+        setLines(response.data.lines);
+      } else {
+        console.log('Could not find any lines for this organization');
+      }
+    };
     getLines();
-  }, [selectedOrganization]);
+  }, [selectedOrganization, config]);
 
   return (
     <Router>

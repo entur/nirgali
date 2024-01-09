@@ -18,7 +18,7 @@ export const AppWrapper = () => {
       // TODO store selected organization in localstorage?
       setSelectedOrganization(organizations[0].id);
     }
-  }, [organizations]);
+  }, [organizations, selectedOrganization]);
 
   return (
     <>
