@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './components/app';
-import api from './api/api';
+import { AppWrapper } from './components/app-wrapper';
 import firebase from 'firebase/compat/app';
-import AuthProvider, { useAuth } from '@entur/auth-provider';
+import AuthProvider from '@entur/auth-provider';
+import { ConfigContext } from './config/ConfigContext';
+import { useLoginStatus } from './hooks/useLoginStatus';
 
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
@@ -12,44 +13,9 @@ import 'bootstrap/dist/css/bootstrap.css';
 import './style/index.css';
 import './style/base/base.scss';
 
-const headers = (token) => ({
-  headers: {
-    Authorization: 'Bearer ' + token,
-  },
-});
-
-const TOKEN_REFRESH_RATE = 60 * 1000;
-
-const AuthenticatedApp = ({ config }) => {
-  const auth = useAuth();
-  const [loggedIn, setLoggedIn] = useState(false);
-  const authApi = config['auth-api'];
-
-  useEffect(() => {
-    const getToken = async () => {
-      const token = await auth.getAccessToken();
-      const authResponse = await fetch(authApi, headers(token));
-      const { firebaseToken } = await authResponse.json();
-      await firebase.auth().signInWithCustomToken(firebaseToken);
-      setLoggedIn(true);
-    };
-
-    if (auth.isAuthenticated) {
-      getToken();
-    }
-
-    const updater = setInterval(() => {
-      if (auth.isAuthenticated) {
-        getToken();
-      }
-    }, TOKEN_REFRESH_RATE);
-
-    return () => {
-      clearInterval(updater);
-    };
-  }, [auth, authApi]);
-
-  return <>{loggedIn && <App auth={auth} api={api(config)} />}</>;
+const AuthenticatedApp = () => {
+  const { loggedIn } = useLoginStatus();
+  return <>{loggedIn && <AppWrapper />}</>;
 };
 
 const renderApp = (config) => {
@@ -64,7 +30,9 @@ const renderApp = (config) => {
       }}
       auth0ClaimsNamespace={config.auth0.claimsNamespace}
     >
-      <AuthenticatedApp config={config} />
+      <ConfigContext.Provider value={config}>
+        <AuthenticatedApp />
+      </ConfigContext.Provider>
     </AuthProvider>,
   );
 };
