@@ -4,10 +4,28 @@ import firebase from 'firebase/compat/app';
 import Overview from './overview';
 import { Register } from './register';
 import Edit from './edit';
+import { useConfig } from '../../config/ConfigContext';
+import api from '../../api/api';
 
-export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
+export const Cancellations = ({ selectedOrganization }: any) => {
   const [cancellations, setCancellations] = useState([]);
+  const [lines, setLines] = useState();
+  const config = useConfig();
+
   const db = firebase.firestore();
+
+  useEffect(() => {
+    const getLines = async () => {
+      const response = await api(config).getLines(selectedOrganization);
+      if (response.data) {
+        setLines(response.data.lines);
+      } else {
+        console.log('Could not find any lines for this organization');
+      }
+    };
+    getLines();
+  }, [selectedOrganization, config]);
+
   useEffect(() => {
     const codespace = selectedOrganization.split(':')[0];
     const authority = selectedOrganization;
@@ -50,7 +68,7 @@ export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
           <Edit
             cancellations={cancellations}
             lines={lines}
-            api={api}
+            api={api(config)}
             organization={selectedOrganization}
           />
         }
@@ -60,7 +78,7 @@ export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
         element={
           <Register
             lines={lines}
-            api={api}
+            api={api(config)}
             organization={selectedOrganization}
           />
         }
