@@ -2,7 +2,8 @@ const {
   transformSituationData,
   filterOpenExpiredMessages,
 } = require('./utils');
-export const produceSituationExchangeDelivery = async (db, dateTime) => {
+
+exports.produceSituationExchangeDelivery = async (db, dateTime) => {
   const open = db
     .collectionGroup('messages')
     .where('Progress', '==', 'open')

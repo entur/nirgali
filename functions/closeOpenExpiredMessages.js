@@ -1,6 +1,7 @@
 const functions = require('firebase-functions');
 const { getFirestore } = require('firebase-admin/firestore');
 const { addHours, parseISO } = require('date-fns');
+
 exports.closeOpenExpiredMessages = function () {
   return functions
     .region('europe-west1')

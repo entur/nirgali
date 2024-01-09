@@ -1,6 +1,7 @@
 const { addMinutes } = require('date-fns');
 const { transformCancellationData } = require('./utils');
-export const produceEstimatedTimetableDelivery = async (db, dateTime) => {
+
+exports.produceEstimatedTimetableDelivery = async (db, dateTime) => {
   const cancellations = await db
     .collectionGroup('cancellations')
     .where(
