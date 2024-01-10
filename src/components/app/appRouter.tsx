@@ -10,12 +10,15 @@ import { TabsContainer } from './tabs-container';
 import { Messages } from '../messages/messages';
 import { Cancellations } from '../cancellations/cancellations';
 import { ExtraJourneys } from '../extrajourneys/extra-journeys';
+import { hasExtraJourneysAccess } from '../../util/roleUtils';
+import { useAuth } from '@entur/auth-provider';
 
 export const AppRouter = ({
   selectedOrganization,
 }: {
   selectedOrganization: string;
 }) => {
+  const auth = useAuth();
   return (
     <Router>
       <div>
@@ -25,7 +28,7 @@ export const AppRouter = ({
             <Route
               path="/:tab/*"
               element={
-                <TabsContainer>
+                <TabsContainer selectedOrganization={selectedOrganization}>
                   {(selectedTab: number) => (
                     <TabPanels>
                       <TabPanel>
@@ -44,9 +47,13 @@ export const AppRouter = ({
                         )}
                       </TabPanel>
 
-                      <TabPanel>
-                        {selectedTab === 2 && <ExtraJourneys />}
-                      </TabPanel>
+                      {hasExtraJourneysAccess(auth, selectedOrganization) ? (
+                        <TabPanel>
+                          {selectedTab === 2 && <ExtraJourneys />}
+                        </TabPanel>
+                      ) : (
+                        selectedTab === 2 && <Navigate to="/meldinger" />
+                      )}
                     </TabPanels>
                   )}
                 </TabsContainer>

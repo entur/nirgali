@@ -2,6 +2,7 @@ import { useAuth } from '@entur/auth-provider';
 import { useEffect, useState } from 'react';
 import { useConfig } from '../config/ConfigContext';
 import api from '../api/api';
+import { getAllowedCodespaces } from '../util/roleUtils';
 
 type Organization = {
   id: string;
@@ -18,10 +19,7 @@ export const useOrganizations: () => Organization[] = () => {
       auth.logout();
     }
 
-    const allowedCodespaces = auth.roleAssignments
-      ?.map(JSON.parse)
-      .filter(({ r: role }: { r: string }) => role === 'editSX')
-      .map(({ o: org }: { o: string }) => org);
+    const allowedCodespaces = getAllowedCodespaces(auth);
 
     if (!(allowedCodespaces.length > 0)) {
       auth.logout();
