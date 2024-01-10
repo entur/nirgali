@@ -1,10 +1,8 @@
-import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { AppWrapper } from './components/app-wrapper';
+import { AuthenticatedApp } from './components/app/app';
 import firebase from 'firebase/compat/app';
 import AuthProvider from '@entur/auth-provider';
-import { ConfigContext } from './config/ConfigContext';
-import { useLoginStatus } from './hooks/useLoginStatus';
+import { Config, ConfigContext } from './config/ConfigContext';
 
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
@@ -13,22 +11,19 @@ import 'bootstrap/dist/css/bootstrap.css';
 import './style/index.css';
 import './style/base/base.scss';
 
-const AuthenticatedApp = () => {
-  const { loggedIn } = useLoginStatus();
-  return <>{loggedIn && <AppWrapper />}</>;
-};
+const renderApp = (config: Config) => {
+  const rootElement = document.getElementById('root');
+  const root = createRoot(rootElement!);
 
-const renderApp = (config) => {
-  const root = createRoot(document.getElementById('root'));
   root.render(
     <AuthProvider
       auth0Config={{
-        domain: config.auth0.domain,
-        clientId: config.auth0.clientId,
-        audience: config.auth0.audience,
+        domain: config.auth0?.domain,
+        clientId: config.auth0?.clientId,
+        audience: config.auth0?.audience,
         redirectUri: window.location.origin,
       }}
-      auth0ClaimsNamespace={config.auth0.claimsNamespace}
+      auth0ClaimsNamespace={config.auth0?.claimsNamespace}
     >
       <ConfigContext.Provider value={config}>
         <AuthenticatedApp />

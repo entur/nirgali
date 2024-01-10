@@ -7,11 +7,11 @@ import {
 } from '@entur/button';
 import { Contrast } from '@entur/layout';
 import { DatePicker } from '@entur/datepicker';
-import LinePicker from '../line-picker';
+import LinePicker from '../common/line-picker';
 import { useNavigate } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { sortServiceJourneyByDepartureTime } from '../../util/sort';
-import StopPicker from '../stop-picker';
+import StopPicker from '../common/stop-picker';
 import { mapEstimatedCall } from './mapEstimatedCall';
 import {
   getLocalTimeZone,

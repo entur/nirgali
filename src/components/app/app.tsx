@@ -1,17 +1,26 @@
 // @ts-ignore
-import Background from '../img/background.jpg';
-import { useOrganizations } from '../hooks/useOrganizations';
+import Background from '../../img/background.jpg';
+import { useOrganizations } from '../../hooks/useOrganizations';
 import NavBar from './navbar';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@entur/auth-provider';
-import { App } from './app';
+import { AppRouter } from './appRouter';
+import { useLoginStatus } from '../../hooks/useLoginStatus';
 
-export const AppWrapper = () => {
+export const AuthenticatedApp = () => {
+  const { loggedIn } = useLoginStatus();
+
+  if (!loggedIn) {
+    return null;
+  }
+
+  return <App />;
+};
+export const App = () => {
   const organizations = useOrganizations();
   const [selectedOrganization, setSelectedOrganization] = useState<
     string | undefined
   >();
-  const auth = useAuth();
 
   useEffect(() => {
     if (organizations.length && !selectedOrganization) {
@@ -20,6 +29,8 @@ export const AppWrapper = () => {
     }
   }, [organizations, selectedOrganization]);
 
+  const { logout } = useAuth();
+
   return (
     <>
       <img className="background-image" src={Background} alt="" />
@@ -27,10 +38,10 @@ export const AppWrapper = () => {
         onSelectOrganization={setSelectedOrganization}
         user={organizations.map((org) => org.id)}
         name={organizations.map((org) => org.name)}
-        logout={() => auth.logout({ returnTo: window.location.origin })}
+        logout={() => logout({ returnTo: window.location.origin })}
       />
       {selectedOrganization && (
-        <App selectedOrganization={selectedOrganization} />
+        <AppRouter selectedOrganization={selectedOrganization} />
       )}
     </>
   );

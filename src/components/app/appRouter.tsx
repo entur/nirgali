@@ -7,11 +7,15 @@ import {
 } from 'react-router-dom';
 import { TabPanel, TabPanels } from '@entur/tab';
 import { TabsContainer } from './tabs-container';
-import { Messages } from './messages/messages';
-import { Cancellations } from './cancellations/cancellations';
-import { ExtraJourneys } from './extrajourneys/extra-journeys';
+import { Messages } from '../messages/messages';
+import { Cancellations } from '../cancellations/cancellations';
+import { ExtraJourneys } from '../extrajourneys/extra-journeys';
 
-export const App = ({ selectedOrganization }) => {
+export const AppRouter = ({
+  selectedOrganization,
+}: {
+  selectedOrganization: string;
+}) => {
   return (
     <Router>
       <div>
@@ -22,7 +26,7 @@ export const App = ({ selectedOrganization }) => {
               path="/:tab/*"
               element={
                 <TabsContainer>
-                  {(selectedTab) => (
+                  {(selectedTab: number) => (
                     <TabPanels>
                       <TabPanel>
                         {selectedTab === 0 && (

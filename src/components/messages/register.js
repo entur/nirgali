@@ -8,8 +8,8 @@ import {
 import { Contrast } from '@entur/layout';
 import { DatePicker, Time } from '@entur/datepicker';
 import { BannerAlertBox } from '@entur/alert';
-import LinePicker from '../line-picker';
-import StopPicker from '../stop-picker';
+import LinePicker from '../common/line-picker';
+import StopPicker from '../common/stop-picker';
 import { useNavigate } from 'react-router-dom';
 import { sortServiceJourneyByDepartureTime } from '../../util/sort';
 import {
