@@ -6,25 +6,13 @@ import { useEffect, useState } from 'react';
 import firebase from 'firebase/compat/app';
 import api from '../../api/api';
 import { useConfig } from '../../config/ConfigContext';
+import { useLines } from '../../hooks/useLines';
 
 export const Messages = ({ selectedOrganization }) => {
   const [messages, setMessages] = useState([]);
-  const [lines, setLines] = useState();
+  const lines = useLines(selectedOrganization);
   const config = useConfig();
-
   const db = firebase.firestore();
-
-  useEffect(() => {
-    const getLines = async () => {
-      const response = await api(config).getLines(selectedOrganization);
-      if (response.data) {
-        setLines(response.data.lines);
-      } else {
-        console.log('Could not find any lines for this organization');
-      }
-    };
-    getLines();
-  }, [selectedOrganization, config]);
 
   useEffect(() => {
     const codespace = selectedOrganization.split(':')[0];

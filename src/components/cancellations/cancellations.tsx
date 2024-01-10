@@ -6,25 +6,14 @@ import { Register } from './register';
 import Edit from './edit';
 import { useConfig } from '../../config/ConfigContext';
 import api from '../../api/api';
+import { useLines } from '../../hooks/useLines';
 
 export const Cancellations = ({ selectedOrganization }: any) => {
   const [cancellations, setCancellations] = useState([]);
-  const [lines, setLines] = useState();
+  const lines = useLines(selectedOrganization);
   const config = useConfig();
 
   const db = firebase.firestore();
-
-  useEffect(() => {
-    const getLines = async () => {
-      const response = await api(config).getLines(selectedOrganization);
-      if (response.data) {
-        setLines(response.data.lines);
-      } else {
-        console.log('Could not find any lines for this organization');
-      }
-    };
-    getLines();
-  }, [selectedOrganization, config]);
 
   useEffect(() => {
     const codespace = selectedOrganization.split(':')[0];
