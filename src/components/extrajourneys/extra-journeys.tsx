@@ -1,3 +1,10 @@
+import { Overview } from './overview';
+import { Route, Routes } from 'react-router-dom';
+import { Register } from './register';
+
 export const ExtraJourneys = () => (
-  <h2 className="text-center text-white">Oversikt</h2>
+  <Routes>
+    <Route path="/" element={<Overview />} />
+    <Route path="/ny" element={<Register />} />
+  </Routes>
 );

@@ -12,13 +12,11 @@ import { Cancellations } from '../cancellations/cancellations';
 import { ExtraJourneys } from '../extrajourneys/extra-journeys';
 import { hasExtraJourneysAccess } from '../../util/roleUtils';
 import { useAuth } from '@entur/auth-provider';
+import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
 
-export const AppRouter = ({
-  selectedOrganization,
-}: {
-  selectedOrganization: string;
-}) => {
+export const AppRouter = () => {
   const auth = useAuth();
+  const selectedOrganization = useSelectedOrganization();
   return (
     <Router>
       <div>

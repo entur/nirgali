@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@entur/auth-provider';
 import { AppRouter } from './appRouter';
 import { useLoginStatus } from '../../hooks/useLoginStatus';
+import { SelectedOrganizationContext } from '../../hooks/useSelectedOrganization';
 
 export const AuthenticatedApp = () => {
   const { loggedIn } = useLoginStatus();
@@ -41,7 +42,9 @@ export const App = () => {
         logout={() => logout({ returnTo: window.location.origin })}
       />
       {selectedOrganization && (
-        <AppRouter selectedOrganization={selectedOrganization} />
+        <SelectedOrganizationContext.Provider value={selectedOrganization}>
+          <AppRouter />
+        </SelectedOrganizationContext.Provider>
       )}
     </>
   );
