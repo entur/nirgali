@@ -22,16 +22,13 @@ import {
   parseZonedDateTime,
 } from '@internationalized/date';
 import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
-import { useOperators } from '../../hooks/useOperators';
+import { Operator, useOperators } from '../../hooks/useOperators';
 import { Dropdown } from '@entur/dropdown';
-
-type Call = {
-  quay?: string;
-  boarding?: boolean;
-  alighting?: boolean;
-  arrival?: string;
-  departure?: string;
-};
+import { StopPlaceAutocomplete } from './stop-place-autocomplete';
+import { QuaySelect } from './quay-select';
+import { Call, ExtraJourney, VehicleMode } from './types';
+import firebase from 'firebase/compat/app';
+import { useNavigate } from 'react-router-dom';
 
 const Row = ({
   call,
@@ -39,12 +36,14 @@ const Row = ({
   isFirst,
   isLast,
   onAdd,
+  mode,
 }: {
   call: Call;
   onChange: (call: Call) => void;
   isFirst: boolean;
   isLast: boolean;
   onAdd: () => void;
+  mode?: VehicleMode;
 }) => {
   const onFieldChange = <T extends Call, K extends keyof T>(
     key: K,
@@ -56,31 +55,39 @@ const Row = ({
     });
   };
 
+  const [selectedStopPlace, setSelectedStopPlace] = useState<any | undefined>();
+
   return (
     <TableRow hover>
       <EditableCell>
-        <TextField
-          aria-label="Platform"
-          label=""
-          value={call.quay}
-          onChange={(e) => onFieldChange('quay', e.target.value)}
-        />
+        <>
+          <StopPlaceAutocomplete
+            mode={mode}
+            value={selectedStopPlace}
+            onChange={setSelectedStopPlace}
+          />
+          <QuaySelect
+            selectedStopPlace={selectedStopPlace?.value}
+            value={call.quay}
+            onChange={(quay) => onFieldChange('quay', quay)}
+          />
+        </>
       </EditableCell>
       <EditableCell>
         <>
-          <Checkbox
-            onChange={(e) => onFieldChange('boarding', e.target.checked)}
-            disabled={isLast}
-            checked={call.boarding}
-          >
-            Påstigning
-          </Checkbox>
           <Checkbox
             onChange={(e) => onFieldChange('alighting', e.target.checked)}
             disabled={isFirst}
             checked={call.alighting}
           >
             Avstigning
+          </Checkbox>
+          <Checkbox
+            onChange={(e) => onFieldChange('boarding', e.target.checked)}
+            disabled={isLast}
+            checked={call.boarding}
+          >
+            Påstigning
           </Checkbox>
         </>
       </EditableCell>
@@ -125,58 +132,8 @@ const Row = ({
   );
 };
 
-type DepartureBoardingActivity = 'boarding' | 'noBoarding';
-type ArrivalBoardingActivity = 'alighting' | 'noAlighting';
-
-type EstimatedCall = {
-  StopPointRef: string;
-  Order: number;
-  DestinationDisplay: string;
-  AimedArrivalTime?: string;
-  ExpectedArrivalTime?: string;
-  AimedDepartureTime?: string;
-  ExpectedDepartureTime?: string;
-  DepartureBoardingActivity?: DepartureBoardingActivity;
-  ArrivalBoardingActivity?: ArrivalBoardingActivity;
-};
-
-/* air
-bus
-coach
-ferry (mapped to "water")
-metro
-rail
-tram
- */
-
-enum VehicleMode {
-  bus = 'bus',
-  coach = 'coach',
-  ferry = 'ferry',
-  metro = 'metro',
-  rail = 'rail',
-  tram = 'tram',
-}
-
-type ExtraJourney = {
-  RecordedAtTime: string;
-  LineRef: string;
-  DirectionRef: '0';
-  EstimatedVehicleJourneyCode: string;
-  ExtraJourney: true;
-  VehicleMode: VehicleMode;
-  RouteRef: string;
-  PublishedLineName: string;
-  GroupOfLinesRef: string;
-  ExternalLineRef: string;
-  OperatorRef: string;
-  Monitored: true;
-  EstimatedCalls: EstimatedCall[];
-  IsCompleteStopSequence: true;
-};
-
 export const Register = () => {
-  const selectedOrganization = useSelectedOrganization().split(':')[0];
+  const selectedOrganization = useSelectedOrganization();
   const operators = useOperators();
   const [name, setName] = useState<string | undefined>();
   const [mode, setMode] = useState<VehicleMode | undefined>();
@@ -184,7 +141,7 @@ export const Register = () => {
     string | undefined
   >();
   const [selectedOperator, setSelectedOperator] = useState<
-    string | undefined
+    Operator | undefined
   >();
 
   const [calls, setCalls] = useState<Call[]>([
@@ -198,8 +155,12 @@ export const Register = () => {
     },
   ]);
 
+  const navigate = useNavigate();
+
+  const codespace = selectedOrganization.split(':')[0];
+
   const transform: () => ExtraJourney = () => {
-    const lineRef = `${selectedOrganization}:Line:${window.crypto.randomUUID()}`;
+    const lineRef = `${codespace}:Line:${window.crypto.randomUUID()}`;
 
     // validation
     if (!mode || !name || !destinationDisplay || !selectedOperator) {
@@ -210,37 +171,52 @@ export const Register = () => {
       RecordedAtTime: now(getLocalTimeZone()).toDate().toISOString(),
       LineRef: lineRef,
       DirectionRef: '0',
-      EstimatedVehicleJourneyCode: `${selectedOrganization}:ServiceJourney:${window.crypto.randomUUID()}`,
+      EstimatedVehicleJourneyCode: `${codespace}:ServiceJourney:${window.crypto.randomUUID()}`,
       ExtraJourney: true,
       VehicleMode: mode,
-      RouteRef: `${selectedOrganization}:Route:${window.crypto.randomUUID()}`,
+      RouteRef: `${codespace}:Route:${window.crypto.randomUUID()}`,
       PublishedLineName: name,
-      GroupOfLinesRef: `${selectedOrganization}:Network:${window.crypto.randomUUID()}`,
+      GroupOfLinesRef: `${codespace}:Network:${window.crypto.randomUUID()}`,
       ExternalLineRef: lineRef,
-      OperatorRef: selectedOperator,
+      OperatorRef: selectedOperator.id,
       Monitored: true,
       EstimatedCalls: calls.map((call, i) => ({
-        StopPointRef: call.quay!,
+        StopPointRef: call.quay?.value!,
         Order: i + 1,
         DestinationDisplay: destinationDisplay,
-        AimedArrivalTime: call.arrival,
-        ExpectedArrivalTime: call.arrival,
-        AimedDepartureTime: call.departure,
-        ExpectedDepartureTime: call.departure,
+        AimedArrivalTime: call.arrival ?? null,
+        ExpectedArrivalTime: call.arrival ?? null,
+        AimedDepartureTime: call.departure ?? null,
+        ExpectedDepartureTime: call.departure ?? null,
         DepartureBoardingActivity:
-          i === calls.length - 1
+          i !== calls.length - 1
             ? call.boarding
               ? 'boarding'
               : 'noBoarding'
-            : undefined,
+            : null,
         ArrivalBoardingActivity:
-          i > 0 ? (call.alighting ? 'alighting' : 'noAlighting') : undefined,
+          i > 0 ? (call.alighting ? 'alighting' : 'noAlighting') : null,
       })),
       IsCompleteStopSequence: true,
     };
 
     return extraJourney;
   };
+
+  const submit = async () => {
+    const extraJourney = transform();
+
+    const db = firebase.firestore();
+    await db
+      .collection(
+        `codespaces/${codespace}/authorities/${selectedOrganization}/extrajourneys`,
+      )
+      .doc()
+      .set(extraJourney);
+
+    navigate('/ekstraavganger');
+  };
+
   return (
     <>
       <h2 className="text-center text-white">Registrer ny ekstraavgang</h2>
@@ -257,16 +233,8 @@ export const Register = () => {
       <Dropdown
         items={Object.values(VehicleMode)}
         label="Mode"
-        selectedItem={{ value: mode || '', label: '' }}
+        selectedItem={mode ? { value: mode || '', label: `${mode}` } : null}
         onChange={(value) => setMode(value?.value as VehicleMode)}
-      />
-
-      <Select<VehicleMode>
-        placeholder="Select mode"
-        // @ts-ignore
-        options={Object.values(VehicleMode)}
-        value={mode}
-        onChange={(newValue) => setMode(newValue ?? undefined)}
       />
 
       <br />
@@ -279,15 +247,27 @@ export const Register = () => {
 
       <br />
 
-      <Select<string>
-        placeholder="Select operator"
-        // @ts-ignore
-        options={operators.map((operator) => operator.id)}
-        getOptionLabel={(value) =>
-          operators.find((op) => op.id === value)?.name || ''
+      <Dropdown
+        items={() =>
+          operators.map((operator) => ({
+            value: operator.id,
+            label: `${operator.name} (${operator.id})`,
+          }))
         }
-        value={selectedOperator}
-        onChange={(newValue) => setSelectedOperator(newValue as string)}
+        label="Operator"
+        selectedItem={
+          selectedOperator
+            ? {
+                value: selectedOperator?.id,
+                label: `${selectedOperator?.name} (${selectedOperator?.id})`,
+              }
+            : null
+        }
+        onChange={(value) =>
+          setSelectedOperator(
+            operators.find((operator) => operator.id === value?.value),
+          )
+        }
       />
 
       <br />
@@ -323,6 +303,7 @@ export const Register = () => {
                     ...calls.slice(i + 1),
                   ])
                 }
+                mode={mode}
               />
             ))}
           </TableBody>
@@ -330,7 +311,7 @@ export const Register = () => {
 
         <br />
 
-        <PrimaryButton onClick={() => console.log(transform())}>
+        <PrimaryButton onClick={() => submit()}>
           Opprett ekstraavgang
         </PrimaryButton>
       </Contrast>

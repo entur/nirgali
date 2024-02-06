@@ -59,7 +59,7 @@ input,
 select,
 select.option,
 span {
-  text-align: center;
+  text-align: left;
 }
 
 .register_box {

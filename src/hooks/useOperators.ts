@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useConfig } from '../config/ConfigContext';
 import api from '../api/api';
 
-type Operator = {
+export type Operator = {
   id: string;
   name: string;
 };
