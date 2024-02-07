@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Checkbox, CheckboxPanel, RadioGroup, TextField } from '@entur/form';
+import { Checkbox, TextField } from '@entur/form';
 import {
   DataCell,
   EditableCell,
@@ -10,16 +10,12 @@ import {
   TableRow,
 } from '@entur/table';
 import { Contrast } from '@entur/layout';
-import { Button, PrimaryButton, SecondaryButton } from '@entur/button';
-import Select from 'react-select';
+import { PrimaryButton, SecondaryButton } from '@entur/button';
 import { DatePicker } from '@entur/datepicker';
 import {
   getLocalTimeZone,
   now,
   parseAbsoluteToLocal,
-  parseDate,
-  parseDateTime,
-  parseZonedDateTime,
 } from '@internationalized/date';
 import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
 import { Operator, useOperators } from '../../hooks/useOperators';

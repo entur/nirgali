@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { SearchableDropdown } from '@entur/dropdown';
 import { VehicleMode } from './types';
 

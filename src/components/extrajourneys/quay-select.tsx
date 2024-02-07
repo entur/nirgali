@@ -6,7 +6,6 @@ export function QuaySelect(props: {
   value: any;
   onChange: (value: any) => void;
 }) {
-  // Husk å bruke useCallback for å unngå at funksjonen kjøres oftere enn nødvendig
   const fetchItems = useCallback(
     async (_: any, abortControllerRef: { current: { signal: any } }) => {
       try {
@@ -16,7 +15,6 @@ export function QuaySelect(props: {
 
         const response = await fetch(
           `https://api.entur.io/stop-places/v1/read/stop-places/${props.selectedStopPlace.properties.id}`,
-          // Bruk signalet fra abortController for å avbryte utdaterte kall
           { signal: abortControllerRef.current.signal },
         );
         const data = await response.json();
@@ -28,13 +26,13 @@ export function QuaySelect(props: {
           }),
         );
       } catch (error) {
-        // AbortError må sendes videre til komponenten for å håndtere cleanup riktig
+
         // @ts-ignore
         if (error && error.name === 'AbortError') throw error;
         return [];
       }
     },
-    [props.selectedStopPlace?.properties?.id],
+    [props.selectedStopPlace],
   );
 
   return (
