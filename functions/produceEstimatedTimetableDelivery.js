@@ -12,7 +12,14 @@ exports.produceEstimatedTimetableDelivery = async (db, dateTime) => {
     )
     .get();
 
-  const extraJourneys = await db.collectionGroup('extrajourneys').get();
+  const extraJourneys = await db
+    .collectionGroup('extrajourneys')
+    .where(
+      'EstimatedVehicleJourney.ExpiresAtEpochMs',
+      '>',
+      addMinutes(new Date(), 10).getTime(),
+    )
+    .get();
 
   const cancellationData = cancellations.docs.map((doc) =>
     transformCancellationData(doc.data().EstimatedVehicleJourney),

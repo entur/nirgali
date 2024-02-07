@@ -198,6 +198,12 @@ export const Register = () => {
           })),
         },
         IsCompleteStopSequence: true,
+        ExpiresAtEpochMs:
+          Date.parse(
+            calls[
+            calls.length - 1
+              ].arrival!,
+          )
       },
     };
 

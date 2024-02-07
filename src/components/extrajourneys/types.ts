@@ -49,5 +49,6 @@ export type ExtraJourney = {
       EstimatedCall: EstimatedCall[];
     };
     IsCompleteStopSequence: true;
+    ExpiresAtEpochMs: number;
   };
 };
