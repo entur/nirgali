@@ -20,7 +20,6 @@ export function StopPlaceAutocomplete({
   value?: any;
   onChange: (newValue: any) => void;
 }) {
-  // Husk å bruke useCallback for å unngå at funksjonen kjøres oftere enn nødvendig
   const fetchItems = useCallback(
     async (
       inputValue: any,
