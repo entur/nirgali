@@ -26,7 +26,6 @@ export function QuaySelect(props: {
           }),
         );
       } catch (error) {
-
         // @ts-ignore
         if (error && error.name === 'AbortError') throw error;
         return [];
