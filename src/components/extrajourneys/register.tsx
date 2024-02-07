@@ -164,36 +164,41 @@ export const Register = () => {
     }
 
     const extraJourney: ExtraJourney = {
-      RecordedAtTime: now(getLocalTimeZone()).toDate().toISOString(),
-      LineRef: lineRef,
-      DirectionRef: '0',
-      EstimatedVehicleJourneyCode: `${codespace}:ServiceJourney:${window.crypto.randomUUID()}`,
-      ExtraJourney: true,
-      VehicleMode: mode,
-      RouteRef: `${codespace}:Route:${window.crypto.randomUUID()}`,
-      PublishedLineName: name,
-      GroupOfLinesRef: `${codespace}:Network:${window.crypto.randomUUID()}`,
-      ExternalLineRef: lineRef,
-      OperatorRef: selectedOperator.id,
-      Monitored: true,
-      EstimatedCalls: calls.map((call, i) => ({
-        StopPointRef: call.quay?.value!,
-        Order: i + 1,
-        DestinationDisplay: destinationDisplay,
-        AimedArrivalTime: call.arrival ?? null,
-        ExpectedArrivalTime: call.arrival ?? null,
-        AimedDepartureTime: call.departure ?? null,
-        ExpectedDepartureTime: call.departure ?? null,
-        DepartureBoardingActivity:
-          i !== calls.length - 1
-            ? call.boarding
-              ? 'boarding'
-              : 'noBoarding'
-            : null,
-        ArrivalBoardingActivity:
-          i > 0 ? (call.alighting ? 'alighting' : 'noAlighting') : null,
-      })),
-      IsCompleteStopSequence: true,
+      EstimatedVehicleJourney: {
+        RecordedAtTime: now(getLocalTimeZone()).toDate().toISOString(),
+        LineRef: lineRef,
+        DirectionRef: '0',
+        EstimatedVehicleJourneyCode: `${codespace}:ServiceJourney:${window.crypto.randomUUID()}`,
+        ExtraJourney: true,
+        VehicleMode: mode,
+        RouteRef: `${codespace}:Route:${window.crypto.randomUUID()}`,
+        PublishedLineName: name,
+        GroupOfLinesRef: `${codespace}:Network:${window.crypto.randomUUID()}`,
+        ExternalLineRef: lineRef,
+        OperatorRef: selectedOperator.id,
+        Monitored: true,
+        DataSource: codespace,
+        EstimatedCalls: {
+          EstimatedCall: calls.map((call, i) => ({
+            StopPointRef: call.quay?.value!,
+            Order: i + 1,
+            DestinationDisplay: destinationDisplay,
+            AimedArrivalTime: call.arrival ?? null,
+            ExpectedArrivalTime: call.arrival ?? null,
+            AimedDepartureTime: call.departure ?? null,
+            ExpectedDepartureTime: call.departure ?? null,
+            DepartureBoardingActivity:
+              i !== calls.length - 1
+                ? call.boarding
+                  ? 'boarding'
+                  : 'noBoarding'
+                : null,
+            ArrivalBoardingActivity:
+              i > 0 ? (call.alighting ? 'alighting' : 'noAlighting') : null,
+          })),
+        },
+        IsCompleteStopSequence: true,
+      },
     };
 
     return extraJourney;

@@ -31,18 +31,23 @@ export enum VehicleMode {
 }
 
 export type ExtraJourney = {
-  RecordedAtTime: string;
-  LineRef: string;
-  DirectionRef: '0';
-  EstimatedVehicleJourneyCode: string;
-  ExtraJourney: true;
-  VehicleMode: VehicleMode;
-  RouteRef: string;
-  PublishedLineName: string;
-  GroupOfLinesRef: string;
-  ExternalLineRef: string;
-  OperatorRef: string;
-  Monitored: true;
-  EstimatedCalls: EstimatedCall[];
-  IsCompleteStopSequence: true;
+  EstimatedVehicleJourney: {
+    RecordedAtTime: string;
+    LineRef: string;
+    DirectionRef: '0';
+    EstimatedVehicleJourneyCode: string;
+    ExtraJourney: true;
+    VehicleMode: VehicleMode;
+    RouteRef: string;
+    PublishedLineName: string;
+    GroupOfLinesRef: string;
+    ExternalLineRef: string;
+    OperatorRef: string;
+    Monitored: true;
+    DataSource: string;
+    EstimatedCalls: {
+      EstimatedCall: EstimatedCall[];
+    };
+    IsCompleteStopSequence: true;
+  };
 };
