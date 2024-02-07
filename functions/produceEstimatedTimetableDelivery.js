@@ -12,7 +12,7 @@ exports.produceEstimatedTimetableDelivery = async (db, dateTime) => {
     )
     .get();
 
-  const extraJourneys = await db.collectionGroup('extraJourneys').get();
+  const extraJourneys = await db.collectionGroup('extrajourneys').get();
 
   const cancellationData = cancellations.docs.map((doc) =>
     transformCancellationData(doc.data().EstimatedVehicleJourney),
