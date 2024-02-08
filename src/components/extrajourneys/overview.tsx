@@ -5,7 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
 import { useEffect, useState } from 'react';
 import firebase from 'firebase/compat/app';
-import { DataCell, HeaderCell, Table, TableBody, TableHead, TableRow } from '@entur/table';
+import {
+  DataCell,
+  HeaderCell,
+  Table,
+  TableBody,
+  TableHead,
+  TableRow,
+} from '@entur/table';
 import { getLocalTimeZone, now } from '@internationalized/date';
 
 import { ExtraJourney } from './types';
@@ -13,7 +20,6 @@ import { ExtraJourney } from './types';
 import green from '../../img/green.png';
 // @ts-ignore
 import red from '../../img/red.png';
-
 
 const returnRedOrGreenIcon = (param: ExtraJourney) => {
   if (
@@ -42,26 +48,28 @@ export const Overview = () => {
       return;
     }
 
-    let query: any = db
-      .collection(
-        `codespaces/${codespace}/authorities/${authority}/extrajourneys`,
-      );
+    let query: any = db.collection(
+      `codespaces/${codespace}/authorities/${authority}/extrajourneys`,
+    );
 
     if (!showCompletedTrips) {
-      query = query.where('EstimatedVehicleJourney.ExpiresAtEpochMs', '>', new Date().getTime())
+      query = query.where(
+        'EstimatedVehicleJourney.ExpiresAtEpochMs',
+        '>',
+        new Date().getTime(),
+      );
     }
 
-    const unsubscribeSnapshotListener = query
-      .onSnapshot((querySnapshot: any) =>
-        setExtraJourneys(
-          querySnapshot.size > 0
-            ? querySnapshot.docs.map((doc: any) => ({
+    const unsubscribeSnapshotListener = query.onSnapshot((querySnapshot: any) =>
+      setExtraJourneys(
+        querySnapshot.size > 0
+          ? querySnapshot.docs.map((doc: any) => ({
               id: doc.id,
               data: doc.data(),
             }))
-            : [],
-        ),
-      );
+          : [],
+      ),
+    );
 
     return () => {
       if (unsubscribeSnapshotListener) {
@@ -86,7 +94,10 @@ export const Overview = () => {
       <br></br>
       <Contrast>
         <div style={{ padding: '0 .5em' }}>
-          <Switch checked={showCompletedTrips} onChange={(e) => setShowCompletedTrips(e.target.checked)}>
+          <Switch
+            checked={showCompletedTrips}
+            onChange={(e) => setShowCompletedTrips(e.target.checked)}
+          >
             Vis passerte ekstraavganger
           </Switch>
         </div>
@@ -106,26 +117,45 @@ export const Overview = () => {
           <TableBody>
             {extrajourneys.map((extrajourney: { data: ExtraJourney }) => (
               <TableRow>
-                <DataCell>
-                  {returnRedOrGreenIcon(extrajourney.data)}
-                </DataCell>
+                <DataCell>{returnRedOrGreenIcon(extrajourney.data)}</DataCell>
                 <DataCell>
                   {extrajourney.data.EstimatedVehicleJourney.PublishedLineName}
                 </DataCell>
                 <DataCell>
-                  {extrajourney.data.EstimatedVehicleJourney.EstimatedVehicleJourneyCode}
+                  {
+                    extrajourney.data.EstimatedVehicleJourney
+                      .EstimatedVehicleJourneyCode
+                  }
                 </DataCell>
                 <DataCell>
-                  {extrajourney.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall[0].StopPointRef}
+                  {
+                    extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
+                      .EstimatedCall[0].StopPointRef
+                  }
                 </DataCell>
                 <DataCell>
-                  {extrajourney.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall[0].AimedDepartureTime}
+                  {
+                    extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
+                      .EstimatedCall[0].AimedDepartureTime
+                  }
                 </DataCell>
                 <DataCell>
-                  {extrajourney.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall[extrajourney.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.length - 1].StopPointRef}
+                  {
+                    extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
+                      .EstimatedCall[
+                      extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
+                        .EstimatedCall.length - 1
+                    ].StopPointRef
+                  }
                 </DataCell>
                 <DataCell>
-                  {extrajourney.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall[extrajourney.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.length - 1].AimedArrivalTime}
+                  {
+                    extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
+                      .EstimatedCall[
+                      extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
+                        .EstimatedCall.length - 1
+                    ].AimedArrivalTime
+                  }
                 </DataCell>
               </TableRow>
             ))}
