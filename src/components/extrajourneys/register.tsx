@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Checkbox, TextField } from '@entur/form';
+import React, { useState } from 'react';
+import { TextField } from '@entur/form';
 import {
-  DataCell,
-  EditableCell,
   HeaderCell,
   Table,
   TableBody,
@@ -10,137 +8,15 @@ import {
   TableRow,
 } from '@entur/table';
 import { Contrast } from '@entur/layout';
-import { PrimaryButton, SecondaryButton } from '@entur/button';
-import { DatePicker } from '@entur/datepicker';
-import {
-  getLocalTimeZone,
-  now,
-  parseAbsoluteToLocal,
-} from '@internationalized/date';
+import { PrimaryButton } from '@entur/button';
 import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
 import { Operator, useOperators } from '../../hooks/useOperators';
-import { StopPlaceAutocomplete } from './stop-place-autocomplete';
-import { QuaySelect } from './quay-select';
-import { Call, ExtraJourney, GeocodedStopPlace, VehicleMode } from './types';
+import { Call, VehicleMode } from './types';
 import firebase from 'firebase/compat/app';
 import { useNavigate } from 'react-router-dom';
 import { TypedDropDown } from './TypedDropdown';
-
-const Row = ({
-  call,
-  onChange,
-  isFirst,
-  isLast,
-  onAdd,
-  mode,
-}: {
-  call: Call;
-  onChange: (call: Call) => void;
-  isFirst: boolean;
-  isLast: boolean;
-  onAdd: () => void;
-  mode?: VehicleMode;
-}) => {
-  const onFieldChange = <T extends Call, K extends keyof T>(
-    key: K,
-    value: T[K],
-  ) => {
-    onChange({
-      ...call,
-      [key]: value,
-    });
-  };
-
-  const [selectedStopPlace, setSelectedStopPlace] = useState<
-    GeocodedStopPlace | undefined
-  >();
-
-  useEffect(() => {
-    if (
-      selectedStopPlace &&
-      call.stopPlaceName !== selectedStopPlace.properties.name
-    ) {
-      onChange({
-        ...call,
-        stopPlaceName: selectedStopPlace.properties.name,
-      });
-    }
-  }, [selectedStopPlace, call, onChange]);
-
-  return (
-    <TableRow hover>
-      <EditableCell>
-        <>
-          <StopPlaceAutocomplete
-            mode={mode}
-            value={selectedStopPlace}
-            onChange={setSelectedStopPlace}
-          />
-          <QuaySelect
-            selectedStopPlace={selectedStopPlace}
-            value={call.quay}
-            onChange={(quay) => onFieldChange('quay', quay)}
-          />
-        </>
-      </EditableCell>
-      <EditableCell>
-        <>
-          <Checkbox
-            onChange={(e) => onFieldChange('alighting', e.target.checked)}
-            disabled={isFirst}
-            checked={call.alighting}
-          >
-            Avstigning
-          </Checkbox>
-          <Checkbox
-            onChange={(e) => onFieldChange('boarding', e.target.checked)}
-            disabled={isLast}
-            checked={call.boarding}
-          >
-            Påstigning
-          </Checkbox>
-        </>
-      </EditableCell>
-      <EditableCell>
-        {!isFirst ? (
-          <DatePicker
-            showTime
-            selectedDate={
-              call.arrival ? parseAbsoluteToLocal(call.arrival) : null
-            }
-            onChange={(e) =>
-              onFieldChange('arrival', e?.toDate().toISOString())
-            }
-            label=""
-            aria-label="Ankomst"
-          />
-        ) : (
-          <></>
-        )}
-      </EditableCell>
-      <EditableCell>
-        {!isLast ? (
-          <DatePicker
-            showTime
-            selectedDate={
-              call.departure ? parseAbsoluteToLocal(call.departure) : null
-            }
-            onChange={(e) =>
-              onFieldChange('departure', e?.toDate().toISOString())
-            }
-            label=""
-            aria-label="Avgang"
-          />
-        ) : (
-          <></>
-        )}
-      </EditableCell>
-      <DataCell>
-        {!isLast && <SecondaryButton onClick={onAdd}>Legg til</SecondaryButton>}
-      </DataCell>
-    </TableRow>
-  );
-};
+import { RegisterEstimatedCallRow } from './register-estimated-call-row';
+import { mapExtraJourney } from './mapExtraJourney';
 
 export const Register = () => {
   const selectedOrganization = useSelectedOrganization();
@@ -169,59 +45,15 @@ export const Register = () => {
 
   const codespace = selectedOrganization.split(':')[0];
 
-  const transform: () => ExtraJourney = () => {
-    const lineRef = `${codespace}:Line:${window.crypto.randomUUID()}`;
-
-    // validation
-    if (!selectedMode || !name || !destinationDisplay || !selectedOperator) {
-      throw new Error('Invalid data');
-    }
-
-    const extraJourney: ExtraJourney = {
-      EstimatedVehicleJourney: {
-        RecordedAtTime: now(getLocalTimeZone()).toDate().toISOString(),
-        LineRef: lineRef,
-        DirectionRef: '0',
-        EstimatedVehicleJourneyCode: `${codespace}:ServiceJourney:${window.crypto.randomUUID()}`,
-        ExtraJourney: true,
-        VehicleMode: selectedMode,
-        RouteRef: `${codespace}:Route:${window.crypto.randomUUID()}`,
-        PublishedLineName: name,
-        GroupOfLinesRef: `${codespace}:Network:${window.crypto.randomUUID()}`,
-        ExternalLineRef: lineRef,
-        OperatorRef: selectedOperator.id,
-        Monitored: true,
-        DataSource: codespace,
-        EstimatedCalls: {
-          EstimatedCall: calls.map((call, i) => ({
-            StopPointRef: call.quay?.id!,
-            StopPointName: call.stopPlaceName!,
-            Order: i + 1,
-            DestinationDisplay: destinationDisplay,
-            AimedArrivalTime: call.arrival ?? null,
-            ExpectedArrivalTime: call.arrival ?? null,
-            AimedDepartureTime: call.departure ?? null,
-            ExpectedDepartureTime: call.departure ?? null,
-            DepartureBoardingActivity:
-              i !== calls.length - 1
-                ? call.boarding
-                  ? 'boarding'
-                  : 'noBoarding'
-                : null,
-            ArrivalBoardingActivity:
-              i > 0 ? (call.alighting ? 'alighting' : 'noAlighting') : null,
-          })),
-        },
-        IsCompleteStopSequence: true,
-        ExpiresAtEpochMs: Date.parse(calls[calls.length - 1].arrival!),
-      },
-    };
-
-    return extraJourney;
-  };
-
   const submit = async () => {
-    const extraJourney = transform();
+    const extraJourney = mapExtraJourney({
+      codespace,
+      selectedMode,
+      name,
+      destinationDisplay,
+      selectedOperator,
+      calls,
+    });
 
     const db = firebase.firestore();
     await db
@@ -304,7 +136,7 @@ export const Register = () => {
           </TableHead>
           <TableBody>
             {calls.map((call, i) => (
-              <Row
+              <RegisterEstimatedCallRow
                 key={i}
                 call={call}
                 isFirst={i === 0}

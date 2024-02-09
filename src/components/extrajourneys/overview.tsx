@@ -106,17 +106,19 @@ export const Overview = () => {
       <Contrast>
         <Table>
           <TableHead>
-            <HeaderCell>Status</HeaderCell>
-            <HeaderCell>Linje</HeaderCell>
-            <HeaderCell>Tur</HeaderCell>
-            <HeaderCell>Fra stasjon</HeaderCell>
-            <HeaderCell>Planlagt avgang</HeaderCell>
-            <HeaderCell>Til stasjon</HeaderCell>
-            <HeaderCell>Planlagt ankomst</HeaderCell>
+            <TableRow>
+              <HeaderCell>Status</HeaderCell>
+              <HeaderCell>Linje</HeaderCell>
+              <HeaderCell>Tur</HeaderCell>
+              <HeaderCell>Fra stasjon</HeaderCell>
+              <HeaderCell>Planlagt avgang</HeaderCell>
+              <HeaderCell>Til stasjon</HeaderCell>
+              <HeaderCell>Planlagt ankomst</HeaderCell>
+            </TableRow>
           </TableHead>
           <TableBody>
             {extrajourneys.map((extrajourney: { data: ExtraJourney }) => (
-              <TableRow>
+              <TableRow key={extrajourney.data.EstimatedVehicleJourney.EstimatedVehicleJourneyCode}>
                 <DataCell>{returnRedOrGreenIcon(extrajourney.data)}</DataCell>
                 <DataCell>
                   {extrajourney.data.EstimatedVehicleJourney.PublishedLineName}
