@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Checkbox, TextField } from '@entur/form';
 import {
   DataCell,
@@ -19,12 +19,12 @@ import {
 } from '@internationalized/date';
 import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
 import { Operator, useOperators } from '../../hooks/useOperators';
-import { Dropdown } from '@entur/dropdown';
 import { StopPlaceAutocomplete } from './stop-place-autocomplete';
 import { QuaySelect } from './quay-select';
-import { Call, ExtraJourney, VehicleMode } from './types';
+import { Call, ExtraJourney, GeocodedStopPlace, VehicleMode } from './types';
 import firebase from 'firebase/compat/app';
 import { useNavigate } from 'react-router-dom';
+import { TypedDropDown } from './TypedDropdown';
 
 const Row = ({
   call,
@@ -51,7 +51,21 @@ const Row = ({
     });
   };
 
-  const [selectedStopPlace, setSelectedStopPlace] = useState<any | undefined>();
+  const [selectedStopPlace, setSelectedStopPlace] = useState<
+    GeocodedStopPlace | undefined
+  >();
+
+  useEffect(() => {
+    if (
+      selectedStopPlace &&
+      call.stopPlaceName !== selectedStopPlace.properties.name
+    ) {
+      onChange({
+        ...call,
+        stopPlaceName: selectedStopPlace.properties.name,
+      });
+    }
+  }, [selectedStopPlace, call, onChange]);
 
   return (
     <TableRow hover>
@@ -63,7 +77,7 @@ const Row = ({
             onChange={setSelectedStopPlace}
           />
           <QuaySelect
-            selectedStopPlace={selectedStopPlace?.value}
+            selectedStopPlace={selectedStopPlace}
             value={call.quay}
             onChange={(quay) => onFieldChange('quay', quay)}
           />
@@ -132,7 +146,7 @@ export const Register = () => {
   const selectedOrganization = useSelectedOrganization();
   const operators = useOperators();
   const [name, setName] = useState<string | undefined>();
-  const [mode, setMode] = useState<VehicleMode | undefined>();
+  const [selectedMode, setSelectedMode] = useState<VehicleMode | undefined>();
   const [destinationDisplay, setDestinationDisplay] = useState<
     string | undefined
   >();
@@ -159,7 +173,7 @@ export const Register = () => {
     const lineRef = `${codespace}:Line:${window.crypto.randomUUID()}`;
 
     // validation
-    if (!mode || !name || !destinationDisplay || !selectedOperator) {
+    if (!selectedMode || !name || !destinationDisplay || !selectedOperator) {
       throw new Error('Invalid data');
     }
 
@@ -170,7 +184,7 @@ export const Register = () => {
         DirectionRef: '0',
         EstimatedVehicleJourneyCode: `${codespace}:ServiceJourney:${window.crypto.randomUUID()}`,
         ExtraJourney: true,
-        VehicleMode: mode,
+        VehicleMode: selectedMode,
         RouteRef: `${codespace}:Route:${window.crypto.randomUUID()}`,
         PublishedLineName: name,
         GroupOfLinesRef: `${codespace}:Network:${window.crypto.randomUUID()}`,
@@ -180,7 +194,8 @@ export const Register = () => {
         DataSource: codespace,
         EstimatedCalls: {
           EstimatedCall: calls.map((call, i) => ({
-            StopPointRef: call.quay?.value!,
+            StopPointRef: call.quay?.id!,
+            StopPointName: call.stopPlaceName!,
             Order: i + 1,
             DestinationDisplay: destinationDisplay,
             AimedArrivalTime: call.arrival ?? null,
@@ -232,11 +247,18 @@ export const Register = () => {
 
       <br />
 
-      <Dropdown
-        items={Object.values(VehicleMode)}
+      <TypedDropDown
         label="Mode"
-        selectedItem={mode ? { value: mode || '', label: `${mode}` } : null}
-        onChange={(value) => setMode(value?.value as VehicleMode)}
+        items={Object.values(VehicleMode).map((mode) => ({
+          value: mode,
+          label: `${mode}`,
+        }))}
+        selectedItem={
+          selectedMode
+            ? { value: selectedMode || '', label: `${selectedMode}` }
+            : null
+        }
+        onChange={(mode) => setSelectedMode(mode)}
       />
 
       <br />
@@ -249,29 +271,24 @@ export const Register = () => {
 
       <br />
 
-      <Dropdown
+      <TypedDropDown
+        label="Operator"
         items={() =>
           operators.map((operator) => ({
-            value: operator.id,
+            value: operator,
             label: `${operator.name} (${operator.id})`,
           }))
         }
-        label="Operator"
         selectedItem={
           selectedOperator
             ? {
-                value: selectedOperator?.id,
-                label: `${selectedOperator?.name} (${selectedOperator?.id})`,
+                value: selectedOperator,
+                label: `${selectedOperator.name} (${selectedOperator.id})`,
               }
             : null
         }
-        onChange={(value) =>
-          setSelectedOperator(
-            operators.find((operator) => operator.id === value?.value),
-          )
-        }
+        onChange={(operator) => setSelectedOperator(operator)}
       />
-
       <br />
 
       <Contrast>
@@ -305,7 +322,7 @@ export const Register = () => {
                     ...calls.slice(i + 1),
                   ])
                 }
-                mode={mode}
+                mode={selectedMode}
               />
             ))}
           </TableBody>

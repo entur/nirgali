@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { SearchableDropdown } from '@entur/dropdown';
-import { VehicleMode } from './types';
+import { GeocodedStopPlace, VehicleMode } from './types';
+import { TypedSearchableDropdown } from './TypedDropdown';
 
 const vehicleModeMap = {
   [VehicleMode.bus]: ['onstreetBus', 'busStation', 'coachStation'],
@@ -17,12 +17,12 @@ export function StopPlaceAutocomplete({
   onChange,
 }: {
   mode?: VehicleMode;
-  value?: any;
-  onChange: (newValue: any) => void;
+  value?: GeocodedStopPlace;
+  onChange: (newValue?: GeocodedStopPlace) => void;
 }) {
   const fetchItems = useCallback(
     async (
-      inputValue: any,
+      inputValue: string,
       abortControllerRef: { current: { signal: any } },
     ) => {
       if (!inputValue) {
@@ -40,7 +40,7 @@ export function StopPlaceAutocomplete({
           signal: abortControllerRef.current.signal,
         });
         const data = await response.json();
-        return data.features.map((item: any) => {
+        return data.features.map((item: GeocodedStopPlace) => {
           return { label: item.properties.name, value: item };
         });
       } catch (error) {
@@ -53,10 +53,10 @@ export function StopPlaceAutocomplete({
   );
 
   return (
-    <SearchableDropdown
+    <TypedSearchableDropdown
       label="Stoppested"
       items={fetchItems}
-      selectedItem={value}
+      selectedItem={value ? { label: value.properties.name, value } : null}
       onChange={onChange}
     />
   );

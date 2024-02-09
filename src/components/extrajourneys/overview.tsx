@@ -130,14 +130,22 @@ export const Overview = () => {
                 <DataCell>
                   {
                     extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
-                      .EstimatedCall[0].StopPointRef
+                      .EstimatedCall[0].StopPointName
                   }
                 </DataCell>
                 <DataCell>
-                  {
-                    extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
-                      .EstimatedCall[0].AimedDepartureTime
-                  }
+                  {new Date(
+                    Date.parse(
+                      extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
+                        .EstimatedCall[0].AimedDepartureTime!,
+                    ),
+                  ).toLocaleString(navigator.language, {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
                 </DataCell>
                 <DataCell>
                   {
@@ -145,17 +153,25 @@ export const Overview = () => {
                       .EstimatedCall[
                       extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
                         .EstimatedCall.length - 1
-                    ].StopPointRef
+                    ].StopPointName
                   }
                 </DataCell>
                 <DataCell>
-                  {
-                    extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
-                      .EstimatedCall[
+                  {new Date(
+                    Date.parse(
                       extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
-                        .EstimatedCall.length - 1
-                    ].AimedArrivalTime
-                  }
+                        .EstimatedCall[
+                        extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
+                          .EstimatedCall.length - 1
+                      ].AimedArrivalTime!,
+                    ),
+                  ).toLocaleString(navigator.language, {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
                 </DataCell>
               </TableRow>
             ))}

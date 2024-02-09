@@ -1,10 +1,11 @@
 import { useCallback } from 'react';
-import { Dropdown } from '@entur/dropdown';
+import { TypedDropDown } from './TypedDropdown';
+import { GeocodedStopPlace, Quay } from './types';
 
 export function QuaySelect(props: {
-  selectedStopPlace: any;
-  value: any;
-  onChange: (value: any) => void;
+  selectedStopPlace?: GeocodedStopPlace;
+  value?: Quay;
+  onChange: (value?: Quay) => void;
 }) {
   const fetchItems = useCallback(
     async (_: any, abortControllerRef: { current: { signal: any } }) => {
@@ -18,13 +19,10 @@ export function QuaySelect(props: {
           { signal: abortControllerRef.current.signal },
         );
         const data = await response.json();
-        console.log(data);
-        return data.quays.quayRefOrQuay.map(
-          (quay: { id: string; publicCode: string }) => ({
-            value: quay.id,
-            label: `${quay.id} (${quay.publicCode})`,
-          }),
-        );
+        return data.quays.quayRefOrQuay.map((quay: Quay) => ({
+          value: quay,
+          label: `${quay.id} (${quay.publicCode})`,
+        }));
       } catch (error) {
         // @ts-ignore
         if (error && error.name === 'AbortError') throw error;
@@ -35,10 +33,17 @@ export function QuaySelect(props: {
   );
 
   return (
-    <Dropdown
+    <TypedDropDown
       label="Platform"
       items={fetchItems}
-      selectedItem={props.value}
+      selectedItem={
+        props.value
+          ? {
+              value: props.value,
+              label: `${props.value.id} (${props.value.publicCode})`,
+            }
+          : null
+      }
       onChange={props.onChange}
     />
   );

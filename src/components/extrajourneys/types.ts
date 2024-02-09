@@ -1,5 +1,6 @@
 export type Call = {
-  quay?: { value: string; label: string };
+  quay?: Quay;
+  stopPlaceName?: string;
   boarding?: boolean;
   alighting?: boolean;
   arrival?: string;
@@ -11,6 +12,7 @@ export type ArrivalBoardingActivity = 'alighting' | 'noAlighting';
 
 export type EstimatedCall = {
   StopPointRef: string;
+  StopPointName: string;
   Order: number;
   DestinationDisplay: string;
   AimedArrivalTime: string | null;
@@ -51,4 +53,16 @@ export type ExtraJourney = {
     IsCompleteStopSequence: true;
     ExpiresAtEpochMs: number;
   };
+};
+
+export type GeocodedStopPlace = {
+  properties: {
+    id: string;
+    name: string;
+  };
+};
+
+export type Quay = {
+  id: string;
+  publicCode: string;
 };
