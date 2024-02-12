@@ -118,7 +118,12 @@ export const Overview = () => {
           </TableHead>
           <TableBody>
             {extrajourneys.map((extrajourney: { data: ExtraJourney }) => (
-              <TableRow key={extrajourney.data.EstimatedVehicleJourney.EstimatedVehicleJourneyCode}>
+              <TableRow
+                key={
+                  extrajourney.data.EstimatedVehicleJourney
+                    .EstimatedVehicleJourneyCode
+                }
+              >
                 <DataCell>{returnRedOrGreenIcon(extrajourney.data)}</DataCell>
                 <DataCell>
                   {extrajourney.data.EstimatedVehicleJourney.PublishedLineName}

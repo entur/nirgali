@@ -1,5 +1,6 @@
 import { Dropdown, SearchableDropdown } from '@entur/dropdown';
 import React from 'react';
+import { VariantType } from '@entur/form';
 
 type TypedDropdownItem<T> = {
   value: T;
@@ -24,6 +25,8 @@ export function TypedDropDown<T>(props: {
   items: PotentiallyAsyncDropdownItemType<T>;
   selectedItem: TypedDropdownItem<T> | null;
   onChange: (value?: T) => void;
+  variant?: VariantType;
+  feedback?: string;
 }) {
   return (
     <Dropdown
@@ -34,6 +37,8 @@ export function TypedDropDown<T>(props: {
       selectedItem={props.selectedItem}
       // @ts-expect-error
       onChange={(item) => props.onChange(item?.value)}
+      feedback={props.feedback}
+      variant={props.variant}
     />
   );
 }
@@ -43,6 +48,8 @@ export function TypedSearchableDropdown<T>(props: {
   items: PotentiallyAsyncDropdownItemType<T>;
   selectedItem: TypedDropdownItem<T> | null;
   onChange: (value?: T) => void;
+  variant?: VariantType;
+  feedback?: string;
 }) {
   return (
     <SearchableDropdown
@@ -53,6 +60,8 @@ export function TypedSearchableDropdown<T>(props: {
       selectedItem={props.value}
       // @ts-expect-error
       onChange={(item) => props.onChange(item?.value)}
+      feedback={props.feedback}
+      variant={props.variant}
     />
   );
 }

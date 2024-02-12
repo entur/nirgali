@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { TypedDropDown } from './TypedDropdown';
 import { RegisterEstimatedCallRow } from './register-estimated-call-row';
 import { mapExtraJourney } from './mapExtraJourney';
+import { CallValidationResult, useExtrajourneyValidation } from './validate';
 
 export const Register = () => {
   const selectedOrganization = useSelectedOrganization();
@@ -43,9 +44,20 @@ export const Register = () => {
 
   const navigate = useNavigate();
 
+  const { result, validate } = useExtrajourneyValidation({
+    name,
+    mode: selectedMode,
+    destinationDisplay,
+    operator: selectedOperator,
+    calls,
+  });
+
   const codespace = selectedOrganization.split(':')[0];
 
   const submit = async () => {
+    if (!validate()) {
+      return;
+    }
     const extraJourney = mapExtraJourney({
       codespace,
       selectedMode,
@@ -70,57 +82,68 @@ export const Register = () => {
     <>
       <h2 className="text-center text-white">Registrer ny ekstraavgang</h2>
 
-      {/*Published line name*/}
-      <TextField
-        label="Navn"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+      <Contrast>
+        <TextField
+          {...result.name}
+          label="Navn"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </Contrast>
 
       <br />
 
-      <TypedDropDown
-        label="Mode"
-        items={Object.values(VehicleMode).map((mode) => ({
-          value: mode,
-          label: `${mode}`,
-        }))}
-        selectedItem={
-          selectedMode
-            ? { value: selectedMode || '', label: `${selectedMode}` }
-            : null
-        }
-        onChange={(mode) => setSelectedMode(mode)}
-      />
+      <Contrast>
+        <TypedDropDown
+          {...result.mode}
+          label="Mode"
+          items={Object.values(VehicleMode).map((mode) => ({
+            value: mode,
+            label: `${mode}`,
+          }))}
+          selectedItem={
+            selectedMode
+              ? { value: selectedMode || '', label: `${selectedMode}` }
+              : null
+          }
+          onChange={(mode) => setSelectedMode(mode)}
+        />
+      </Contrast>
 
       <br />
 
-      <TextField
-        label="Destinasjon"
-        value={destinationDisplay}
-        onChange={(e) => setDestinationDisplay(e.target.value)}
-      />
+      <Contrast>
+        <TextField
+          {...result.destinationDisplay}
+          label="Destinasjon"
+          value={destinationDisplay}
+          onChange={(e) => setDestinationDisplay(e.target.value)}
+        />
+      </Contrast>
 
       <br />
 
-      <TypedDropDown
-        label="Operator"
-        items={() =>
-          operators.map((operator) => ({
-            value: operator,
-            label: `${operator.name} (${operator.id})`,
-          }))
-        }
-        selectedItem={
-          selectedOperator
-            ? {
-                value: selectedOperator,
-                label: `${selectedOperator.name} (${selectedOperator.id})`,
-              }
-            : null
-        }
-        onChange={(operator) => setSelectedOperator(operator)}
-      />
+      <Contrast>
+        <TypedDropDown
+          {...result.operator}
+          label="Operator"
+          items={() =>
+            operators.map((operator) => ({
+              value: operator,
+              label: `${operator.name} (${operator.id})`,
+            }))
+          }
+          selectedItem={
+            selectedOperator
+              ? {
+                  value: selectedOperator,
+                  label: `${selectedOperator.name} (${selectedOperator.id})`,
+                }
+              : null
+          }
+          onChange={(operator) => setSelectedOperator(operator)}
+        />
+      </Contrast>
       <br />
 
       <Contrast>
@@ -137,6 +160,11 @@ export const Register = () => {
           <TableBody>
             {calls.map((call, i) => (
               <RegisterEstimatedCallRow
+                validationResult={
+                  result.calls
+                    ? (result.calls as CallValidationResult[])[i]
+                    : undefined
+                }
                 key={i}
                 call={call}
                 isFirst={i === 0}

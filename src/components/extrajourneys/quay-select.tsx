@@ -1,11 +1,13 @@
 import { useCallback } from 'react';
 import { TypedDropDown } from './TypedDropdown';
 import { GeocodedStopPlace, Quay } from './types';
+import { ValidationFeedback } from './validate';
 
 export function QuaySelect(props: {
   selectedStopPlace?: GeocodedStopPlace;
   value?: Quay;
   onChange: (value?: Quay) => void;
+  validationResult?: ValidationFeedback;
 }) {
   const fetchItems = useCallback(
     async (_: any, abortControllerRef: { current: { signal: any } }) => {
@@ -34,6 +36,7 @@ export function QuaySelect(props: {
 
   return (
     <TypedDropDown
+      {...props.validationResult}
       label="Platform"
       items={fetchItems}
       selectedItem={

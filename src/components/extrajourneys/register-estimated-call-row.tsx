@@ -7,6 +7,7 @@ import { Checkbox } from '@entur/form';
 import { DatePicker } from '@entur/datepicker';
 import { parseAbsoluteToLocal } from '@internationalized/date';
 import { SecondaryButton } from '@entur/button';
+import { CallValidationResult } from './validate';
 
 export const RegisterEstimatedCallRow = ({
   call,
@@ -15,6 +16,7 @@ export const RegisterEstimatedCallRow = ({
   isLast,
   onAdd,
   mode,
+  validationResult,
 }: {
   call: Call;
   onChange: (call: Call) => void;
@@ -22,6 +24,7 @@ export const RegisterEstimatedCallRow = ({
   isLast: boolean;
   onAdd: () => void;
   mode?: VehicleMode;
+  validationResult?: CallValidationResult;
 }) => {
   const onFieldChange = <T extends Call, K extends keyof T>(
     key: K,
@@ -59,6 +62,7 @@ export const RegisterEstimatedCallRow = ({
             onChange={setSelectedStopPlace}
           />
           <QuaySelect
+            validationResult={validationResult?.quay}
             selectedStopPlace={selectedStopPlace}
             value={call.quay}
             onChange={(quay) => onFieldChange('quay', quay)}
@@ -68,6 +72,7 @@ export const RegisterEstimatedCallRow = ({
       <EditableCell>
         <>
           <Checkbox
+            {...validationResult?.alighting}
             onChange={(e) => onFieldChange('alighting', e.target.checked)}
             disabled={isFirst}
             checked={call.alighting}
@@ -75,6 +80,7 @@ export const RegisterEstimatedCallRow = ({
             Avstigning
           </Checkbox>
           <Checkbox
+            {...validationResult?.boarding}
             onChange={(e) => onFieldChange('boarding', e.target.checked)}
             disabled={isLast}
             checked={call.boarding}
@@ -86,6 +92,7 @@ export const RegisterEstimatedCallRow = ({
       <EditableCell>
         {!isFirst ? (
           <DatePicker
+            {...validationResult?.arrival}
             showTime
             selectedDate={
               call.arrival ? parseAbsoluteToLocal(call.arrival) : null
@@ -103,6 +110,7 @@ export const RegisterEstimatedCallRow = ({
       <EditableCell>
         {!isLast ? (
           <DatePicker
+            {...validationResult?.departure}
             showTime
             selectedDate={
               call.departure ? parseAbsoluteToLocal(call.departure) : null
