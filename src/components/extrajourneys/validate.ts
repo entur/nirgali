@@ -81,11 +81,6 @@ export const useExtrajourneyValidation = (input: ValidationInput) => {
           feedback: 'Alle stopp må tillate enten avstigning eller påstigning',
           variant: 'error',
         };
-
-        callResult.boarding = {
-          feedback: 'Alle stopp må tillate enten avstigning eller påstigning',
-          variant: 'error',
-        };
       }
 
       if (i !== 0 && !call.arrival) {

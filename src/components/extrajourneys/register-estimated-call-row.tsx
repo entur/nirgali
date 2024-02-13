@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { DataCell, EditableCell, TableRow } from '@entur/table';
 import { StopPlaceAutocomplete } from './stop-place-autocomplete';
 import { QuaySelect } from './quay-select';
-import { Checkbox } from '@entur/form';
+import { Checkbox, Fieldset } from '@entur/form';
 import { DatePicker } from '@entur/datepicker';
 import { parseAbsoluteToLocal } from '@internationalized/date';
 import { SecondaryButton } from '@entur/button';
@@ -70,9 +70,8 @@ export const RegisterEstimatedCallRow = ({
         </>
       </EditableCell>
       <EditableCell>
-        <>
+        <Fieldset {...validationResult?.alighting}>
           <Checkbox
-            {...validationResult?.alighting}
             onChange={(e) => onFieldChange('alighting', e.target.checked)}
             disabled={isFirst}
             checked={call.alighting}
@@ -80,14 +79,13 @@ export const RegisterEstimatedCallRow = ({
             Avstigning
           </Checkbox>
           <Checkbox
-            {...validationResult?.boarding}
             onChange={(e) => onFieldChange('boarding', e.target.checked)}
             disabled={isLast}
             checked={call.boarding}
           >
             Påstigning
           </Checkbox>
-        </>
+        </Fieldset>
       </EditableCell>
       <EditableCell>
         {!isFirst ? (

@@ -23,7 +23,7 @@ export function QuaySelect(props: {
         const data = await response.json();
         return data.quays.quayRefOrQuay.map((quay: Quay) => ({
           value: quay,
-          label: `${quay.id} (${quay.publicCode})`,
+          label: `${quay.id} (${quay.publicCode ? quay.publicCode : 'Ukjent'})`,
         }));
       } catch (error) {
         // @ts-ignore
