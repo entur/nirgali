@@ -4,10 +4,17 @@ import firebase from 'firebase/compat/app';
 import Overview from './overview';
 import { Register } from './register';
 import Edit from './edit';
+import { useConfig } from '../../config/ConfigContext';
+import api from '../../api/api';
+import { useLines } from '../../hooks/useLines';
 
-export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
+export const Cancellations = ({ selectedOrganization }: any) => {
   const [cancellations, setCancellations] = useState([]);
+  const lines = useLines(selectedOrganization);
+  const config = useConfig();
+
   const db = firebase.firestore();
+
   useEffect(() => {
     const codespace = selectedOrganization.split(':')[0];
     const authority = selectedOrganization;
@@ -50,7 +57,7 @@ export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
           <Edit
             cancellations={cancellations}
             lines={lines}
-            api={api}
+            api={api(config)}
             organization={selectedOrganization}
           />
         }
@@ -60,7 +67,7 @@ export const Cancellations = ({ selectedOrganization, lines, api }: any) => {
         element={
           <Register
             lines={lines}
-            api={api}
+            api={api(config)}
             organization={selectedOrganization}
           />
         }

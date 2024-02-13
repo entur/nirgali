@@ -9,7 +9,7 @@ import Select from 'react-select';
 import { useNavigate, useParams } from 'react-router-dom';
 import firebase from 'firebase/compat/app';
 import { DatePicker } from '@entur/datepicker';
-import StopPicker from '../stop-picker';
+import StopPicker from '../common/stop-picker';
 import { mapEstimatedCall } from './mapEstimatedCall';
 import { getLineOption } from '../../util/getLineOption';
 import { now, parseDate } from '@internationalized/date';

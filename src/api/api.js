@@ -131,6 +131,22 @@ const getServiceJourney = (URI) => (id, date) => {
     .then((response) => response);
 };
 
+const getOperators = (URI) => () => {
+  const apolloFetch = createFetch(URI);
+
+  const query = `
+    {
+      operators {
+        id
+        name
+      }
+    }`;
+
+  return apolloFetch({ query })
+    .catch((error) => error)
+    .then((response) => response);
+};
+
 const fetchGet = {
   method: 'GET',
   headers: {
@@ -171,6 +187,7 @@ const api = (config) => ({
   getLines: getLines(config['journey-planner-api']),
   getDepartures: getDepartures(config['journey-planner-api']),
   getServiceJourney: getServiceJourney(config['journey-planner-api']),
+  getOperators: getOperators(config['journey-planner-api']),
   getStopPlaces: getStopPlaces(config['stop-places-api']),
   getTopographicPlaces: getTopographicPlaces(config['stop-places-api']),
 });

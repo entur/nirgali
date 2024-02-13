@@ -1,12 +1,12 @@
-const { addHours, parseISO, addMinutes } = require('date-fns');
 const { getFirestore } = require('firebase-admin/firestore');
 const functions = require('firebase-functions');
 const convert = require('xml-js');
 const {
-  transformSituationData,
-  filterOpenExpiredMessages,
-  transformCancellationData,
-} = require('./utils');
+  produceSituationExchangeDelivery,
+} = require('./produceSituationExchangeDelivery');
+const {
+  produceEstimatedTimetableDelivery,
+} = require('./produceEstimatedTimetableDelivery');
 
 exports.xml = function () {
   return functions
@@ -81,13 +81,11 @@ exports.xml = function () {
 
       try {
         if (serviceRequestType === 'SituationExchangeRequest') {
-          const SituationExchangeDelivery =
+          array.SituationExchangeDelivery =
             await produceSituationExchangeDelivery(db, dateTime);
-          array.SituationExchangeDelivery = SituationExchangeDelivery;
         } else if (serviceRequestType === 'EstimatedTimetableRequest') {
-          const EstimatedTimetableDelivery =
+          array.EstimatedTimetableDelivery =
             await produceEstimatedTimetableDelivery(db, dateTime);
-          array.EstimatedTimetableDelivery = EstimatedTimetableDelivery;
         }
 
         siri.Siri.ServiceDelivery = array;
@@ -95,134 +93,8 @@ exports.xml = function () {
 
         response.set('Content-Type', 'text/xml').status(200).send(result);
       } catch (error) {
-        console.error('Error in XML requeest: ', error);
+        console.error('Error in XML request: ', error);
         response.status(500);
       }
-    });
-};
-
-const produceSituationExchangeDelivery = async (db, dateTime) => {
-  const open = db
-    .collectionGroup('messages')
-    .where('Progress', '==', 'open')
-    .get();
-
-  const closed = db
-    .collectionGroup('messages')
-    .where('Progress', '==', 'closed')
-    .where('ValidityPeriod.EndTime', '>', dateTime)
-    .get();
-
-  const [openSnapshot, closedSnapshot] = await Promise.all([open, closed]);
-
-  const allDocs = openSnapshot.docs.concat(closedSnapshot.docs);
-  const situations = { PtSituationElement: [] };
-
-  situations.PtSituationElement = allDocs
-    .map((doc) => transformSituationData(doc.data()))
-    .filter(filterOpenExpiredMessages(dateTime));
-
-  console.log(
-    'Returning number of situations: ' + situations.PtSituationElement.length,
-  );
-
-  return {
-    ResponseTimestamp: dateTime,
-    Situations: situations,
-  };
-};
-
-const produceEstimatedTimetableDelivery = async (db, dateTime) => {
-  const cancellations = await db
-    .collectionGroup('cancellations')
-    .where(
-      'EstimatedVehicleJourney.ExpiresAtEpochMs',
-      '>',
-      addMinutes(new Date(), 10).getTime(),
-    )
-    .get();
-
-  return {
-    _attributes: { version: '2.0' },
-    ResponseTimestamp: dateTime,
-    EstimatedJourneyVersionFrame: {
-      RecordedAtTime: dateTime,
-      EstimatedVehicleJourney: cancellations.docs.map((doc) =>
-        transformCancellationData(doc.data().EstimatedVehicleJourney),
-      ),
-    },
-  };
-};
-
-exports.closeOpenExpiredMessages = function () {
-  return functions
-    .region('europe-west1')
-    .pubsub.schedule('every 30 minutes')
-    .onRun(async (_) => {
-      const dateTime = new Date().toISOString();
-      console.info('closeOpenExpiredMessages started - dateTime=' + dateTime);
-      const db = getFirestore();
-
-      try {
-        const openSnapshot = await db
-          .collectionGroup('messages')
-          .where('Progress', '==', 'open')
-          .get();
-
-        openSnapshot.docs.forEach((docSnapshot) => {
-          db.runTransaction((transaction) => {
-            return transaction
-              .get(docSnapshot.ref)
-              .then((doc) => {
-                if (
-                  doc.data().ValidityPeriod.EndTime &&
-                  dateTime > doc.data().ValidityPeriod.EndTime
-                ) {
-                  const endTime = addHours(
-                    parseISO(doc.data().ValidityPeriod.EndTime),
-                    5,
-                  ).toISOString();
-                  console.log(
-                    `Closing message id=${doc.id} situationNumber=${
-                      doc.data().SituationNumber
-                    } newEndTime=${endTime}`,
-                  );
-                  transaction.update(docSnapshot.ref, {
-                    Progress: 'closed',
-                    ValidityPeriod: {
-                      StartTime: doc.data().ValidityPeriod.StartTime,
-                      EndTime: endTime,
-                    },
-                  });
-                }
-              })
-              .then(function () {
-                console.debug('Transaction successfully committed!');
-              })
-              .catch(function (error) {
-                console.log('Transaction failed: ', error);
-              });
-          });
-        });
-      } catch (error) {
-        console.error('Error in closeOpenExpiredMessages: ', error);
-      }
-    });
-};
-
-exports.logDbWrites = function () {
-  return functions
-    .region('europe-west1')
-    .firestore.document(
-      'codespaces/{codespace}/authorities/{authority}/messages/{messageId}',
-    )
-    .onWrite((change, context) => {
-      const { codespace, authority, messageId } = context.params;
-
-      console.log(
-        `Message written: codespace=${codespace} authority=${authority} messageId=${messageId}:\n${JSON.stringify(
-          change.after.data(),
-        )}`,
-      );
     });
 };

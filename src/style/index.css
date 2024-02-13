@@ -11,6 +11,9 @@
 @import '~@entur/a11y/dist/styles.css';
 @import '~@entur/expand/dist/styles.css';
 @import '~@entur/modal/dist/styles.css';
+@import '~@entur/table/dist/styles.css';
+@import '~@entur/dropdown/dist/styles.css';
+@import '~@entur/chip/dist/styles.css';
 
 .hidden {
   opacity: 0;
@@ -56,7 +59,7 @@ input,
 select,
 select.option,
 span {
-  text-align: center;
+  text-align: left;
 }
 
 .register_box {

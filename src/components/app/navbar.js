@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import logo from '../img/entur_logo.jpg';
+import logo from '../../img/entur_logo.jpg';
 import Select from 'react-select';
 import { PrimaryButton } from '@entur/button';
 import { Contrast } from '@entur/layout';
