@@ -56,6 +56,8 @@ export const Register = () => {
 
   const submit = async () => {
     if (!validate()) {
+      console.log('Did not validate correctly');
+      console.log({ result });
       return;
     }
     const extraJourney = mapExtraJourney({

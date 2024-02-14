@@ -66,59 +66,70 @@ export const useExtrajourneyValidation = (input: ValidationInput) => {
       };
     }
 
-    tmpResult.calls = input.calls.map((call, i) => {
-      const callResult: CallValidationResult = {};
+    const callValidationResults = input.calls
+      .map((call, i) => {
+        const callResult: CallValidationResult = {};
 
-      if (!call.quay) {
-        callResult.quay = {
-          feedback: 'Alle stopp må ha en plattform',
-          variant: 'error',
-        };
-      }
+        if (!call.quay) {
+          callResult.quay = {
+            feedback: 'Alle stopp må ha en plattform',
+            variant: 'error',
+          };
+        }
 
-      if (!call.alighting && !call.boarding) {
-        callResult.alighting = {
-          feedback: 'Alle stopp må tillate enten avstigning eller påstigning',
-          variant: 'error',
-        };
-      }
+        if (!call.alighting && !call.boarding) {
+          callResult.alighting = {
+            feedback: 'Alle stopp må tillate enten avstigning eller påstigning',
+            variant: 'error',
+          };
+        }
 
-      if (i !== 0 && !call.arrival) {
-        callResult.arrival = {
-          feedback: 'Stoppet må ha en ankomsttid',
-          variant: 'error',
-        };
-      }
+        if (i !== 0 && !call.arrival) {
+          callResult.arrival = {
+            feedback: 'Stoppet må ha en ankomsttid',
+            variant: 'error',
+          };
+        }
 
-      if (i < input.calls.length - 1 && !call.departure) {
-        callResult.departure = {
-          feedback: 'Stoppet må ha en avgangstid',
-          variant: 'error',
-        };
-      }
+        if (i < input.calls.length - 1 && !call.departure) {
+          callResult.departure = {
+            feedback: 'Stoppet må ha en avgangstid',
+            variant: 'error',
+          };
+        }
 
-      if (i !== 0 && isBefore(call.arrival, input.calls[i - 1].departure)) {
-        callResult.arrival = {
-          feedback: 'Ankomst er før avgang på forrige stopp',
-          variant: 'error',
-        };
-      }
+        if (i !== 0 && isBefore(call.arrival, input.calls[i - 1].departure)) {
+          callResult.arrival = {
+            feedback: 'Ankomst er før avgang på forrige stopp',
+            variant: 'error',
+          };
+        }
 
-      if (
-        i === input.calls.length - 1 &&
-        !isBefore(
-          call.arrival,
-          now(getLocalTimeZone()).add({ days: 7 }).toAbsoluteString(),
-        )
-      ) {
-        callResult.arrival = {
-          feedback: 'Ankomst på siste stopp kan ikke være mer enn 7 dager frem',
-          variant: 'error',
-        };
-      }
+        if (
+          i === input.calls.length - 1 &&
+          !isBefore(
+            call.arrival,
+            now(getLocalTimeZone()).add({ days: 7 }).toAbsoluteString(),
+          )
+        ) {
+          callResult.arrival = {
+            feedback:
+              'Ankomst på siste stopp kan ikke være mer enn 7 dager frem',
+            variant: 'error',
+          };
+        }
 
-      return callResult;
-    });
+        if (Object.keys(callResult).length > 0) {
+          return callResult;
+        } else {
+          return undefined;
+        }
+      })
+      .filter((result) => result !== undefined);
+
+    if (callValidationResults.length > 0) {
+      tmpResult.calls = callValidationResults as CallValidationResult[];
+    }
 
     setResult(tmpResult);
 
