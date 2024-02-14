@@ -43,7 +43,7 @@ export function QuaySelect(props: {
         props.value
           ? {
               value: props.value,
-              label: `${props.value.id} (${props.value.publicCode})`,
+              label: `${props.value.id} (${props.value.publicCode ? props.value.publicCode : 'Ukjent'})`,
             }
           : null
       }
