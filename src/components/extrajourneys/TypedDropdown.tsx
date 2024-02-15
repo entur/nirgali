@@ -57,7 +57,7 @@ export function TypedSearchableDropdown<T>(props: {
       // @ts-expect-error
       items={props.items}
       // @ts-expect-error
-      selectedItem={props.value}
+      selectedItem={props.selectedItem}
       // @ts-expect-error
       onChange={(item) => props.onChange(item?.value)}
       feedback={props.feedback}
