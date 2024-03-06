@@ -67,7 +67,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "7.21.11",
     "@types/jest": "29.5.12",
-    "@types/node": "18.19.21",
+    "@types/node": "18.19.22",
     "@types/react": "18.2.63",
     "@types/react-dom": "18.2.20",
     "@typescript-eslint/typescript-estree": "6.21.0",
