@@ -95,7 +95,7 @@ jobs:
         run: cp build/avv-d.ico build/favicon.ico
       - name: Copy config
         run: cp config/config-dev.json build/config.json
-      - uses: w9jds/firebase-action@v13.5.1
+      - uses: w9jds/firebase-action@v13.5.2
         with:
           args: deploy
         env:
@@ -136,7 +136,7 @@ jobs:
         run: cp build/avv-s.ico build/favicon.ico
       - name: Copy config
         run: cp config/config-staging.json build/config.json
-      - uses: w9jds/firebase-action@v13.5.1
+      - uses: w9jds/firebase-action@v13.5.2
         with:
           args: deploy
         env:
@@ -177,7 +177,7 @@ jobs:
         run: cp build/avv-p.ico build/favicon.ico
       - name: Copy config
         run: cp config/config-prod.json build/config.json
-      - uses: w9jds/firebase-action@v13.5.1
+      - uses: w9jds/firebase-action@v13.5.2
         with:
           args: deploy
         env:
