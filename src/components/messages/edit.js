@@ -236,6 +236,9 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
   };
 
   const getLineDepartureOption = () => {
+    if (serviceJourney.estimatedCalls.length === 0) {
+      return null;
+    }
     const estimatedCall = serviceJourney.estimatedCalls[0];
     const quayName = estimatedCall.quay.name;
     const aimedDepartureTime = estimatedCall.aimedDepartureTime
@@ -367,10 +370,12 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
                   />
                 </div>
                 <div className="choose_type">
-                  <Select
-                    value={getLineDepartureOption()}
-                    options={[getLineDepartureOption()]}
-                  />
+                  {getLineDepartureOption() && (
+                    <Select
+                      value={getLineDepartureOption()}
+                      options={[getLineDepartureOption()]}
+                    />
+                  )}
                 </div>
                 {getDepartureQuays() && (
                   <Select
