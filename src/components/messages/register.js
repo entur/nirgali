@@ -374,15 +374,21 @@ class Register extends React.Component {
   onToChange = (to) => {
     if (to.compare(now(getLocalTimeZone())) < 0) {
       this.setState({ to: now(getLocalTimeZone()) });
-    } else if (to.compare(this.state.from) < 0) {
-      this.setState({ to: this.state.from });
     } else {
       let copy = to.copy();
-      if (!copy.hour || !copy.minute) {
+      if (!copy.hour) {
         copy = toZoned(
           toCalendarDateTime(
             copy,
             new Time(this.state.from.hour, this.state.from.minute),
+          ),
+          getLocalTimeZone(),
+        );
+      } else if (!copy.minute) {
+        copy = toZoned(
+          toCalendarDateTime(
+            copy,
+            new Time(this.state.to.hour, this.state.from.minute),
           ),
           getLocalTimeZone(),
         );
