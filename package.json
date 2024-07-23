@@ -78,7 +78,7 @@
     "prettier": "3.3.3",
     "react-scripts": "5.0.1",
     "sass": "1.77.8",
-    "typescript": "5.5.3"
+    "typescript": "5.5.4"
   },
   "proxy": "http://localhost:4000"
 }
