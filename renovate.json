@@ -1,4 +1,13 @@
 {
   "extends": ["github>entur/ror-renovate-config"],
-  "npmrcMerge": true
+  "npmrcMerge": true,
+  "packageRules": [
+    {
+      "description": "Ignore nodejs",
+      "matchPackageNames": ["node"],
+      "matchManagers": ["npm"],
+      "matchDepTypes": [ "engines" ],
+      "dependencyDashboardApproval": true
+    }
+  ]
 }
