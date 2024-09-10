@@ -2,6 +2,8 @@
 
 Frontend application to manage deviation messages and cancellations, and serverless function to serve them in the SIRI xml format.
 
+Ñote: This application is currently being repurposed as frontend-only. The backend responsibilities (serverless functions) are in the process of being migrated to another component: [github.com/entur/enlil](https://github.com/entur/enlil).
+
 ### Frontend application
 
 In production, the frontend application is available at https://avvik.entur.org.
