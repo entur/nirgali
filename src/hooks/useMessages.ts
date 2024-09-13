@@ -24,7 +24,7 @@ export const useMessages = (codespace: string, authority: string) => {
     if (codespace && authority) {
       getMessages();
     }
-  }, [codespace, authority, config]);
+  }, [codespace, authority, config, auth]);
 
   return messages;
 };
