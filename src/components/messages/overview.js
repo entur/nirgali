@@ -12,8 +12,8 @@ import { DateFormatter } from '@internationalized/date';
 
 const returnRedOrGreenIcon = (param, date) => {
   if (
-    Date.parse(param.ValidityPeriod.EndTime) < date ||
-    param.Progress === 'closed'
+    Date.parse(param.validityPeriod.endTime) < date ||
+    param.progress === 'closed'
   ) {
     return <img src={red} id="not_active" alt="" height="30" width="30" />;
   } else {
@@ -23,13 +23,13 @@ const returnRedOrGreenIcon = (param, date) => {
 
 const getType = (param) => {
   if (param != null) {
-    if (Object.keys(param)[0] === 'Networks') {
+    if (Object.keys(param)[0] === 'networks') {
       return 'Linje';
     }
-    if (Object.keys(param)[0] === 'StopPoints') {
+    if (Object.keys(param)[0] === 'stopPoints') {
       return 'Stopp';
     }
-    if (Object.keys(param)[0] === 'VehicleJourneys') {
+    if (Object.keys(param)[0] === 'vehicleJourneys') {
       return 'Avgang';
     } else {
       return 'Error';
@@ -70,10 +70,10 @@ const Overview = ({ messages }) => {
   const messagesToRender = useMemo(() => {
     let messagesToRender = showExpiredMessages
       ? messages
-      : messages.filter(({ data: message }) => {
+      : messages.filter((message) => {
           return (
-            !message.ValidityPeriod.EndTime ||
-            Date.parse(message.ValidityPeriod.EndTime) > date
+            !message.validityPeriod.endTime ||
+            Date.parse(message.validityPeriod.endTime) > date
           );
         });
 
@@ -137,21 +137,21 @@ const Overview = ({ messages }) => {
               </Tr>
             </Thead>
             <Tbody>
-              {messagesToRender.map(({ id, data: item }, index) => (
-                <Tr key={item.SituationNumber}>
+              {messagesToRender.map(({ id, ...item }, index) => (
+                <Tr key={item.situationNumber}>
                   <Td className="Status">{returnRedOrGreenIcon(item, date)}</Td>
-                  <Td className="#">{item.SituationNumber.split(':').pop()}</Td>
+                  <Td className="#">{item.situationNumber.split(':').pop()}</Td>
                   <Td className="Melding" width="25%">
-                    {item.Summary['_text']}
+                    {item.summary.text}
                   </Td>
-                  <Td className="ReportType">{item.ReportType}</Td>
+                  <Td className="ReportType">{item.reportType}</Td>
                   <Td className="Fra-dato">
-                    {getDate(item.ValidityPeriod.StartTime)}
+                    {getDate(item.validityPeriod.startTime)}
                   </Td>
                   <Td className="Til-dato">
-                    {getDate(item.ValidityPeriod.EndTime)}
+                    {getDate(item.validityPeriod.endTime)}
                   </Td>
-                  <Td className="Type">{getType(item.Affects)}</Td>
+                  <Td className="Type">{getType(item.affects)}</Td>
                   <Td>
                     <Button
                       variant="secondary"

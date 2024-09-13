@@ -1,4 +1,5 @@
 {
+  "deviation-messages-api": "https://api.staging.entur.io/deviation-messages/v2/graphql",
   "journey-planner-api": "https://api.staging.entur.io/journey-planner/v3/graphql",
   "stop-places-api": "https://api.staging.entur.io/stop-places/v1/read",
   "organisations-api": "https://api.staging.entur.io/organisations/v1/register/organisations",
