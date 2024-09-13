@@ -303,6 +303,23 @@ const createOrUpdateMessage =
       .then((response) => response);
   };
 
+const getUserContext = (URI, auth) => async () => {
+  const accessToken = await auth.getAccessToken();
+  const apolloFetch = createFetch(URI, accessToken);
+
+  const query = `
+    query GetUserContext {
+      userContext {
+        allowedCodespaces
+      }
+    }
+  `;
+
+  return apolloFetch({ query })
+    .catch((error) => error)
+    .then((response) => response);
+};
+
 const api = (config, auth) => ({
   getAuthorities: getAuthorities(config['journey-planner-api']),
   organisationID: organisationID(config['organisations-api']),
@@ -317,6 +334,7 @@ const api = (config, auth) => ({
     config['deviation-messages-api'],
     auth,
   ),
+  getUserContext: getUserContext(config['deviation-messages-api'], auth),
 });
 
 export default api;

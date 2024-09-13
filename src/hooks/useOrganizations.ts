@@ -18,29 +18,30 @@ export const useOrganizations: () => Organization[] = () => {
     if (!(auth.roleAssignments?.length > 0)) {
       auth.logout();
     }
-
-    const allowedCodespaces = getAllowedCodespaces(auth);
-
-    if (!(allowedCodespaces.length > 0)) {
-      auth.logout();
-    }
-
     const fetchAuthorities = async () => {
-      const response = await api(config).getAuthorities();
-      const authorities = response.data.authorities.filter((authority: any) =>
-        allowedCodespaces.includes(authority.id.split(':')[0]),
-      );
+      const userContextResponse = await api(config, auth).getUserContext();
+      const userContext = userContextResponse.data.userContext;
+      const allowedCodespaces = userContext.allowedCodespaces;
 
-      if (!(authorities.length > 0)) {
+      if (!(allowedCodespaces.length > 0)) {
         auth.logout();
-      }
+      } else {
+        const response = await api(config).getAuthorities();
+        const authorities = response.data.authorities.filter((authority: any) =>
+          allowedCodespaces.includes(authority.id.split(':')[0]),
+        );
 
-      setOrganizations(
-        authorities.map(({ id, name }: any) => ({
-          id,
-          name,
-        })),
-      );
+        if (!(authorities.length > 0)) {
+          auth.logout();
+        }
+
+        setOrganizations(
+          authorities.map(({ id, name }: any) => ({
+            id,
+            name,
+          })),
+        );
+      }
     };
 
     fetchAuthorities();
