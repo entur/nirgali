@@ -1,7 +1,7 @@
 export const sortBySituationNumber = (a, b) => {
   return sortAsc(
-    getSituationNumberSequence(a.data.SituationNumber),
-    getSituationNumberSequence(b.data.SituationNumber),
+    getSituationNumberSequence(a.situationNumber),
+    getSituationNumberSequence(b.situationNumber),
   );
 };
 

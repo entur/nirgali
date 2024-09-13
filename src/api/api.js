@@ -181,6 +181,121 @@ const getTopographicPlaces = (URI) => async (ids) => {
   return topographicPlaces;
 };
 
+const getMessages = (URI) => async (codespace, authority) => {
+  const apolloFetch = createFetch(URI);
+
+  const query = `
+    query MessagesQuery($authority:String!, $codespace: String!) {
+  situationElements(authority: $authority, codespace: $codespace) {
+    id
+    creationTime
+    participantRef
+    progress
+    reportType
+    severity
+    situationNumber
+    advice {
+      attributes {
+        xmlLang
+      }
+      text
+    }
+    affects {
+      networks {
+        affectedNetwork {
+          affectedLine {
+            lineRef
+            routes {
+              affectedRoute {
+                stopPoints {
+                  affectedStopPoint {
+                    stopPointRef
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      stopPoints {
+        affectedStopPoint {
+          stopPointRef
+        }
+      }
+      vehicleJourneys {
+        affectedVehicleJourney {
+          framedVehicleJourneyRef {
+            dataFrameRef
+            datedVehicleJourneyRef
+          }
+          route {
+            stopPoints {
+              affectedStopPoint {
+                stopPointRef
+              }
+            }
+          }
+        }
+      }
+    }
+    description {
+      attributes {
+        xmlLang
+      }
+      text
+    }
+    infoLinks {
+      infoLink {
+        uri
+        label
+      }
+    }
+    source {
+      sourceType
+    }
+    summary {
+      attributes {
+        xmlLang
+      }
+      text
+    }
+    validityPeriod {
+      endTime
+      startTime
+    }
+  }
+}`;
+
+  const variables = {
+    codespace,
+    authority,
+  };
+
+  return apolloFetch({ query, variables })
+    .catch((error) => error)
+    .then((response) => response);
+};
+
+const createOrUpdateMessage = (URI) => async (codespace, authority, input) => {
+  const apolloFetch = createFetch(URI);
+
+  const query = `
+    mutation CreateOrUpdateMessage($codespace: String!, $authority: String!, $input: SituationElementInput!) {
+      createOrUpdateSituationElement(codespace: $codespace, authority: $authority, input: $input)
+    }
+  `;
+
+  const variables = {
+    codespace,
+    authority,
+    input,
+  };
+
+  return apolloFetch({ query, variables })
+    .catch((error) => error)
+    .then((response) => response);
+};
+
 const api = (config) => ({
   getAuthorities: getAuthorities(config['journey-planner-api']),
   organisationID: organisationID(config['organisations-api']),
@@ -190,6 +305,10 @@ const api = (config) => ({
   getOperators: getOperators(config['journey-planner-api']),
   getStopPlaces: getStopPlaces(config['stop-places-api']),
   getTopographicPlaces: getTopographicPlaces(config['stop-places-api']),
+  getMessages: getMessages(config['deviation-messages-api']),
+  createOrUpdateMessage: createOrUpdateMessage(
+    config['deviation-messages-api'],
+  ),
 });
 
 export default api;

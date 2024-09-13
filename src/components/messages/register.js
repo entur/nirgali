@@ -76,17 +76,17 @@ class Register extends React.Component {
 
   createNewLine = () => {
     return {
-      Networks: {
-        AffectedNetwork: { AffectedLine: { LineRef: this.state.chosenLine } },
+      networks: {
+        affectedNetwork: { affectedLine: { lineRef: this.state.chosenLine } },
       },
     };
   };
 
   createAffectedRoute = () => {
     return {
-      StopPoints: {
-        AffectedStopPoint: this.state.multipleStops.map((item) => ({
-          StopPointRef: item.value,
+      stopPoints: {
+        affectedStopPoint: this.state.multipleStops.map((item) => ({
+          stopPointRef: item.value,
         })),
       },
     };
@@ -94,20 +94,20 @@ class Register extends React.Component {
 
   createAffectedRouteLine = () => {
     return {
-      AffectedStopPoint: this.state.multipleStops.map((item) => ({
-        StopPointRef: item.value,
+      affectedStopPoint: this.state.multipleStops.map((item) => ({
+        stopPointRef: item.value,
       })),
     };
   };
 
   createNewSpecifiedStops = () => {
     return {
-      Networks: {
-        AffectedNetwork: {
-          AffectedLine: {
-            LineRef: this.state.chosenLine,
-            Routes: {
-              AffectedRoute: { StopPoints: this.createAffectedRouteLine() },
+      networks: {
+        affectedNetwork: {
+          affectedLine: {
+            lineRef: this.state.chosenLine,
+            routes: {
+              affectedRoute: { stopPoints: this.createAffectedRouteLine() },
             },
           },
         },
@@ -117,13 +117,13 @@ class Register extends React.Component {
 
   createAffectedDeparture = () => {
     return {
-      VehicleJourneys: {
-        AffectedVehicleJourney: {
-          FramedVehicleJourneyRef: {
-            DataFrameRef: toCalendarDate(this.state.departureDate).toString(),
-            DatedVehicleJourneyRef: this.state.datedVehicleJourney,
+      vehicleJourneys: {
+        affectedVehicleJourney: {
+          framedVehicleJourneyRef: {
+            dataFrameRef: toCalendarDate(this.state.departureDate).toString(),
+            datedVehicleJourneyRef: this.state.datedVehicleJourney,
           },
-          Route: null,
+          route: null,
         },
       },
     };
@@ -131,13 +131,13 @@ class Register extends React.Component {
 
   createNewSpecifiedStopsDeparture = () => {
     return {
-      VehicleJourneys: {
-        AffectedVehicleJourney: {
-          FramedVehicleJourneyRef: {
-            DataFrameRef: toCalendarDate(this.state.departureDate).toString(),
-            DatedVehicleJourneyRef: this.state.datedVehicleJourney,
+      vehicleJourneys: {
+        affectedVehicleJourney: {
+          framedVehicleJourneyRef: {
+            dataFrameRef: toCalendarDate(this.state.departureDate).toString(),
+            datedVehicleJourneyRef: this.state.datedVehicleJourney,
           },
-          Route: this.createAffectedRoute(),
+          route: this.createAffectedRoute(),
         },
       },
     };
@@ -148,7 +148,7 @@ class Register extends React.Component {
   };
 
   handleSubmit = async (event) => {
-    const newIssue = await this.createNewIssue();
+    const newIssue = this.createNewIssue();
 
     this.handleEmptyDescription(newIssue);
     this.handleEmptyAdvice(newIssue);
@@ -156,79 +156,45 @@ class Register extends React.Component {
     this.handleAffects(newIssue);
     this.handleInfoLink(newIssue);
 
-    this.props.firebase
-      .collection(
-        `codespaces/${this.props.organization.split(':')[0]}/authorities/${
-          this.props.organization
-        }/messages`,
-      )
-      .doc()
-      .set(newIssue);
+    const codespace = this.props.organization.split(':')[0];
+    const authority = this.props.organization;
+
+    await this.props.api.createOrUpdateMessage(codespace, authority, newIssue);
     this.props.navigate('/');
   };
 
-  createNewIssue = async () => {
-    const count = await this.getNextSituationNumber();
-
+  createNewIssue = () => {
     return {
-      CreationTime: this.state.date.toAbsoluteString(),
-      ParticipantRef: this.props.organization.split(':')[0],
-      SituationNumber:
-        this.props.organization.split(':')[0] + ':SituationNumber:' + count,
-      Source: {
-        SourceType: 'directReport',
+      creationTime: this.state.date.toAbsoluteString(),
+      participantRef: this.props.organization.split(':')[0],
+      source: {
+        sourceType: 'directReport',
       },
-      Progress: 'open',
-      ValidityPeriod: null,
-      Severity: 'normal',
-      ReportType: this.state.reportType,
-      Summary: {
-        _attributes: {
-          'xml:lang': 'NO',
+      progress: 'open',
+      validityPeriod: null,
+      severity: 'normal',
+      reportType: this.state.reportType,
+      summary: {
+        attributes: {
+          xmlLang: 'NO',
         },
-        _text: this.state.oppsummering,
+        text: this.state.oppsummering,
       },
-      Description: {
-        _attributes: {
-          'xml:lang': 'NO',
+      description: {
+        attributes: {
+          xmlLang: 'NO',
         },
-        _text: this.state.beskrivelse,
+        text: this.state.beskrivelse,
       },
-      Advice: {
-        _attributes: {
-          'xml:lang': 'NO',
+      advice: {
+        attributes: {
+          xmlLang: 'NO',
         },
-        _text: this.state.forslag,
+        text: this.state.forslag,
       },
-      Affects: [],
+      affects: [],
     };
   };
-
-  getNextSituationNumber = () => {
-    const codespace = this.props.organization.split(':')[0];
-    const codespaceDocRef = this.props.firebase.doc(`codespaces/${codespace}`);
-    return this.props.firebase.runTransaction(
-      this.getNextSituationNumberTransaction(codespaceDocRef),
-    );
-  };
-
-  getNextSituationNumberTransaction =
-    (codespaceDocRef) => async (transaction) => {
-      const codespaceDoc = await transaction.get(codespaceDocRef);
-
-      if (!codespaceDoc.exists) {
-        await transaction.set(codespaceDocRef, {
-          nextSituationNumber: 2,
-        });
-        return 1;
-      } else {
-        let nextSituationNumber = codespaceDoc.data().nextSituationNumber;
-        await transaction.update(codespaceDocRef, {
-          nextSituationNumber: nextSituationNumber + 1,
-        });
-        return nextSituationNumber;
-      }
-    };
 
   handleChangeType = (value) => {
     this.createStops();
@@ -401,24 +367,24 @@ class Register extends React.Component {
     if (this.state.type === 'line') {
       if (this.state.checkbox) {
         const newAffect = this.createNewSpecifiedStops();
-        newIssue.Affects = newAffect;
+        newIssue.affects = newAffect;
       } else {
         const newAffect = this.createNewLine();
-        newIssue.Affects = newAffect;
+        newIssue.affects = newAffect;
       }
     }
 
     if (this.state.type === 'stop') {
       const newAffect = this.createAffectedRoute();
-      newIssue.Affects = newAffect;
+      newIssue.affects = newAffect;
     }
     if (this.state.type === 'departure') {
       if (this.state.checkbox2) {
         const newAffect = this.createNewSpecifiedStopsDeparture();
-        newIssue.Affects = newAffect;
+        newIssue.affects = newAffect;
       } else {
         const newAffect = this.createAffectedDeparture();
-        newIssue.Affects = newAffect;
+        newIssue.affects = newAffect;
       }
     }
   }
@@ -433,19 +399,19 @@ class Register extends React.Component {
         toCalendarDateTime(this.state.departureDate, new Time(23, 59, 59, 999)),
         getLocalTimeZone(),
       );
-      newIssue.ValidityPeriod = {
-        StartTime: from.toAbsoluteString(),
-        EndTime: to.toAbsoluteString(),
+      newIssue.validityPeriod = {
+        startTime: from.toAbsoluteString(),
+        endTime: to.toAbsoluteString(),
       };
     } else {
       if (this.state.to) {
-        newIssue.ValidityPeriod = {
-          StartTime: this.state.from.toAbsoluteString(),
-          EndTime: this.state.to.toAbsoluteString(),
+        newIssue.validityPeriod = {
+          startTime: this.state.from.toAbsoluteString(),
+          endTime: this.state.to.toAbsoluteString(),
         };
       } else {
-        newIssue.ValidityPeriod = {
-          StartTime: this.state.from.toAbsoluteString(),
+        newIssue.validityPeriod = {
+          startTime: this.state.from.toAbsoluteString(),
         };
       }
     }
@@ -453,27 +419,27 @@ class Register extends React.Component {
 
   handleInfoLink(newIssue) {
     if (this.state.infoLink) {
-      newIssue.InfoLinks = {
-        InfoLink: {
-          Uri: this.state.infoLink.uri,
+      newIssue.infoLinks = {
+        infoLink: {
+          uri: this.state.infoLink.uri,
         },
       };
 
       if (this.state.infoLink.label) {
-        newIssue.InfoLinks.InfoLink.Label = this.state.infoLink.label;
+        newIssue.infoLinks.infoLink.label = this.state.infoLink.label;
       }
     }
   }
 
   handleEmptyAdvice(newIssue) {
     if (this.state.forslag === '') {
-      delete newIssue.Advice;
+      delete newIssue.advice;
     }
   }
 
   handleEmptyDescription(newIssue) {
     if (this.state.beskrivelse === '') {
-      delete newIssue.Description;
+      delete newIssue.description;
     }
   }
 

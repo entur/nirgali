@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DatePicker, Time } from '@entur/datepicker';
 import {
-  PrimaryButton as Button,
-  NegativeButton,
-  SecondaryButton,
   ButtonGroup,
+  NegativeButton,
+  PrimaryButton as Button,
+  SecondaryButton,
 } from '@entur/button';
 import { Contrast } from '@entur/layout';
 import Select from 'react-select';
@@ -18,7 +18,7 @@ import {
   toZoned,
 } from '@internationalized/date';
 
-const Edit = ({ messages, firebase, organization, lines, api }) => {
+const Edit = ({ messages, organization, lines, api }) => {
   const navigate = useNavigate();
   const { id: issueId } = useParams();
 
@@ -29,21 +29,21 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
 
   const [serviceJourney, setServiceJourney] = useState(undefined);
   const [from, setFrom] = useState(
-    parseAbsoluteToLocal(issue.data.ValidityPeriod.StartTime),
+    parseAbsoluteToLocal(issue?.validityPeriod.startTime),
   );
   const [to, setTo] = useState(undefined);
 
   useEffect(() => {
-    const Affects = issue?.data?.Affects;
-    const FramedVehicleJourneyRef =
-      Affects?.VehicleJourneys?.AffectedVehicleJourney?.FramedVehicleJourneyRef;
-    const DatedVehicleJourneyRef =
-      FramedVehicleJourneyRef?.DatedVehicleJourneyRef;
-    const DataFrameRef = FramedVehicleJourneyRef?.DataFrameRef;
+    const affects = issue?.affects;
+    const framedVehicleJourneyRef =
+      affects?.vehicleJourneys?.affectedVehicleJourney?.framedVehicleJourneyRef;
+    const datedVehicleJourneyRef =
+      framedVehicleJourneyRef?.datedVehicleJourneyRef;
+    const dataFrameRef = framedVehicleJourneyRef?.dataFrameRef;
 
-    if (DatedVehicleJourneyRef) {
+    if (datedVehicleJourneyRef) {
       api
-        .getServiceJourney(DatedVehicleJourneyRef, DataFrameRef)
+        .getServiceJourney(datedVehicleJourneyRef, dataFrameRef)
         .then(({ data }) => {
           setServiceJourney(data.serviceJourney);
         });
@@ -52,54 +52,62 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    issue.data.Progress = 'open';
-    issue.data.Summary['_text'] = event.target.oppsummering.value;
+
+    const newIssue = Object.assign({}, issue);
+
+    newIssue.progress = 'open';
+    newIssue.summary = {
+      attributes: {
+        xmlLang: 'NO',
+      },
+      text: event.target.oppsummering.value,
+    };
+
     if (event.target.beskrivelse.value !== '') {
-      issue.data['Description'] = {
-        _attributes: { 'xml:lang': 'NO' },
-        _text: event.target.beskrivelse.value,
+      newIssue.description = {
+        attributes: {
+          xmlLang: 'NO',
+        },
+        text: event.target.beskrivelse.value,
       };
     } else {
-      if (issue.data.Description) {
-        delete issue.data.Description;
+      if (newIssue.description) {
+        delete newIssue.description;
       }
     }
     if (event.target.forslag.value !== '') {
-      issue.data['Advice'] = {
-        _attributes: { 'xml:lang': 'NO' },
-        _text: event.target.forslag.value,
+      newIssue.advice = {
+        attributes: {
+          xmlLang: 'NO',
+        },
+        text: event.target.forslag.value,
       };
     } else {
-      if (issue.data.Advice) {
-        delete issue.data.Advice;
+      if (newIssue.advice) {
+        delete newIssue.advice;
       }
     }
     if (from) {
-      issue.data.ValidityPeriod.StartTime = from.toAbsoluteString();
+      newIssue.validityPeriod.startTime = from.toAbsoluteString();
     }
     if (to) {
-      issue.data.ValidityPeriod.EndTime = to.toAbsoluteString();
+      newIssue.validityPeriod.endTime = to.toAbsoluteString();
     }
-    issue.data.ReportType = event.target.reportType.value;
+    newIssue.reportType = event.target.reportType.value;
 
     if (event.target.infoLinkUri.value !== '') {
-      issue.data.InfoLinks = {
-        InfoLink: {
-          Uri: event.target.infoLinkUri.value,
-          Label: event.target.infoLinkLabel.value,
+      newIssue.infoLinks = {
+        infoLink: {
+          uri: event.target.infoLinkUri.value,
+          label: event.target.infoLinkLabel.value,
         },
       };
     } else {
-      delete issue.data.InfoLinks;
+      delete newIssue.infoLinks;
     }
 
-    const codespace = organization.split(':')[0];
-    const authority = organization;
-    const id = issue.id;
-
-    firebase
-      .doc(`codespaces/${codespace}/authorities/${authority}/messages/${id}`)
-      .set(issue.data)
+    api
+      .createOrUpdateMessage(organization.split(':')[0], organization, newIssue)
       .then(() => navigate('/'));
   };
 
@@ -108,22 +116,18 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
   }, [navigate]);
 
   const setProgressToClosed = useCallback(() => {
-    const update = {
-      Progress: 'closed',
-      ValidityPeriod: {
-        EndTime: now(getLocalTimeZone()).add({ hours: 5 }).toAbsoluteString(),
+    const update = Object.assign({}, issue, {
+      progress: 'closed',
+      validityPeriod: {
+        startTime: issue.validityPeriod.startTime,
+        endTime: now(getLocalTimeZone()).add({ hours: 5 }).toAbsoluteString(),
       },
-    };
-    const codespace = organization.split(':')[0];
-    const authority = organization;
-    const id = issue.id;
-    firebase
-      .doc(`codespaces/${codespace}/authorities/${authority}/messages/${id}`)
-      .set(update, {
-        mergeFields: ['Progress', 'ValidityPeriod.EndTime'],
-      })
+    });
+
+    api
+      .createOrUpdateMessage(organization.split(':')[0], organization, update)
       .then(() => navigate('/'));
-  }, [firebase, issue.id, navigate, organization]);
+  }, [issue, navigate, organization, api]);
 
   const checkStatus = (param) => {
     if (param === 'open') {
@@ -155,40 +159,40 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
   };
 
   const getReportType = () => {
-    return issue.data.ReportType;
+    return issue.reportType;
   };
 
   const getSummary = () => {
-    return issue.data.Summary['_text'];
+    return issue.summary.text;
   };
 
   const getDescription = () => {
-    if (issue.data.Description) {
-      return issue.data.Description['_text'];
+    if (issue.description) {
+      return issue.description.text;
     } else {
       return '';
     }
   };
 
   const getAdvice = () => {
-    if (issue.data.Advice) {
-      return issue.data.Advice['_text'];
+    if (issue.advice) {
+      return issue.advice.text;
     } else {
       return '';
     }
   };
 
   const getInfoLinkUri = () => {
-    if (issue.data.InfoLinks) {
-      return issue.data.InfoLinks.InfoLink.Uri;
+    if (issue.infoLinks) {
+      return issue.infoLinks.infoLink.uri;
     } else {
       return undefined;
     }
   };
 
   const getInfoLinkLabel = () => {
-    if (issue.data.InfoLinks) {
-      return issue.data.InfoLinks.InfoLink.Label;
+    if (issue.infoLinks) {
+      return issue.infoLinks.infoLink.label;
     } else {
       return undefined;
     }
@@ -214,14 +218,14 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
   };
 
   const getType = () => {
-    if (issue.data.Affects?.Networks?.AffectedNetwork?.AffectedLine?.LineRef) {
+    if (issue.affects?.networks?.affectedNetwork?.affectedLine?.lineRef) {
       return 'line';
     } else if (
-      issue.data.Affects?.VehicleJourneys?.AffectedVehicleJourney
-        ?.FramedVehicleJourneyRef
+      issue.affects?.vehicleJourneys?.affectedVehicleJourney
+        ?.framedVehicleJourneyRef
     ) {
       return 'departure';
-    } else if (issue.data.Affects?.StopPoints) {
+    } else if (issue.affects?.stopPoints) {
       return 'stop';
     }
 
@@ -229,10 +233,10 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
   };
 
   const getLine = () => {
-    const Affects = issue.data.Affects;
-    const AffectedLine = Affects?.Networks?.AffectedNetwork?.AffectedLine;
-    const LineRef = AffectedLine?.LineRef;
-    return getLineOption(lines, LineRef);
+    const affects = issue.affects;
+    const affectedLine = affects?.networks?.affectedNetwork?.affectedLine;
+    const lineRef = affectedLine?.lineRef;
+    return getLineOption(lines, lineRef);
   };
 
   const getLineDepartureOption = () => {
@@ -253,38 +257,40 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
   };
 
   const getLineQuays = () => {
-    const Affects = issue.data.Affects;
-    const AffectedLine = Affects?.Networks?.AffectedNetwork?.AffectedLine;
-    const LineRef = AffectedLine?.LineRef;
-    const line = lines.find((l) => l.id === LineRef);
-    const StopPoints = AffectedLine?.Routes?.AffectedRoute?.StopPoints;
-    return getQuayOptions(StopPoints, line?.quays);
+    const affects = issue.affects;
+    const affectedLine = affects?.networks?.affectedNetwork?.affectedLine;
+    const lineRef = affectedLine?.lineRef;
+    const line = lines.find((l) => l.id === lineRef);
+    const stopPoints = affectedLine?.routes?.affectedRoute?.stopPoints;
+    return getQuayOptions(stopPoints, line?.quays);
   };
 
   const getDepartureQuays = () => {
-    const Affects = issue.data.Affects;
-    const Route = Affects?.VehicleJourneys?.AffectedVehicleJourney?.Route;
-    const StopPoints = Route?.StopPoints;
+    const affects = issue.affects;
+    const route = affects?.vehicleJourneys?.affectedVehicleJourney?.route;
+    const stopPoints = route?.stopPoints;
     const lineId = serviceJourney.line.id;
     const line = lines.find((l) => l.id === lineId);
-    return getQuayOptions(StopPoints, line.quays);
+    return getQuayOptions(stopPoints, line.quays);
   };
 
   const getStopQuays = () => {
-    const Affects = issue.data.Affects;
-    const StopPoints = Affects?.StopPoints;
+    const affects = issue.affects;
+    const stopPoints = affects?.stopPoints;
     const quays = lines.reduce((acc, line) => [...acc, ...line.quays], []);
-    return getQuayOptions(StopPoints, quays);
+    return getQuayOptions(stopPoints, quays);
   };
 
-  const getQuayOptions = (StopPoints, quays) => {
+  const getQuayOptions = (stopPoints, quays) => {
     return quays
-      ? StopPoints?.AffectedStopPoint?.map((AffectedStopPoint) => {
-          return quays.find(
-            (q) =>
-              q.stopPlace && q.stopPlace.id === AffectedStopPoint.StopPointRef,
-          );
-        })
+      ? stopPoints?.affectedStopPoint
+          ?.map((affectedStopPoint) => {
+            return quays.find(
+              (q) =>
+                q.stopPlace &&
+                q.stopPlace.id === affectedStopPoint.stopPointRef,
+            );
+          })
           ?.filter((v) => v !== undefined)
           ?.map(({ id, name }) => ({
             value: id,
@@ -302,7 +308,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
   const onToChange = useCallback(
     (to) => {
       const calculatedFrom =
-        from || parseAbsoluteToLocal(issue.data.ValidityPeriod.StartTime);
+        from || parseAbsoluteToLocal(issue.validityPeriod.startTime);
 
       if (to.compare(now(getLocalTimeZone())) < 0) {
         setTo(now(getLocalTimeZone()));
@@ -409,7 +415,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
           <DatePicker
             label="Fra"
             selectedDate={
-              from || parseAbsoluteToLocal(issue.data.ValidityPeriod.StartTime)
+              from || parseAbsoluteToLocal(issue.validityPeriod.startTime)
             }
             onChange={onFromChange}
             minDate={now(getLocalTimeZone())}
@@ -419,8 +425,8 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
             label="Til"
             selectedDate={
               to ||
-              (issue.data.ValidityPeriod.EndTime
-                ? parseAbsoluteToLocal(issue.data.ValidityPeriod.EndTime)
+              (issue.validityPeriod.endTime
+                ? parseAbsoluteToLocal(issue.validityPeriod.endTime)
                 : undefined)
             }
             onChange={onToChange}
@@ -481,7 +487,7 @@ const Edit = ({ messages, firebase, organization, lines, api }) => {
           defaultValue={returnValue('infoLinkLabel')}
         />
         <br></br>
-        {checkStatus(issue.data.Progress)}
+        {checkStatus(issue.progress)}
       </form>
     </>
   );
