@@ -1,5 +1,5 @@
 {
-  "deviation-messages-api": "http://localhost:8080/graphql",
+  "deviation-messages-api": "https://api.dev.entur.io/deviation-messages/v2/graphql",
   "journey-planner-api": "https://api.dev.entur.io/journey-planner/v3/graphql",
   "stop-places-api": "https://api.dev.entur.io/stop-places/v1/read",
   "organisations-api": "https://api.dev.entur.io/organisations/v1/register/organisations",
