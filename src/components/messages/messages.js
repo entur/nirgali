@@ -6,8 +6,10 @@ import api from '../../api/api';
 import { useConfig } from '../../config/ConfigContext';
 import { useLines } from '../../hooks/useLines';
 import { useMessages } from '../../hooks/useMessages';
+import { useAuth } from '@entur/auth-provider';
 
 export const Messages = ({ selectedOrganization }) => {
+  const auth = useAuth();
   const lines = useLines(selectedOrganization);
   const config = useConfig();
 
@@ -26,7 +28,7 @@ export const Messages = ({ selectedOrganization }) => {
             <Edit
               messages={messages}
               lines={lines}
-              api={api(config)}
+              api={api(config, auth)}
               organization={selectedOrganization}
             />
           }
@@ -36,7 +38,7 @@ export const Messages = ({ selectedOrganization }) => {
         path="/ny"
         element={
           <Register
-            api={api(config)}
+            api={api(config, auth)}
             lines={lines}
             organization={selectedOrganization}
           />

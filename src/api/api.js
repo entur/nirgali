@@ -1,6 +1,6 @@
 const { createApolloFetch } = require('apollo-fetch');
 
-const createFetch = (URI) => {
+const createFetch = (URI, accessToken) => {
   const apolloFetch = createApolloFetch({
     uri: URI,
   });
@@ -10,6 +10,10 @@ const createFetch = (URI) => {
       options.headers = {}; // Create the headers object if needed.
     }
     options.headers['ET-Client-Name'] = 'entur - deviation-messages';
+
+    if (accessToken) {
+      options.headers['Authorization'] = `Bearer ${accessToken}`;
+    }
 
     next();
   });
@@ -181,8 +185,9 @@ const getTopographicPlaces = (URI) => async (ids) => {
   return topographicPlaces;
 };
 
-const getMessages = (URI) => async (codespace, authority) => {
-  const apolloFetch = createFetch(URI);
+const getMessages = (URI, auth) => async (codespace, authority) => {
+  const accessToken = await auth.getAccessToken();
+  const apolloFetch = createFetch(URI, accessToken);
 
   const query = `
     query MessagesQuery($authority:String!, $codespace: String!) {
@@ -276,27 +281,29 @@ const getMessages = (URI) => async (codespace, authority) => {
     .then((response) => response);
 };
 
-const createOrUpdateMessage = (URI) => async (codespace, authority, input) => {
-  const apolloFetch = createFetch(URI);
+const createOrUpdateMessage =
+  (URI, auth) => async (codespace, authority, input) => {
+    const accessToken = await auth.getAccessToken();
+    const apolloFetch = createFetch(URI, accessToken);
 
-  const query = `
+    const query = `
     mutation CreateOrUpdateMessage($codespace: String!, $authority: String!, $input: SituationElementInput!) {
       createOrUpdateSituationElement(codespace: $codespace, authority: $authority, input: $input)
     }
   `;
 
-  const variables = {
-    codespace,
-    authority,
-    input,
+    const variables = {
+      codespace,
+      authority,
+      input,
+    };
+
+    return apolloFetch({ query, variables })
+      .catch((error) => error)
+      .then((response) => response);
   };
 
-  return apolloFetch({ query, variables })
-    .catch((error) => error)
-    .then((response) => response);
-};
-
-const api = (config) => ({
+const api = (config, auth) => ({
   getAuthorities: getAuthorities(config['journey-planner-api']),
   organisationID: organisationID(config['organisations-api']),
   getLines: getLines(config['journey-planner-api']),
@@ -305,9 +312,10 @@ const api = (config) => ({
   getOperators: getOperators(config['journey-planner-api']),
   getStopPlaces: getStopPlaces(config['stop-places-api']),
   getTopographicPlaces: getTopographicPlaces(config['stop-places-api']),
-  getMessages: getMessages(config['deviation-messages-api']),
+  getMessages: getMessages(config['deviation-messages-api'], auth),
   createOrUpdateMessage: createOrUpdateMessage(
     config['deviation-messages-api'],
+    auth,
   ),
 });
 
