@@ -2,7 +2,6 @@ import { useAuth } from '@entur/auth-provider';
 import { useEffect, useState } from 'react';
 import { useConfig } from '../config/ConfigContext';
 import api from '../api/api';
-import { getAllowedCodespaces } from '../util/roleUtils';
 
 type Organization = {
   id: string;
@@ -15,9 +14,6 @@ export const useOrganizations: () => Organization[] = () => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
 
   useEffect(() => {
-    if (!(auth.roleAssignments?.length > 0)) {
-      auth.logout();
-    }
     const fetchAuthorities = async () => {
       const userContextResponse = await api(config, auth).getUserContext();
       const userContext = userContextResponse.data.userContext;
