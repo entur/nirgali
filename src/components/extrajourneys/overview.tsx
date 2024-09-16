@@ -20,10 +20,11 @@ import { ExtraJourney } from './types';
 import green from '../../img/green.png';
 // @ts-ignore
 import red from '../../img/red.png';
+import { useExtrajourneys } from '../../hooks/useExtrajourneys';
 
 const returnRedOrGreenIcon = (param: ExtraJourney) => {
   if (
-    param.EstimatedVehicleJourney.ExpiresAtEpochMs >
+    param.estimatedVehicleJourney.expiresAtEpochMs >
     now(getLocalTimeZone()).add({ minutes: 10 }).toDate().getTime()
   ) {
     return <img src={green} id="active" alt="" height="30" width="30" />;
@@ -35,48 +36,13 @@ const returnRedOrGreenIcon = (param: ExtraJourney) => {
 export const Overview = () => {
   const navigate = useNavigate();
   const selectedOrganization = useSelectedOrganization();
-  const [extrajourneys, setExtraJourneys] = useState([]);
   const [showCompletedTrips, setShowCompletedTrips] = useState(false);
 
-  const db = firebase.firestore();
-
-  useEffect(() => {
-    const codespace = selectedOrganization.split(':')[0];
-    const authority = selectedOrganization;
-
-    if (!codespace || !authority) {
-      return;
-    }
-
-    let query: any = db.collection(
-      `codespaces/${codespace}/authorities/${authority}/extrajourneys`,
-    );
-
-    if (!showCompletedTrips) {
-      query = query.where(
-        'EstimatedVehicleJourney.ExpiresAtEpochMs',
-        '>',
-        new Date().getTime(),
-      );
-    }
-
-    const unsubscribeSnapshotListener = query.onSnapshot((querySnapshot: any) =>
-      setExtraJourneys(
-        querySnapshot.size > 0
-          ? querySnapshot.docs.map((doc: any) => ({
-              id: doc.id,
-              data: doc.data(),
-            }))
-          : [],
-      ),
-    );
-
-    return () => {
-      if (unsubscribeSnapshotListener) {
-        unsubscribeSnapshotListener();
-      }
-    };
-  }, [selectedOrganization, db, showCompletedTrips]);
+  const { extrajourneys } = useExtrajourneys(
+    selectedOrganization.split(':')[0],
+    selectedOrganization,
+    showCompletedTrips,
+  );
 
   return (
     <>
@@ -117,34 +83,34 @@ export const Overview = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {extrajourneys.map((extrajourney: { data: ExtraJourney }) => (
+            {extrajourneys.map((extrajourney: ExtraJourney) => (
               <TableRow
                 key={
-                  extrajourney.data.EstimatedVehicleJourney
-                    .EstimatedVehicleJourneyCode
+                  extrajourney.estimatedVehicleJourney
+                    .estimatedVehicleJourneyCode
                 }
               >
-                <DataCell>{returnRedOrGreenIcon(extrajourney.data)}</DataCell>
+                <DataCell>{returnRedOrGreenIcon(extrajourney)}</DataCell>
                 <DataCell>
-                  {extrajourney.data.EstimatedVehicleJourney.PublishedLineName}
+                  {extrajourney.estimatedVehicleJourney.publishedLineName}
                 </DataCell>
                 <DataCell>
                   {
-                    extrajourney.data.EstimatedVehicleJourney
-                      .EstimatedVehicleJourneyCode
+                    extrajourney.estimatedVehicleJourney
+                      .estimatedVehicleJourneyCode
                   }
                 </DataCell>
                 <DataCell>
                   {
-                    extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
-                      .EstimatedCall[0].StopPointName
+                    extrajourney.estimatedVehicleJourney.estimatedCalls
+                      .estimatedCall[0].stopPointName
                   }
                 </DataCell>
                 <DataCell>
                   {new Date(
                     Date.parse(
-                      extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
-                        .EstimatedCall[0].AimedDepartureTime!,
+                      extrajourney.estimatedVehicleJourney.estimatedCalls
+                        .estimatedCall[0].aimedDepartureTime!,
                     ),
                   ).toLocaleString(navigator.language, {
                     day: '2-digit',
@@ -156,21 +122,21 @@ export const Overview = () => {
                 </DataCell>
                 <DataCell>
                   {
-                    extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
-                      .EstimatedCall[
-                      extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
-                        .EstimatedCall.length - 1
-                    ].StopPointName
+                    extrajourney.estimatedVehicleJourney.estimatedCalls
+                      .estimatedCall[
+                      extrajourney.estimatedVehicleJourney.estimatedCalls
+                        .estimatedCall.length - 1
+                    ].stopPointName
                   }
                 </DataCell>
                 <DataCell>
                   {new Date(
                     Date.parse(
-                      extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
-                        .EstimatedCall[
-                        extrajourney.data.EstimatedVehicleJourney.EstimatedCalls
-                          .EstimatedCall.length - 1
-                      ].AimedArrivalTime!,
+                      extrajourney.estimatedVehicleJourney.estimatedCalls
+                        .estimatedCall[
+                        extrajourney.estimatedVehicleJourney.estimatedCalls
+                          .estimatedCall.length - 1
+                      ].aimedArrivalTime!,
                     ),
                   ).toLocaleString(navigator.language, {
                     day: '2-digit',

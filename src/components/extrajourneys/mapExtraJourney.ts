@@ -25,42 +25,42 @@ export const mapExtraJourney = ({
   }
 
   return {
-    EstimatedVehicleJourney: {
-      RecordedAtTime: now(getLocalTimeZone()).toDate().toISOString(),
-      LineRef: lineRef,
-      DirectionRef: '0',
-      EstimatedVehicleJourneyCode: `${codespace}:ServiceJourney:${window.crypto.randomUUID()}`,
-      ExtraJourney: true,
-      VehicleMode: selectedMode,
-      RouteRef: `${codespace}:Route:${window.crypto.randomUUID()}`,
-      PublishedLineName: name,
-      GroupOfLinesRef: `${codespace}:Network:${window.crypto.randomUUID()}`,
-      ExternalLineRef: lineRef,
-      OperatorRef: selectedOperator.id,
-      Monitored: true,
-      DataSource: codespace,
-      EstimatedCalls: {
-        EstimatedCall: calls.map((call, i) => ({
-          StopPointRef: call.quay?.id!,
-          StopPointName: call.stopPlaceName!,
-          Order: i + 1,
-          DestinationDisplay: destinationDisplay,
-          AimedArrivalTime: call.arrival ?? null,
-          ExpectedArrivalTime: call.arrival ?? null,
-          AimedDepartureTime: call.departure ?? null,
-          ExpectedDepartureTime: call.departure ?? null,
-          DepartureBoardingActivity:
+    estimatedVehicleJourney: {
+      recordedAtTime: now(getLocalTimeZone()).toDate().toISOString(),
+      lineRef: lineRef,
+      directionRef: '0',
+      estimatedVehicleJourneyCode: `${codespace}:ServiceJourney:${window.crypto.randomUUID()}`,
+      extraJourney: true,
+      vehicleMode: selectedMode,
+      routeRef: `${codespace}:Route:${window.crypto.randomUUID()}`,
+      publishedLineName: name,
+      groupOfLinesRef: `${codespace}:Network:${window.crypto.randomUUID()}`,
+      externalLineRef: lineRef,
+      operatorRef: selectedOperator.id,
+      monitored: true,
+      dataSource: codespace,
+      estimatedCalls: {
+        estimatedCall: calls.map((call, i) => ({
+          stopPointRef: call.quay?.id!,
+          stopPointName: call.stopPlaceName!,
+          order: i + 1,
+          destinationDisplay: destinationDisplay,
+          aimedArrivalTime: call.arrival ?? null,
+          expectedArrivalTime: call.arrival ?? null,
+          aimedDepartureTime: call.departure ?? null,
+          expectedDepartureTime: call.departure ?? null,
+          departureBoardingActivity:
             i !== calls.length - 1
               ? call.boarding
                 ? 'boarding'
                 : 'noBoarding'
               : null,
-          ArrivalBoardingActivity:
+          arrivalBoardingActivity:
             i > 0 ? (call.alighting ? 'alighting' : 'noAlighting') : null,
         })),
       },
-      IsCompleteStopSequence: true,
-      ExpiresAtEpochMs: Date.parse(calls[calls.length - 1].arrival!),
+      isCompleteStopSequence: true,
+      expiresAtEpochMs: Date.parse(calls[calls.length - 1].arrival!),
     },
   };
 };

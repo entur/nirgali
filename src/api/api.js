@@ -385,13 +385,14 @@ const createOrUpdateCancellation =
       .then((response) => response);
   };
 
-const getExtrajourneys = (URI, auth) => async (codespace, authority) => {
-  const accessToken = await auth.getAccessToken();
-  const apolloFetch = createFetch(URI, accessToken);
+const getExtrajourneys =
+  (URI, auth) => async (codespace, authority, showCompletedTrips) => {
+    const accessToken = await auth.getAccessToken();
+    const apolloFetch = createFetch(URI, accessToken);
 
-  const query = `
-    query ExtraJourneysQuery($authority:String!, $codespace: String!) {
-  extrajourneys(authority: $authority, codespace: $codespace) {
+    const query = `
+    query ExtraJourneysQuery($authority:String!, $codespace: String!, $showCompletedTrips: Boolean!) {
+  extrajourneys(authority: $authority, codespace: $codespace, showCompletedTrips: $showCompletedTrips) {
     id
     estimatedVehicleJourney {
       cancellation
@@ -435,15 +436,16 @@ const getExtrajourneys = (URI, auth) => async (codespace, authority) => {
   }
 }`;
 
-  const variables = {
-    codespace,
-    authority,
-  };
+    const variables = {
+      codespace,
+      authority,
+      showCompletedTrips,
+    };
 
-  return apolloFetch({ query, variables })
-    .catch((error) => error)
-    .then((response) => response);
-};
+    return apolloFetch({ query, variables })
+      .catch((error) => error)
+      .then((response) => response);
+  };
 
 const createOrUpdateExtrajourney =
   (URI, auth) => async (codespace, authority, input) => {

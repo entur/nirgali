@@ -18,6 +18,9 @@ import { TypedDropDown } from './TypedDropdown';
 import { RegisterEstimatedCallRow } from './register-estimated-call-row';
 import { mapExtraJourney } from './mapExtraJourney';
 import { CallValidationResult, useExtrajourneyValidation } from './validate';
+import api from '../../api/api';
+import { useAuth } from '@entur/auth-provider';
+import { useConfig } from '../../config/ConfigContext';
 
 export const Register = () => {
   const selectedOrganization = useSelectedOrganization();
@@ -52,6 +55,11 @@ export const Register = () => {
     calls,
   });
 
+  const config = useConfig();
+  const auth = useAuth();
+
+  const { createOrUpdateExtrajourney } = api(config, auth);
+
   const codespace = selectedOrganization.split(':')[0];
 
   const submit = async () => {
@@ -69,13 +77,11 @@ export const Register = () => {
       calls,
     });
 
-    const db = firebase.firestore();
-    await db
-      .collection(
-        `codespaces/${codespace}/authorities/${selectedOrganization}/extrajourneys`,
-      )
-      .doc()
-      .set(extraJourney);
+    await createOrUpdateExtrajourney(
+      codespace,
+      selectedOrganization,
+      extraJourney,
+    );
 
     navigate('/ekstraavganger');
   };
