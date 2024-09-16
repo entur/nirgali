@@ -6,28 +6,28 @@ export const mapEstimatedCall = (
   const i = estimatedCall.stopPositionInPattern;
 
   const call = {
-    StopPointRef: estimatedCall.quay.id,
-    Order: estimatedCall.stopPositionInPattern + 1,
-    StopPointName: estimatedCall.quay.name,
-    Cancellation: true,
-    RequestStop: departureData.passingTimes[i].requestStop,
-    AimedArrivalTime: i > 0 ? estimatedCall.aimedArrivalTime : null,
-    ExpectedArrivalTime: i > 0 ? estimatedCall.expectedArrivalTime : null,
-    AimedDepartureTime:
+    stopPointRef: estimatedCall.quay.id,
+    order: estimatedCall.stopPositionInPattern + 1,
+    stopPointName: estimatedCall.quay.name,
+    cancellation: true,
+    requestStop: departureData.passingTimes[i].requestStop,
+    aimedArrivalTime: i > 0 ? estimatedCall.aimedArrivalTime : null,
+    expectedArrivalTime: i > 0 ? estimatedCall.expectedArrivalTime : null,
+    aimedDepartureTime:
       i < departureData.estimatedCalls.length - 1
         ? estimatedCall.aimedDepartureTime
         : null,
-    ExpectedDepartureTime:
+    expectedDepartureTime:
       i < departureData.estimatedCalls.length - 1
         ? estimatedCall.expectedDepartureTime
         : null,
-    ArrivalStatus: i > 0 ? 'cancelled' : null,
-    ArrivalBoardingActivity: departureData.passingTimes[i].forAlighting
+    arrivalStatus: i > 0 ? 'cancelled' : null,
+    arrivalBoardingActivity: departureData.passingTimes[i].forAlighting
       ? 'alighting'
       : 'noAlighting',
-    DepartureStatus:
+    departureStatus:
       i < departureData.estimatedCalls.length - 1 ? 'cancelled' : null,
-    DepartureBoardingActivity: departureData.passingTimes[i].forBoarding
+    departureBoardingActivity: departureData.passingTimes[i].forBoarding
       ? 'boarding'
       : 'noBoarding',
   };
@@ -36,9 +36,9 @@ export const mapEstimatedCall = (
     departureStops.length > 0 &&
     !departureStops.some((stopId) => stopId === estimatedCall.quay.stopPlace.id)
   ) {
-    call.Cancellation = false;
-    call.ArrivalStatus = i > 0 ? 'onTime' : null;
-    call.DepartureStatus =
+    call.cancellation = false;
+    call.arrivalStatus = i > 0 ? 'onTime' : null;
+    call.departureStatus =
       i < departureData.estimatedCalls.length - 1 ? 'onTime' : null;
   }
 
