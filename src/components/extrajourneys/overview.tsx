@@ -3,8 +3,7 @@ import { SecondaryButton } from '@entur/button';
 import { Switch } from '@entur/form';
 import { useNavigate } from 'react-router-dom';
 import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
-import { useEffect, useState } from 'react';
-import firebase from 'firebase/compat/app';
+import { useState } from 'react';
 import {
   DataCell,
   HeaderCell,

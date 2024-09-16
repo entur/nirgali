@@ -12,7 +12,6 @@ import { PrimaryButton } from '@entur/button';
 import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
 import { Operator, useOperators } from '../../hooks/useOperators';
 import { Call, VehicleMode } from './types';
-import firebase from 'firebase/compat/app';
 import { useNavigate } from 'react-router-dom';
 import { TypedDropDown } from './TypedDropdown';
 import { RegisterEstimatedCallRow } from './register-estimated-call-row';

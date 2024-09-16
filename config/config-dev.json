@@ -3,7 +3,6 @@
   "journey-planner-api": "https://api.dev.entur.io/journey-planner/v3/graphql",
   "stop-places-api": "https://api.dev.entur.io/stop-places/v1/read",
   "organisations-api": "https://api.dev.entur.io/organisations/v1/register/organisations",
-  "auth-api": "/auth/firebase/auth0",
   "auth0": {
     "domain": "ror-entur-dev.eu.auth0.com",
     "clientId": "ze7TvpcC4FbVfU1CPJf7ljb3eTeTS39J",
