@@ -23,7 +23,7 @@
     "xml-js": "1.6.11"
   },
   "devDependencies": {
-    "eslint": "8.57.1"
+    "eslint": "9.10.0"
   },
   "private": true
 }
