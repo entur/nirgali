@@ -68,7 +68,7 @@
     "@babel/plugin-proposal-private-property-in-object": "7.21.11",
     "@types/jest": "29.5.13",
     "@types/node": "18.19.50",
-    "@types/react": "18.3.5",
+    "@types/react": "18.3.6",
     "@types/react-dom": "18.3.0",
     "@typescript-eslint/typescript-estree": "6.21.0",
     "fork-ts-checker-webpack-plugin": "9.0.2",
