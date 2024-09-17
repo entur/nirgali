@@ -8,7 +8,7 @@ import { AppRouter } from './appRouter';
 import { SelectedOrganizationContext } from '../../hooks/useSelectedOrganization';
 
 export const App = () => {
-  const organizations = useOrganizations();
+  const { organizations, allowedCodespaces } = useOrganizations();
   const [selectedOrganization, setSelectedOrganization] = useState<
     string | undefined
   >();
@@ -33,7 +33,7 @@ export const App = () => {
       />
       {selectedOrganization && (
         <SelectedOrganizationContext.Provider value={selectedOrganization}>
-          <AppRouter />
+          <AppRouter allowedCodespaces={allowedCodespaces} />
         </SelectedOrganizationContext.Provider>
       )}
     </>

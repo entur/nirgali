@@ -10,13 +10,18 @@ import { TabsContainer } from './tabs-container';
 import { Messages } from '../messages/messages';
 import { Cancellations } from '../cancellations/cancellations';
 import { ExtraJourneys } from '../extrajourneys/extra-journeys';
-import { hasExtraJourneysAccess } from '../../util/roleUtils';
-import { useAuth } from '@entur/auth-provider';
 import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
 
-export const AppRouter = () => {
-  const auth = useAuth();
+export const AppRouter = ({
+  allowedCodespaces,
+}: {
+  allowedCodespaces: any[];
+}) => {
   const selectedOrganization = useSelectedOrganization();
+  const permissions = allowedCodespaces.find(
+    (codespace) => codespace.id === selectedOrganization.split(':')[0],
+  ).permissions;
+
   return (
     <Router>
       <div>
@@ -26,7 +31,7 @@ export const AppRouter = () => {
             <Route
               path="/:tab/*"
               element={
-                <TabsContainer selectedOrganization={selectedOrganization}>
+                <TabsContainer permissions={permissions}>
                   {(selectedTab: number) => (
                     <TabPanels>
                       <TabPanel>
@@ -45,13 +50,9 @@ export const AppRouter = () => {
                         )}
                       </TabPanel>
 
-                      {hasExtraJourneysAccess(auth, selectedOrganization) ? (
-                        <TabPanel>
-                          {selectedTab === 2 && <ExtraJourneys />}
-                        </TabPanel>
-                      ) : (
-                        selectedTab === 2 && <Navigate to="/meldinger" />
-                      )}
+                      <TabPanel>
+                        {selectedTab === 2 && <ExtraJourneys />}
+                      </TabPanel>
                     </TabPanels>
                   )}
                 </TabsContainer>

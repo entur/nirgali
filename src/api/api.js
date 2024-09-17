@@ -476,7 +476,10 @@ const getUserContext = (URI, auth) => async () => {
   const query = `
     query GetUserContext {
       userContext {
-        allowedCodespaces
+        allowedCodespaces {
+          id
+          permissions
+         }
       }
     }
   `;
