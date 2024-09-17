@@ -32,11 +32,8 @@ jobs:
         continue-on-error: true
         run: npm list
       - run: npm ci
-      - working-directory: ./functions
-        run: npm ci
       - run: npm run check
       - run: npm run test -- --coverage
-      - run: npm run test:functions -- --coverage --coverageDirectory functions/coverage
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
@@ -46,11 +43,11 @@ jobs:
           args: >
             -Dsonar.organization=enturas-github
             -Dsonar.projectKey=entur_nirgali
-            -Dsonar.sources=src,functions
-            -Dsonar.tests=src,functions
+            -Dsonar.sources=src
+            -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.test.js
             -Dsonar.coverage.exclusions=**/*.test.js
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info,functions/coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
       - run: npm run build
         env:
           REACT_APP_VERSION: ${{ github.sha }}
@@ -87,8 +84,6 @@ jobs:
         continue-on-error: true
         run: npm list
       - run: npm ci
-      - working-directory: ./functions
-        run: npm ci
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v4
       - name: Copy favicon
@@ -128,8 +123,6 @@ jobs:
         continue-on-error: true
         run: npm list
       - run: npm ci
-      - working-directory: ./functions
-        run: npm ci
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v4
       - name: Copy favicon
@@ -169,8 +162,6 @@ jobs:
         continue-on-error: true
         run: npm list
       - run: npm ci
-      - working-directory: ./functions
-        run: npm ci
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v4
       - name: Copy favicon
