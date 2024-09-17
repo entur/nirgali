@@ -86,6 +86,8 @@ export const Register = ({ lines, api, organization, refetch }) => {
 
     navigate('/kanselleringer');
   }, [
+    api,
+    refetch,
     chosenDeparture,
     chosenLine,
     departureDate,
