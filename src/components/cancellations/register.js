@@ -9,7 +9,6 @@ import { Contrast } from '@entur/layout';
 import { DatePicker } from '@entur/datepicker';
 import LinePicker from '../common/line-picker';
 import { useNavigate } from 'react-router-dom';
-import firebase from 'firebase/compat/app';
 import { sortServiceJourneyByDepartureTime } from '../../util/sort';
 import StopPicker from '../common/stop-picker';
 import { mapEstimatedCall } from './mapEstimatedCall';
@@ -20,7 +19,7 @@ import {
   today,
 } from '@internationalized/date';
 
-export const Register = ({ lines, api, organization }) => {
+export const Register = ({ lines, api, organization, refetch }) => {
   const navigate = useNavigate();
   const [chosenLine, setChosenLine] = React.useState(null);
   const [departureDate, setDepartureDate] = React.useState(
@@ -51,23 +50,23 @@ export const Register = ({ lines, api, organization }) => {
       (departure) => departure.id === chosenDeparture,
     );
     const newCancellation = {
-      EstimatedVehicleJourney: {
-        RecordedAtTime: now.toISOString(),
-        LineRef: chosenLine,
-        DirectionRef: 0,
-        FramedVehicleJourneyRef: {
-          DataFrameRef: toCalendarDate(departureDate).toString(),
-          DatedVehicleJourneyRef: chosenDeparture,
+      estimatedVehicleJourney: {
+        recordedAtTime: now.toISOString(),
+        lineRef: chosenLine,
+        directionRef: 0,
+        framedVehicleJourneyRef: {
+          dataFrameRef: toCalendarDate(departureDate).toString(),
+          datedVehicleJourneyRef: chosenDeparture,
         },
-        Cancellation: !isDepartureStops && departureStops.length === 0,
-        DataSource: organization.split(':')[0],
-        EstimatedCalls: {
-          EstimatedCall: departureData.estimatedCalls.map((estimatedCall) =>
+        cancellation: !isDepartureStops && departureStops.length === 0,
+        dataSource: organization.split(':')[0],
+        estimatedCalls: {
+          estimatedCall: departureData.estimatedCalls.map((estimatedCall) =>
             mapEstimatedCall(estimatedCall, departureData, departureStops),
           ),
         },
-        IsCompleteStopSequence: true,
-        ExpiresAtEpochMs:
+        isCompleteStopSequence: true,
+        expiresAtEpochMs:
           Date.parse(
             departureData.estimatedCalls[
               departureData.estimatedCalls.length - 1
@@ -77,17 +76,18 @@ export const Register = ({ lines, api, organization }) => {
       },
     };
 
-    const db = firebase.firestore();
-    await db
-      .collection(
-        `codespaces/${
-          organization.split(':')[0]
-        }/authorities/${organization}/cancellations`,
-      )
-      .doc()
-      .set(newCancellation);
+    await api.createOrUpdateCancellation(
+      organization.split(':')[0],
+      organization,
+      newCancellation,
+    );
+
+    await refetch();
+
     navigate('/kanselleringer');
   }, [
+    api,
+    refetch,
     chosenDeparture,
     chosenLine,
     departureDate,

@@ -5,18 +5,8 @@ import NavBar from './navbar';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@entur/auth-provider';
 import { AppRouter } from './appRouter';
-import { useLoginStatus } from '../../hooks/useLoginStatus';
 import { SelectedOrganizationContext } from '../../hooks/useSelectedOrganization';
 
-export const AuthenticatedApp = () => {
-  const { loggedIn } = useLoginStatus();
-
-  if (!loggedIn) {
-    return null;
-  }
-
-  return <App />;
-};
 export const App = () => {
   const organizations = useOrganizations();
   const [selectedOrganization, setSelectedOrganization] = useState<

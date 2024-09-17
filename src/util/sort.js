@@ -13,8 +13,8 @@ const getSituationNumberSequence = (SituationNumber) => {
 
 export const sortCancellationByExpiry = (a, b) => {
   return (
-    b.data.EstimatedVehicleJourney.ExpiresAtEpochMs -
-    a.data.EstimatedVehicleJourney.ExpiresAtEpochMs
+    b.estimatedVehicleJourney.expiresAtEpochMs -
+    a.estimatedVehicleJourney.expiresAtEpochMs
   );
 };
 

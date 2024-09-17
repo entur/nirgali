@@ -7,15 +7,13 @@ import {
 import { Contrast } from '@entur/layout';
 import Select from 'react-select';
 import { useNavigate, useParams } from 'react-router-dom';
-import firebase from 'firebase/compat/app';
 import { DatePicker } from '@entur/datepicker';
 import StopPicker from '../common/stop-picker';
 import { mapEstimatedCall } from './mapEstimatedCall';
 import { getLineOption } from '../../util/getLineOption';
 import { now, parseDate } from '@internationalized/date';
 
-const Edit = ({ cancellations, organization, lines, api }) => {
-  const db = firebase.firestore();
+const Edit = ({ cancellations, organization, lines, api, refetch }) => {
   const navigate = useNavigate();
   const { id: cancellationId } = useParams();
 
@@ -30,10 +28,10 @@ const Edit = ({ cancellations, organization, lines, api }) => {
 
   useEffect(() => {
     if (cancellation) {
-      const { DatedVehicleJourneyRef, DataFrameRef } =
-        cancellation.data.EstimatedVehicleJourney.FramedVehicleJourneyRef;
+      const { datedVehicleJourneyRef, dataFrameRef } =
+        cancellation.estimatedVehicleJourney.framedVehicleJourneyRef;
       api
-        .getServiceJourney(DatedVehicleJourneyRef, DataFrameRef)
+        .getServiceJourney(datedVehicleJourneyRef, dataFrameRef)
         .then(({ data }) => {
           setServiceJourney(data.serviceJourney);
         });
@@ -41,31 +39,31 @@ const Edit = ({ cancellations, organization, lines, api }) => {
   }, [cancellationId, api, cancellation]);
 
   const handleSubmit = useCallback(
-    (event) => {
+    async (event) => {
       event.preventDefault();
 
-      cancellation.data.EstimatedVehicleJourney.Cancellation =
+      cancellation.estimatedVehicleJourney.cancellation =
         !isDepartureStops && departureStops.length === 0;
-      cancellation.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall =
+      cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall =
         serviceJourney.estimatedCalls.map((call) =>
           mapEstimatedCall(call, serviceJourney, departureStops),
         );
-      cancellation.data.EstimatedVehicleJourney.RecordedAtTime =
+      cancellation.estimatedVehicleJourney.recordedAtTime =
         new Date().toISOString();
 
       const codespace = organization.split(':')[0];
       const authority = organization;
-      const id = cancellation.id;
 
-      db.doc(
-        `codespaces/${codespace}/authorities/${authority}/cancellations/${id}`,
-      )
-        .set(cancellation.data)
-        .then(() => navigate('/kanselleringer'));
+      await api.createOrUpdateCancellation(codespace, authority, cancellation);
+
+      await refetch();
+
+      navigate('/kanselleringer');
     },
     [
+      api,
+      refetch,
       cancellation,
-      db,
       departureStops,
       isDepartureStops,
       navigate,
@@ -75,57 +73,56 @@ const Edit = ({ cancellations, organization, lines, api }) => {
   );
 
   const handleRestore = useCallback(
-    (event) => {
+    async (event) => {
       event.preventDefault();
 
       const newCancellation = false;
       const newDepartureStatus = 'onTime';
       const newArrivalStatus = 'onTime';
 
-      cancellation.data.EstimatedVehicleJourney.Cancellation = newCancellation;
-      cancellation.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.forEach(
+      cancellation.estimatedVehicleJourney.cancellation = newCancellation;
+      cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall.forEach(
         (call) => {
-          call.Cancellation = newCancellation;
+          call.cancellation = newCancellation;
 
-          if (call.ArrivalStatus) {
-            call.ArrivalStatus = newArrivalStatus;
+          if (call.arrivalStatus) {
+            call.arrivalStatus = newArrivalStatus;
           }
 
-          if (call.ArrivalBoardingActivity) {
-            call.ArrivalBoardingActivity = serviceJourney.passingTimes.find(
-              ({ quay }) => quay.id === call.StopPointRef,
+          if (call.arrivalBoardingActivity) {
+            call.arrivalBoardingActivity = serviceJourney.passingTimes.find(
+              ({ quay }) => quay.id === call.stopPointRef,
             )?.forAlighting
               ? 'alighting'
               : 'noAlighting';
           }
 
-          if (call.DepartureStatus) {
-            call.DepartureStatus = newDepartureStatus;
+          if (call.departureStatus) {
+            call.departureStatus = newDepartureStatus;
           }
 
-          if (call.DepartureBoardingActivity) {
-            call.DepartureBoardingActivity = serviceJourney.passingTimes.find(
-              ({ quay }) => quay.id === call.StopPointRef,
+          if (call.departureBoardingActivity) {
+            call.departureBoardingActivity = serviceJourney.passingTimes.find(
+              ({ quay }) => quay.id === call.stopPointRef,
             )?.forBoarding
               ? 'boarding'
               : 'noBoarding';
           }
         },
       );
-      cancellation.data.EstimatedVehicleJourney.RecordedAtTime =
+      cancellation.estimatedVehicleJourney.recordedAtTime =
         new Date().toISOString();
 
       const codespace = organization.split(':')[0];
       const authority = organization;
-      const id = cancellation.id;
 
-      db.doc(
-        `codespaces/${codespace}/authorities/${authority}/cancellations/${id}`,
-      )
-        .set(cancellation.data)
-        .then(() => navigate('/kanselleringer'));
+      await api.createOrUpdateCancellation(codespace, authority, cancellation);
+
+      await refetch();
+
+      navigate('/kanselleringer');
     },
-    [cancellation, db, navigate, organization, serviceJourney],
+    [api, refetch, cancellation, navigate, organization, serviceJourney],
   );
 
   const handleCancel = useCallback(() => {
@@ -147,10 +144,9 @@ const Edit = ({ cancellations, organization, lines, api }) => {
   };
 
   const getQuayOptions = () => {
-    return cancellation.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.filter(
-      (call) => call.Cancellation,
-    )
-      .map((call) => call.StopPointRef)
+    return cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall
+      .filter((call) => call.Cancellation)
+      .map((call) => call.stopPointRef)
       .map(
         (ref) =>
           serviceJourney.estimatedCalls.find((call) => call.quay.id === ref)
@@ -208,8 +204,8 @@ const Edit = ({ cancellations, organization, lines, api }) => {
               <DatePicker
                 label="Dato"
                 selectedDate={parseDate(
-                  cancellation.data.EstimatedVehicleJourney
-                    .FramedVehicleJourneyRef.DataFrameRef,
+                  cancellation.estimatedVehicleJourney.framedVehicleJourneyRef
+                    .dataFrameRef,
                 )}
                 disabled
                 dateFormats={['yyyy-MM-dd']}
@@ -228,9 +224,9 @@ const Edit = ({ cancellations, organization, lines, api }) => {
           </>
         )}
         {serviceJourney &&
-          !cancellation.data.EstimatedVehicleJourney.Cancellation &&
-          cancellation.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.some(
-            (call) => call.Cancellation,
+          !cancellation.estimatedVehicleJourney.cancellation &&
+          cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall.some(
+            (call) => call.cancellation,
           ) && (
             <div>
               <Select
@@ -243,9 +239,9 @@ const Edit = ({ cancellations, organization, lines, api }) => {
           )}
 
         {serviceJourney &&
-          !cancellation.data.EstimatedVehicleJourney.Cancellation &&
-          !cancellation.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.some(
-            (call) => call.Cancellation,
+          !cancellation.estimatedVehicleJourney.cancellation &&
+          !cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall.some(
+            (call) => call.cancellation,
           ) && (
             <>
               <div className="form-check d-flex">
@@ -281,8 +277,8 @@ const Edit = ({ cancellations, organization, lines, api }) => {
         <br></br>
         <Contrast>
           <ButtonGroup>
-            {cancellation.data.EstimatedVehicleJourney.Cancellation ||
-            cancellation.data.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.some(
+            {cancellation.estimatedVehicleJourney.cancellation ||
+            cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall.some(
               (call) => call.Cancellation,
             ) ? (
               <NegativeButton type="button" onClick={handleRestore}>

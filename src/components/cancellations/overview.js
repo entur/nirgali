@@ -12,7 +12,7 @@ import { getLocalTimeZone, now } from '@internationalized/date';
 
 const returnRedOrGreenIcon = (param) => {
   if (
-    param.EstimatedVehicleJourney.ExpiresAtEpochMs >
+    param.expiresAtEpochMs >
     now(getLocalTimeZone()).add({ minutes: 10 }).toDate().getTime()
   ) {
     return <img src={green} id="active" alt="" height="30" width="30" />;
@@ -22,12 +22,10 @@ const returnRedOrGreenIcon = (param) => {
 };
 
 const getCancellationLabel = (item) => {
-  if (item.EstimatedVehicleJourney.Cancellation) {
+  if (item.cancellation) {
     return 'Ja';
   } else if (
-    item.EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.some(
-      (call) => call.Cancellation,
-    )
+    item.estimatedCalls.estimatedCall.some((call) => call.cancellation)
   ) {
     return 'Delvis';
   } else {
@@ -57,7 +55,7 @@ const Overview = ({ cancellations, lines }) => {
       : cancellations
           .filter((cancellation) => {
             return (
-              cancellation.data.EstimatedVehicleJourney.ExpiresAtEpochMs >
+              cancellation.estimatedVehicleJourney.expiresAtEpochMs >
               Date.now() + 600000
             );
           })
@@ -127,65 +125,52 @@ const Overview = ({ cancellations, lines }) => {
               </Tr>
             </Thead>
             <Tbody>
-              {cancellationsToShow.map(({ id, data: item }, index) => (
-                <Tr key={item.EstimatedVehicleJourney.RecordedAtTime}>
-                  <Td className="Status">{returnRedOrGreenIcon(item)}</Td>
-                  <Td className="#">
-                    {
-                      lines.find(
-                        (l) => l.id === item.EstimatedVehicleJourney.LineRef,
-                      )?.publicCode
-                    }{' '}
-                    ({item.EstimatedVehicleJourney.LineRef})
-                  </Td>
-                  <Td>
-                    {
-                      item.EstimatedVehicleJourney.FramedVehicleJourneyRef
-                        .DatedVehicleJourneyRef
-                    }
-                  </Td>
-                  <Td>
-                    {
-                      item.EstimatedVehicleJourney.EstimatedCalls
-                        .EstimatedCall[0].StopPointName
-                    }
-                  </Td>
-                  <Td>
-                    {new Date(
-                      Date.parse(
-                        item.EstimatedVehicleJourney.EstimatedCalls
-                          .EstimatedCall[0].AimedDepartureTime,
-                      ),
-                    ).toLocaleTimeString(navigator.language, {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </Td>
-                  <Td>
-                    {
-                      item.EstimatedVehicleJourney.FramedVehicleJourneyRef
-                        .DataFrameRef
-                    }
-                  </Td>
-                  <Td>{getCancellationLabel(item)}</Td>
-                  <Td>
-                    <Button
-                      variant="secondary"
-                      value={index}
-                      onClick={getEditCallback(id)}
-                      disabled={
-                        item.EstimatedVehicleJourney.ExpiresAtEpochMs <=
-                        now(getLocalTimeZone())
-                          .add({ minutes: 10 })
-                          .toDate()
-                          .getTime()
-                      }
-                    >
-                      Endre
-                    </Button>
-                  </Td>
-                </Tr>
-              ))}
+              {cancellationsToShow.map(
+                ({ id, estimatedVehicleJourney: item }, index) => (
+                  <Tr key={item.recordedAtTime}>
+                    <Td className="Status">{returnRedOrGreenIcon(item)}</Td>
+                    <Td className="#">
+                      {lines.find((l) => l.id === item.lineRef)?.publicCode} (
+                      {item.lineRef})
+                    </Td>
+                    <Td>
+                      {item.framedVehicleJourneyRef.datedVehicleJourneyRef}
+                    </Td>
+                    <Td>
+                      {item.estimatedCalls.estimatedCall[0].stopPointName}
+                    </Td>
+                    <Td>
+                      {new Date(
+                        Date.parse(
+                          item.estimatedCalls.estimatedCall[0]
+                            .aimedDepartureTime,
+                        ),
+                      ).toLocaleTimeString(navigator.language, {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Td>
+                    <Td>{item.framedVehicleJourneyRef.dataFrameRef}</Td>
+                    <Td>{getCancellationLabel(item)}</Td>
+                    <Td>
+                      <Button
+                        variant="secondary"
+                        value={index}
+                        onClick={getEditCallback(id)}
+                        disabled={
+                          item.expiresAtEpochMs <=
+                          now(getLocalTimeZone())
+                            .add({ minutes: 10 })
+                            .toDate()
+                            .getTime()
+                        }
+                      >
+                        Endre
+                      </Button>
+                    </Td>
+                  </Tr>
+                ),
+              )}
             </Tbody>
           </Table>
         </div>
