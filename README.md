@@ -45,40 +45,9 @@ Deployment is handled by [circleci](https://app.circleci.com/pipelines/github/en
 
 ## Infrastructure
 
-The auth function in firebase needs some config parameters to be set:
-
-* `auth.firebase.auth0.auth_jwks_uri`
-* `auth.firebase.auth0.auth_issuer`
-* `auth.firebase.auth0.claims_namespace`
-
-Use firebase cli to set them (project alias from .firebaserc)
-
-    firebase -P <project alias> functions:config:set <key>=<value>
-
-Dev values:
-
-    firebase -P dev functions:config:get
-
-Output:
-
-    {
-      "auth": {
-        "firebase": {
-          "auth0": {
-            "auth_jwks_uri": "https://ror-entur-dev.eu.auth0.com/.well-known/jwks.json",
-            "auth_issuer": "https://ror-entur-dev.eu.auth0.com/",
-            "claims_namespace": "https://ror.entur.io/role_assignments"
-          }
-        }
-      }
-    }
-
-
 Configuration for the frontend app is located in the `config/` folder.
 
 #### Firebase requirements:
 
-* The default service account for the firebase project requires Token Creator role
 * The firebase database needs to be set to native mode
-* The firebase project needs to have the IAM api enabled
 
