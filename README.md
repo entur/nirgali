@@ -1,61 +1,13 @@
 # nirgali
 
-Frontend application to manage deviation messages and cancellations, and serverless function to serve them in the SIRI xml format.
+Frontend application to manage deviation messages, cancellations and extrajourneys.
 
-Ñote: This application is currently being repurposed as frontend-only. The backend responsibilities (serverless functions) are in the process of being migrated to another component: [github.com/entur/enlil](https://github.com/entur/enlil).
+This application has a corresponding backend component: [github.com/entur/enlil](https://github.com/entur/enlil).
 
-### Frontend application
-
-In production, the frontend application is available at https://avvik.entur.org.
-
-Frontend application assumes user has editSX role associated with one or more providers. Roles can be assigned in Ninkasi. Once logged in, the user selects a provider from a menu, and sees a list of currently active messages - if any. The user may then add new messages or edit existing messages.
-
-### How to fetch XML
-
-Send POST request to `/api/xml` -  in production https://api.entur.io/deviation-messages/v1/xml.
-
-Request for SIRI-SX (SituationExchangeRequest):
-
-    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <Siri version="2.0" xmlns="http://www.siri.org.uk/siri" xmlns:ns2="http://www.ifopt.org.uk/acsb" xmlns:ns3="http://www.ifopt.org.uk/ifopt" xmlns:ns4="http://datex2.eu/schema/2_0RC1/2_0">
-      <ServiceRequest>
-        <RequestTimestamp>2020-02-10T08:57:23.397883+01:00</RequestTimestamp>
-        <RequestorRef>ENTUR_DEV</RequestorRef>
-        <SituationExchangeRequest version="2.0">
-          <RequestTimestamp>2020-02-10T08:57:23.397893+01:00</RequestTimestamp>
-          <MessageIdentifier>de353056-466d-44ef-a405-d11311281810</MessageIdentifier>
-          <PreviewInterval>PT10H</PreviewInterval>
-        </SituationExchangeRequest>
-      </ServiceRequest>
-    </Siri>
-
-Request for SIRI-ET (EstimatedTimetableRequest):
-
-    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <Siri version="2.0" xmlns="http://www.siri.org.uk/siri" xmlns:ns2="http://www.ifopt.org.uk/acsb" xmlns:ns3="http://www.ifopt.org.uk/ifopt" xmlns:ns4="http://datex2.eu/schema/2_0RC1/2_0">
-      <ServiceRequest>
-        <RequestTimestamp>2019-11-06T14:45:00+01:00</RequestTimestamp>
-        <RequestorRef>ENTUR_DEV-1</RequestorRef>
-        <EstimatedTimetableRequest version="2.0">
-          <RequestTimestamp>2019-11-06T14:45:00+01:00</RequestTimestamp>
-          <MessageIdentifier>e11d9efb-ee7b-4a67-847a-a254e813f0da</MessageIdentifier>
-        </EstimatedTimetableRequest>
-      </ServiceRequest>
-    </Siri>
-
-At Entur, the Anshar application is responsible for consuming this endpoint and adding messages and cancellations to the real time updates of the journey planner.
-
-### Custom tokens
-
-In order to enforce security in the firebase database, a custom token is created in [the auth function](functions/auth) based on the auth0 token. The `editSX` roles are carried over to the custom token and used in `firestore.rules` for authorization.
 
 ## Local development
 
-For local development, we use a combination of standard Create React App tools and the Firebase emulator suite. As a prequisite, you need to download the credentials for the Firebase service account, or your own user account provided it has the Token Creator role. Once you have the file, point to it like this before proceeding:
-
-    export GOOGLE_APPLICATION_CREDENTIALS="/path/to/credentials"
-
-Then start the local development server and firebase emulator suite like this:
+Start the local development server like this:
 
     npm start
 
@@ -67,7 +19,7 @@ Tests may be run like this:
 
 ### Frontend
 
-The frontend application is a simple vanilla Create React App using Firebase SDK. It loads configurations from the server side for environment specific values, so that a single build can be deployed to all environments.
+The frontend application is a simple vanilla Create React App. It loads configurations from the server side for environment specific values, so that a single build can be deployed to all environments.
 
 ### Database
 
