@@ -29,7 +29,7 @@
   "scripts": {
     "copy:config": "cp config/config-dev.json public/config.json",
     "prestart": "run-p --race copy:config",
-    "start": "run-p --race start:firebase start:react",
+    "start": "run-p --race start:react",
     "start:react": "PORT=3001 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

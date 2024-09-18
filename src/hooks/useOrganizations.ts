@@ -8,28 +8,36 @@ type Organization = {
   name: string;
 };
 
-export const useOrganizations: () => Organization[] = () => {
+export const useOrganizations: () => {
+  organizations: Organization[];
+  allowedCodespaces: any[];
+} = () => {
   const auth = useAuth();
   const config = useConfig();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [allowedCodespaces, setAllowedCodespaces] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchAuthorities = async () => {
       const userContextResponse = await api(config, auth).getUserContext();
       const userContext = userContextResponse.data.userContext;
-      const allowedCodespaces = userContext.allowedCodespaces;
+      const allowedCodespaceIds = userContext.allowedCodespaces.map(
+        (codespace: any) => codespace.id,
+      );
 
-      if (!(allowedCodespaces.length > 0)) {
+      if (!(allowedCodespaceIds.length > 0)) {
         auth.logout();
       } else {
         const response = await api(config).getAuthorities();
         const authorities = response.data.authorities.filter((authority: any) =>
-          allowedCodespaces.includes(authority.id.split(':')[0]),
+          allowedCodespaceIds.includes(authority.id.split(':')[0]),
         );
 
         if (!(authorities.length > 0)) {
           auth.logout();
         }
+
+        setAllowedCodespaces(userContext.allowedCodespaces);
 
         setOrganizations(
           authorities.map(({ id, name }: any) => ({
@@ -43,5 +51,5 @@ export const useOrganizations: () => Organization[] = () => {
     fetchAuthorities();
   }, [auth, config]);
 
-  return organizations;
+  return { organizations, allowedCodespaces };
 };
