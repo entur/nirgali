@@ -1,6 +1,9 @@
 import React, { useContext } from 'react';
 
 export interface Config {
+  'deviation-messages-api'?: string;
+  'journey-planner-api'?: string;
+  'stop-places-api'?: string;
   auth0?: {
     domain: string;
     clientId: string;
