@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 
 export interface Config {
-  'auth-api'?: string;
   auth0?: {
     domain: string;
     clientId: string;

@@ -151,20 +151,6 @@ const getOperators = (URI) => () => {
     .then((response) => response);
 };
 
-const fetchGet = {
-  method: 'GET',
-  headers: {
-    accept: 'application/json',
-    'ET-Client-Name': 'entur - deviation-messages',
-  },
-};
-
-const organisationID = (URI) => (id) => {
-  fetch(`${URI}/${id}`, fetchGet)
-    .catch((error) => error)
-    .then((response) => response);
-};
-
 const getStopPlaces = (URI) => async (ids) => {
   const response = await fetch(`${URI}/stop-places?ids=${ids}`, {
     headers: {
@@ -491,7 +477,6 @@ const getUserContext = (URI, auth) => async () => {
 
 const api = (config, auth) => ({
   getAuthorities: getAuthorities(config['journey-planner-api']),
-  organisationID: organisationID(config['organisations-api']),
   getLines: getLines(config['journey-planner-api']),
   getDepartures: getDepartures(config['journey-planner-api']),
   getServiceJourney: getServiceJourney(config['journey-planner-api']),
