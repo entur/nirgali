@@ -8,18 +8,9 @@
     ],
     "rewrites": [
       {
-        "source": "/auth/firebase/auth0",
-        "function": "auth",
-        "region": "europe-west1"
-      },
-      {
         "source": "**",
         "destination": "/index.html"
       }
     ]
-  },
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
   }
 }
