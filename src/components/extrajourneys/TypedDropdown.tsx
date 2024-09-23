@@ -31,11 +31,8 @@ export function TypedDropDown<T>(props: {
   return (
     <Dropdown
       label={props.label}
-      // @ts-expect-error
       items={props.items}
-      // @ts-expect-error
       selectedItem={props.selectedItem}
-      // @ts-expect-error
       onChange={(item) => props.onChange(item?.value)}
       feedback={props.feedback}
       variant={props.variant}
@@ -54,11 +51,8 @@ export function TypedSearchableDropdown<T>(props: {
   return (
     <SearchableDropdown
       label={props.label}
-      // @ts-expect-error
       items={props.items}
-      // @ts-expect-error
       selectedItem={props.selectedItem}
-      // @ts-expect-error
       onChange={(item) => props.onChange(item?.value)}
       feedback={props.feedback}
       variant={props.variant}
