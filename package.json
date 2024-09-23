@@ -17,7 +17,6 @@
     "@entur/tooltip": "2.6.45",
     "@entur/typography": "1.8.23",
     "@internationalized/date": "3.5.5",
-    "@vitejs/plugin-react-swc": "3.7.0",
     "apollo-fetch": "0.7.0",
     "bootstrap": "5.3.3",
     "react": "18.3.1",
@@ -40,9 +39,6 @@
     "check": "prettier --check \"{src,config}/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "prepare": "husky install"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -64,14 +60,11 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "7.21.11",
-    "@types/jest": "29.5.13",
     "@types/node": "18.19.50",
     "@types/react": "18.3.8",
     "@types/react-dom": "18.3.0",
-    "@typescript-eslint/typescript-estree": "6.21.0",
+    "@vitejs/plugin-react-swc": "3.7.0",
     "@vitest/coverage-v8": "2.1.1",
-    "fork-ts-checker-webpack-plugin": "9.0.2",
     "husky": "8.0.3",
     "jsdom": "25.0.1",
     "lint-staged": "15.2.10",
@@ -84,6 +77,5 @@
     "vite": "5.4.7",
     "vite-plugin-svgr": "4.2.0",
     "vite-tsconfig-paths": "5.0.1"
-  },
-  "proxy": "http://localhost:4000"
+  }
 }
