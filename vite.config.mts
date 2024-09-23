@@ -20,6 +20,11 @@ export default defineConfig({
   server: {
     port: 3001
   },
+  publicDir: 'public',
+  build: {
+    outDir: 'build',
+    sourcemap: true,
+  },
   test: {
     globals: true,
     environment: 'jsdom',
