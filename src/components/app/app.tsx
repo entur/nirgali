@@ -3,9 +3,9 @@ import Background from '../../img/background.jpg';
 import { useOrganizations } from '../../hooks/useOrganizations';
 import NavBar from './navbar';
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '@entur/auth-provider';
 import { AppRouter } from './appRouter';
 import { SelectedOrganizationContext } from '../../hooks/useSelectedOrganization';
+import { useAuth } from 'react-oidc-context';
 
 export const App = () => {
   const { organizations, allowedCodespaces } = useOrganizations();
@@ -20,7 +20,7 @@ export const App = () => {
     }
   }, [organizations, selectedOrganization]);
 
-  const { logout } = useAuth();
+  const { signoutRedirect } = useAuth();
 
   return (
     <>
@@ -29,7 +29,9 @@ export const App = () => {
         onSelectOrganization={setSelectedOrganization}
         user={organizations.map((org) => org.id)}
         name={organizations.map((org) => org.name)}
-        logout={() => logout({ returnTo: window.location.origin })}
+        logout={() =>
+          signoutRedirect({ post_logout_redirect_uri: window.location.origin })
+        }
       />
       {selectedOrganization && (
         <SelectedOrganizationContext.Provider value={selectedOrganization}>

@@ -18,8 +18,8 @@ import { RegisterEstimatedCallRow } from './register-estimated-call-row';
 import { mapExtraJourney } from './mapExtraJourney';
 import { CallValidationResult, useExtrajourneyValidation } from './validate';
 import api from '../../api/api';
-import { useAuth } from '@entur/auth-provider';
 import { useConfig } from '../../config/ConfigContext';
+import { useAuth } from 'react-oidc-context';
 
 export const Register = () => {
   const selectedOrganization = useSelectedOrganization();

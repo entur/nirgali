@@ -6,7 +6,7 @@ import api from '../../api/api';
 import { useConfig } from '../../config/ConfigContext';
 import { useLines } from '../../hooks/useLines';
 import { useMessages } from '../../hooks/useMessages';
-import { useAuth } from '@entur/auth-provider';
+import { useAuth } from 'react-oidc-context';
 
 export const Messages = ({ selectedOrganization }) => {
   const auth = useAuth();

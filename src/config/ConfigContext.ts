@@ -1,16 +1,11 @@
 import React, { useContext } from 'react';
+import { OidcClientSettings } from 'oidc-client-ts';
 
 export interface Config {
   'deviation-messages-api'?: string;
   'journey-planner-api'?: string;
   'stop-places-api'?: string;
-  auth0?: {
-    domain: string;
-    clientId: string;
-    audience: string;
-    redirectUri: string;
-    claimsNamespace: string;
-  };
+  oidcConfig?: OidcClientSettings;
 }
 
 export const ConfigContext = React.createContext<Config>({});
