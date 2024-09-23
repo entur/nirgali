@@ -50,9 +50,9 @@ jobs:
         env:
           REACT_APP_VERSION: ${{ github.sha }}
       - name: Copy favicon
-        run: cp build/avv-d.ico build/favicon.ico
+        run: cp .github/environments/avv-d.ico build/favicon.ico
       - name: Copy config
-        run: cp config/config-dev.json build/config.json
+        run: cp .github/environments/config-dev.json build/config.json
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'

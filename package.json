@@ -27,7 +27,7 @@
     "react-windowed-select": "5.2.0"
   },
   "scripts": {
-    "copy:config": "cp config/config-dev.json public/config.json",
+    "copy:config": "cp .github/environments/config-dev.json public/config.json",
     "prestart": "run-p --race copy:config",
     "start": "run-p --race start:react",
     "start:react": "PORT=3001 react-scripts start",
