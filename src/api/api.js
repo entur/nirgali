@@ -1,4 +1,4 @@
-const { createApolloFetch } = require('apollo-fetch');
+import { createApolloFetch } from 'apollo-fetch';
 
 const createFetch = (URI, accessToken) => {
   const apolloFetch = createApolloFetch({

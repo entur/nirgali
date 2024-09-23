@@ -4,7 +4,7 @@ import Select from 'react-select';
 import { PrimaryButton } from '@entur/button';
 import { Contrast } from '@entur/layout';
 
-const NavBar = ({ onSelectOrganization, user, name, logout }) => {
+const Navbar = ({ onSelectOrganization, user, name, logout }) => {
   const handleChange = useCallback(
     (event) => {
       onSelectOrganization(event.value);
@@ -46,4 +46,4 @@ const NavBar = ({ onSelectOrganization, user, name, logout }) => {
   );
 };
 
-export default NavBar;
+export default Navbar;
