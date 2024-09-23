@@ -1,7 +1,7 @@
-import { useAuth } from '@entur/auth-provider';
 import { useEffect, useState } from 'react';
 import { useConfig } from '../config/ConfigContext';
 import api from '../api/api';
+import { useAuth } from 'react-oidc-context';
 
 type Organization = {
   id: string;
@@ -26,7 +26,7 @@ export const useOrganizations: () => {
       );
 
       if (!(allowedCodespaceIds.length > 0)) {
-        auth.logout();
+        auth.signoutRedirect();
       } else {
         const response = await api(config).getAuthorities();
         const authorities = response.data.authorities.filter((authority: any) =>
@@ -34,17 +34,17 @@ export const useOrganizations: () => {
         );
 
         if (!(authorities.length > 0)) {
-          auth.logout();
+          auth.signoutRedirect();
+        } else {
+          setAllowedCodespaces(userContext.allowedCodespaces);
+
+          setOrganizations(
+            authorities.map(({ id, name }: any) => ({
+              id,
+              name,
+            })),
+          );
         }
-
-        setAllowedCodespaces(userContext.allowedCodespaces);
-
-        setOrganizations(
-          authorities.map(({ id, name }: any) => ({
-            id,
-            name,
-          })),
-        );
       }
     };
 

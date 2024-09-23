@@ -1,11 +1,36 @@
 import { createRoot } from 'react-dom/client';
 import { App } from './components/app/app';
-import AuthProvider from '@entur/auth-provider';
 import { Config, ConfigContext } from './config/ConfigContext';
+import { AuthProvider, hasAuthParams, useAuth } from 'react-oidc-context';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './style/index.css';
 import './style/base/base.scss';
+import { useEffect } from 'react';
+
+const AuthenticatedApp = () => {
+  const { isAuthenticated, activeNavigator, isLoading, signinRedirect, user } =
+    useAuth();
+
+  useEffect(() => {
+    if (
+      !hasAuthParams() &&
+      !isAuthenticated &&
+      !activeNavigator &&
+      !isLoading
+    ) {
+      signinRedirect().catch((err: any) => {
+        throw err;
+      });
+    }
+  }, [isAuthenticated, activeNavigator, isLoading, signinRedirect]);
+
+  if (!isAuthenticated) {
+    return null;
+  } else {
+    return <App />;
+  }
+};
 
 const renderApp = (config: Config) => {
   const rootElement = document.getElementById('root');
@@ -13,16 +38,18 @@ const renderApp = (config: Config) => {
 
   root.render(
     <AuthProvider
-      auth0Config={{
-        domain: config.auth0?.domain,
-        clientId: config.auth0?.clientId,
-        audience: config.auth0?.audience,
-        redirectUri: window.location.origin,
+      {...config.oidcConfig}
+      onSigninCallback={() => {
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
       }}
-      auth0ClaimsNamespace={config.auth0?.claimsNamespace}
+      redirect_uri={window.location.origin}
     >
       <ConfigContext.Provider value={config}>
-        <App />
+        <AuthenticatedApp />
       </ConfigContext.Provider>
     </AuthProvider>,
   );

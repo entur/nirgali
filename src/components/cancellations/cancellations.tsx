@@ -6,7 +6,7 @@ import { useConfig } from '../../config/ConfigContext';
 import api from '../../api/api';
 import { useLines } from '../../hooks/useLines';
 import { useCancellations } from '../../hooks/useCancellations';
-import { useAuth } from '@entur/auth-provider';
+import { useAuth } from 'react-oidc-context';
 
 export const Cancellations = ({ selectedOrganization }: any) => {
   const lines = useLines(selectedOrganization);

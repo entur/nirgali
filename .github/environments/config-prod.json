@@ -2,10 +2,11 @@
   "deviation-messages-api": "https://api.entur.io/deviation-messages/v2/graphql",
   "journey-planner-api": "https://api.entur.io/journey-planner/v3/graphql",
   "stop-places-api": "https://api.entur.io/stop-places/v1/read",
-  "auth0": {
-    "domain": "auth2.entur.org",
-    "clientId": "ggAkSCLNVPP2dUHNh3KsdZt0PjT13su7",
-    "audience": "https://ror.api.entur.io",
-    "claimsNamespace": "https://ror.entur.io/role_assignments"
+  "oidcConfig": {
+    "authority": "https://auth2.entur.org",
+    "client_id": "ggAkSCLNVPP2dUHNh3KsdZt0PjT13su7",
+    "extraQueryParams": {
+      "audience": "https://ror.api.entur.io"
+    }
   }
 }

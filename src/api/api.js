@@ -21,7 +21,7 @@ const createFetch = (URI, accessToken) => {
   return apolloFetch;
 };
 
-const getAuthorities = (URI) => () => {
+const getAuthorities = (URI) => async () => {
   const apolloFetch = createFetch(URI);
   const query = `
       {
@@ -36,7 +36,7 @@ const getAuthorities = (URI) => () => {
     .then((response) => response);
 };
 
-const getLines = (URI) => (authorities) => {
+const getLines = (URI) => async (authorities) => {
   const apolloFetch = createFetch(URI);
 
   const query = `
@@ -60,7 +60,7 @@ const getLines = (URI) => (authorities) => {
     .then((response) => response);
 };
 
-const getDepartures = (URI) => (line, date) => {
+const getDepartures = (URI) => async (line, date) => {
   const apolloFetch = createFetch(URI);
 
   const query = `
@@ -97,7 +97,7 @@ const getDepartures = (URI) => (line, date) => {
     .then((response) => response);
 };
 
-const getServiceJourney = (URI) => (id, date) => {
+const getServiceJourney = (URI) => async (id, date) => {
   const apolloFetch = createFetch(URI);
 
   const query = `
@@ -135,7 +135,7 @@ const getServiceJourney = (URI) => (id, date) => {
     .then((response) => response);
 };
 
-const getOperators = (URI) => () => {
+const getOperators = (URI) => async () => {
   const apolloFetch = createFetch(URI);
 
   const query = `
@@ -172,7 +172,7 @@ const getTopographicPlaces = (URI) => async (ids) => {
 };
 
 const getMessages = (URI, auth) => async (codespace, authority) => {
-  const accessToken = await auth.getAccessToken();
+  const accessToken = auth.user.access_token;
   const apolloFetch = createFetch(URI, accessToken);
 
   const query = `
@@ -269,7 +269,7 @@ const getMessages = (URI, auth) => async (codespace, authority) => {
 
 const createOrUpdateMessage =
   (URI, auth) => async (codespace, authority, input) => {
-    const accessToken = await auth.getAccessToken();
+    const accessToken = auth.user.access_token;
     const apolloFetch = createFetch(URI, accessToken);
 
     const query = `
@@ -290,7 +290,7 @@ const createOrUpdateMessage =
   };
 
 const getCancellations = (URI, auth) => async (codespace, authority) => {
-  const accessToken = await auth.getAccessToken();
+  const accessToken = auth.user.access_token;
   const apolloFetch = createFetch(URI, accessToken);
 
   const query = `
@@ -351,7 +351,7 @@ const getCancellations = (URI, auth) => async (codespace, authority) => {
 
 const createOrUpdateCancellation =
   (URI, auth) => async (codespace, authority, input) => {
-    const accessToken = await auth.getAccessToken();
+    const accessToken = auth.user.access_token;
     const apolloFetch = createFetch(URI, accessToken);
 
     const query = `
@@ -373,7 +373,7 @@ const createOrUpdateCancellation =
 
 const getExtrajourneys =
   (URI, auth) => async (codespace, authority, showCompletedTrips) => {
-    const accessToken = await auth.getAccessToken();
+    const accessToken = auth.user.access_token;
     const apolloFetch = createFetch(URI, accessToken);
 
     const query = `
@@ -435,7 +435,7 @@ const getExtrajourneys =
 
 const createOrUpdateExtrajourney =
   (URI, auth) => async (codespace, authority, input) => {
-    const accessToken = await auth.getAccessToken();
+    const accessToken = auth.user.access_token;
     const apolloFetch = createFetch(URI, accessToken);
 
     const query = `
@@ -456,7 +456,7 @@ const createOrUpdateExtrajourney =
   };
 
 const getUserContext = (URI, auth) => async () => {
-  const accessToken = await auth.getAccessToken();
+  const accessToken = auth.user.access_token;
   const apolloFetch = createFetch(URI, accessToken);
 
   const query = `

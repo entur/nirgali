@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useConfig } from '../config/ConfigContext';
 import api from '../api/api';
-import { useAuth } from '@entur/auth-provider';
+import { useAuth } from 'react-oidc-context';
 
 export const useMessages = (codespace: string, authority: string) => {
   const auth = useAuth();
