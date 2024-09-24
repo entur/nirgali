@@ -1,45 +1,46 @@
-import { createApolloFetch } from 'apollo-fetch';
+import { ApolloClient, gql, InMemoryCache } from '@apollo/client';
 
-const createFetch = (URI, accessToken) => {
-  const apolloFetch = createApolloFetch({
-    uri: URI,
+const createClient = (uri, accessToken) => {
+  const headers = {
+    'ET-Client-Name': 'entur - deviation-messages',
+  };
+
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+
+  const client = new ApolloClient({
+    uri,
+    cache: new InMemoryCache({
+      addTypename: false,
+    }),
+    headers,
   });
 
-  apolloFetch.use(({ request, options }, next) => {
-    if (!options.headers) {
-      options.headers = {}; // Create the headers object if needed.
-    }
-    options.headers['ET-Client-Name'] = 'entur - deviation-messages';
-
-    if (accessToken) {
-      options.headers['Authorization'] = `Bearer ${accessToken}`;
-    }
-
-    next();
-  });
-
-  return apolloFetch;
+  return client;
 };
 
 const getAuthorities = (URI) => async () => {
-  const apolloFetch = createFetch(URI);
-  const query = `
-      {
-        authorities{
-          id
-          name
-        }
-      } `;
+  const client = createClient(URI);
+  const query = gql`
+    {
+      authorities {
+        id
+        name
+      }
+    }
+  `;
 
-  return apolloFetch({ query })
+  return client
+    .query({ query })
     .catch((error) => error)
     .then((response) => response);
 };
 
 const getLines = (URI) => async (authorities) => {
-  const apolloFetch = createFetch(URI);
+  const client = createClient(URI);
 
-  const query = `
+  const query = gql`
       {
         lines(authorities: "${authorities}") {
           name
@@ -55,15 +56,16 @@ const getLines = (URI) => async (authorities) => {
         }
       } `;
 
-  return apolloFetch({ query })
+  return client
+    .query({ query })
     .catch((error) => error)
     .then((response) => response);
 };
 
 const getDepartures = (URI) => async (line, date) => {
-  const apolloFetch = createFetch(URI);
+  const client = createClient(URI);
 
-  const query = `
+  const query = gql`
       {
         serviceJourneys(lines: "${line}", activeDates: "${date}") {
           id
@@ -92,15 +94,16 @@ const getDepartures = (URI) => async (line, date) => {
         }
       }`;
 
-  return apolloFetch({ query })
+  return client
+    .query({ query })
     .catch((error) => error)
     .then((response) => response);
 };
 
 const getServiceJourney = (URI) => async (id, date) => {
-  const apolloFetch = createFetch(URI);
+  const client = createClient(URI);
 
-  const query = `
+  const query = gql`
     {
       serviceJourney(id: "${id}") {
         id
@@ -130,23 +133,26 @@ const getServiceJourney = (URI) => async (id, date) => {
       }
     }`;
 
-  return apolloFetch({ query })
+  return client
+    .query({ query })
     .catch((error) => error)
     .then((response) => response);
 };
 
 const getOperators = (URI) => async () => {
-  const apolloFetch = createFetch(URI);
+  const client = createClient(URI);
 
-  const query = `
+  const query = gql`
     {
       operators {
         id
         name
       }
-    }`;
+    }
+  `;
 
-  return apolloFetch({ query })
+  return client
+    .query({ query })
     .catch((error) => error)
     .then((response) => response);
 };
@@ -157,8 +163,7 @@ const getStopPlaces = (URI) => async (ids) => {
       'Et-Client-Name': 'entur - deviation-messages',
     },
   });
-  const stopPlaces = await response.json();
-  return stopPlaces;
+  return await response.json();
 };
 
 const getTopographicPlaces = (URI) => async (ids) => {
@@ -167,37 +172,58 @@ const getTopographicPlaces = (URI) => async (ids) => {
       'Et-Client-Name': 'entur - deviation-messages',
     },
   });
-  const topographicPlaces = await response.json();
-  return topographicPlaces;
+  return await response.json();
 };
 
 const getMessages = (URI, auth) => async (codespace, authority) => {
   const accessToken = auth.user.access_token;
-  const apolloFetch = createFetch(URI, accessToken);
+  const client = createClient(URI, accessToken);
 
-  const query = `
-    query MessagesQuery($authority:String!, $codespace: String!) {
-  situationElements(authority: $authority, codespace: $codespace) {
-    id
-    creationTime
-    participantRef
-    progress
-    reportType
-    severity
-    situationNumber
-    advice {
-      attributes {
-        xmlLang
-      }
-      text
-    }
-    affects {
-      networks {
-        affectedNetwork {
-          affectedLine {
-            lineRef
-            routes {
-              affectedRoute {
+  const query = gql`
+    query MessagesQuery($authority: String!, $codespace: String!) {
+      situationElements(authority: $authority, codespace: $codespace) {
+        id
+        creationTime
+        participantRef
+        progress
+        reportType
+        severity
+        situationNumber
+        advice {
+          attributes {
+            xmlLang
+          }
+          text
+        }
+        affects {
+          networks {
+            affectedNetwork {
+              affectedLine {
+                lineRef
+                routes {
+                  affectedRoute {
+                    stopPoints {
+                      affectedStopPoint {
+                        stopPointRef
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          stopPoints {
+            affectedStopPoint {
+              stopPointRef
+            }
+          }
+          vehicleJourneys {
+            affectedVehicleJourney {
+              framedVehicleJourneyRef {
+                dataFrameRef
+                datedVehicleJourneyRef
+              }
+              route {
                 stopPoints {
                   affectedStopPoint {
                     stopPointRef
@@ -207,62 +233,42 @@ const getMessages = (URI, auth) => async (codespace, authority) => {
             }
           }
         }
-      }
-      stopPoints {
-        affectedStopPoint {
-          stopPointRef
-        }
-      }
-      vehicleJourneys {
-        affectedVehicleJourney {
-          framedVehicleJourneyRef {
-            dataFrameRef
-            datedVehicleJourneyRef
+        description {
+          attributes {
+            xmlLang
           }
-          route {
-            stopPoints {
-              affectedStopPoint {
-                stopPointRef
-              }
-            }
+          text
+        }
+        infoLinks {
+          infoLink {
+            uri
+            label
           }
         }
+        source {
+          sourceType
+        }
+        summary {
+          attributes {
+            xmlLang
+          }
+          text
+        }
+        validityPeriod {
+          endTime
+          startTime
+        }
       }
     }
-    description {
-      attributes {
-        xmlLang
-      }
-      text
-    }
-    infoLinks {
-      infoLink {
-        uri
-        label
-      }
-    }
-    source {
-      sourceType
-    }
-    summary {
-      attributes {
-        xmlLang
-      }
-      text
-    }
-    validityPeriod {
-      endTime
-      startTime
-    }
-  }
-}`;
+  `;
 
   const variables = {
     codespace,
     authority,
   };
 
-  return apolloFetch({ query, variables })
+  return client
+    .query({ query, variables })
     .catch((error) => error)
     .then((response) => response);
 };
@@ -270,13 +276,21 @@ const getMessages = (URI, auth) => async (codespace, authority) => {
 const createOrUpdateMessage =
   (URI, auth) => async (codespace, authority, input) => {
     const accessToken = auth.user.access_token;
-    const apolloFetch = createFetch(URI, accessToken);
+    const client = createClient(URI, accessToken);
 
-    const query = `
-    mutation CreateOrUpdateMessage($codespace: String!, $authority: String!, $input: SituationElementInput!) {
-      createOrUpdateSituationElement(codespace: $codespace, authority: $authority, input: $input)
-    }
-  `;
+    const mutation = gql`
+      mutation CreateOrUpdateMessage(
+        $codespace: String!
+        $authority: String!
+        $input: SituationElementInput!
+      ) {
+        createOrUpdateSituationElement(
+          codespace: $codespace
+          authority: $authority
+          input: $input
+        )
+      }
+    `;
 
     const variables = {
       codespace,
@@ -284,67 +298,70 @@ const createOrUpdateMessage =
       input,
     };
 
-    return apolloFetch({ query, variables })
+    return client
+      .mutate({ mutation, variables })
       .catch((error) => error)
       .then((response) => response);
   };
 
 const getCancellations = (URI, auth) => async (codespace, authority) => {
   const accessToken = auth.user.access_token;
-  const apolloFetch = createFetch(URI, accessToken);
+  const client = createClient(URI, accessToken);
 
-  const query = `
-    query CancellationsQuery($authority:String!, $codespace: String!) {
-  cancellations(authority: $authority, codespace: $codespace) {
-    id
-    estimatedVehicleJourney {
-      cancellation
-      lineRef
-      directionRef
-      dataSource
-      estimatedVehicleJourneyCode
-      expiresAtEpochMs
-      extraJourney
-      groupOfLinesRef
-      isCompleteStopSequence
-      monitored
-      operatorRef
-      publishedLineName
-      recordedAtTime
-      routeRef
-      vehicleMode
-      estimatedCalls {
-        estimatedCall {
-          aimedArrivalTime
-          aimedDepartureTime
-          arrivalBoardingActivity
-          arrivalStatus
+  const query = gql`
+    query CancellationsQuery($authority: String!, $codespace: String!) {
+      cancellations(authority: $authority, codespace: $codespace) {
+        id
+        estimatedVehicleJourney {
           cancellation
-          departureBoardingActivity
-          departureStatus
-          destinationDisplay
-          expectedArrivalTime
-          expectedDepartureTime
-          order
-          requestStop
-          stopPointName
-          stopPointRef
+          lineRef
+          directionRef
+          dataSource
+          estimatedVehicleJourneyCode
+          expiresAtEpochMs
+          extraJourney
+          groupOfLinesRef
+          isCompleteStopSequence
+          monitored
+          operatorRef
+          publishedLineName
+          recordedAtTime
+          routeRef
+          vehicleMode
+          estimatedCalls {
+            estimatedCall {
+              aimedArrivalTime
+              aimedDepartureTime
+              arrivalBoardingActivity
+              arrivalStatus
+              cancellation
+              departureBoardingActivity
+              departureStatus
+              destinationDisplay
+              expectedArrivalTime
+              expectedDepartureTime
+              order
+              requestStop
+              stopPointName
+              stopPointRef
+            }
+          }
+          framedVehicleJourneyRef {
+            dataFrameRef
+            datedVehicleJourneyRef
+          }
         }
       }
-      framedVehicleJourneyRef {
-        dataFrameRef
-        datedVehicleJourneyRef
-      }
     }
-  }
-}`;
+  `;
 
   const variables = {
     codespace,
     authority,
   };
 
-  return apolloFetch({ query, variables })
+  return client
+    .query({ query, variables })
     .catch((error) => error)
     .then((response) => response);
 };
@@ -352,13 +369,21 @@ const getCancellations = (URI, auth) => async (codespace, authority) => {
 const createOrUpdateCancellation =
   (URI, auth) => async (codespace, authority, input) => {
     const accessToken = auth.user.access_token;
-    const apolloFetch = createFetch(URI, accessToken);
+    const client = createClient(URI, accessToken);
 
-    const query = `
-    mutation CreateOrUpdateCancellation($codespace: String!, $authority: String!, $input: CancellationInput!) {
-      createOrUpdateCancellation(codespace: $codespace, authority: $authority, input: $input)
-    }
-  `;
+    const mutation = gql`
+      mutation CreateOrUpdateCancellation(
+        $codespace: String!
+        $authority: String!
+        $input: CancellationInput!
+      ) {
+        createOrUpdateCancellation(
+          codespace: $codespace
+          authority: $authority
+          input: $input
+        )
+      }
+    `;
 
     const variables = {
       codespace,
@@ -366,7 +391,8 @@ const createOrUpdateCancellation =
       input,
     };
 
-    return apolloFetch({ query, variables })
+    return client
+      .mutate({ mutation, variables })
       .catch((error) => error)
       .then((response) => response);
   };
@@ -374,53 +400,62 @@ const createOrUpdateCancellation =
 const getExtrajourneys =
   (URI, auth) => async (codespace, authority, showCompletedTrips) => {
     const accessToken = auth.user.access_token;
-    const apolloFetch = createFetch(URI, accessToken);
+    const client = createClient(URI, accessToken);
 
-    const query = `
-    query ExtraJourneysQuery($authority:String!, $codespace: String!, $showCompletedTrips: Boolean!) {
-  extrajourneys(authority: $authority, codespace: $codespace, showCompletedTrips: $showCompletedTrips) {
-    id
-    estimatedVehicleJourney {
-      cancellation
-      lineRef
-      directionRef
-      dataSource
-      estimatedVehicleJourneyCode
-      expiresAtEpochMs
-      extraJourney
-      groupOfLinesRef
-      isCompleteStopSequence
-      monitored
-      operatorRef
-      publishedLineName
-      recordedAtTime
-      routeRef
-      vehicleMode
-      estimatedCalls {
-        estimatedCall {
-          aimedArrivalTime
-          aimedDepartureTime
-          arrivalBoardingActivity
-          arrivalStatus
-          cancellation
-          departureBoardingActivity
-          departureStatus
-          destinationDisplay
-          expectedArrivalTime
-          expectedDepartureTime
-          order
-          requestStop
-          stopPointName
-          stopPointRef
+    const query = gql`
+      query ExtraJourneysQuery(
+        $authority: String!
+        $codespace: String!
+        $showCompletedTrips: Boolean!
+      ) {
+        extrajourneys(
+          authority: $authority
+          codespace: $codespace
+          showCompletedTrips: $showCompletedTrips
+        ) {
+          id
+          estimatedVehicleJourney {
+            cancellation
+            lineRef
+            directionRef
+            dataSource
+            estimatedVehicleJourneyCode
+            expiresAtEpochMs
+            extraJourney
+            groupOfLinesRef
+            isCompleteStopSequence
+            monitored
+            operatorRef
+            publishedLineName
+            recordedAtTime
+            routeRef
+            vehicleMode
+            estimatedCalls {
+              estimatedCall {
+                aimedArrivalTime
+                aimedDepartureTime
+                arrivalBoardingActivity
+                arrivalStatus
+                cancellation
+                departureBoardingActivity
+                departureStatus
+                destinationDisplay
+                expectedArrivalTime
+                expectedDepartureTime
+                order
+                requestStop
+                stopPointName
+                stopPointRef
+              }
+            }
+            framedVehicleJourneyRef {
+              dataFrameRef
+              datedVehicleJourneyRef
+            }
+          }
         }
       }
-      framedVehicleJourneyRef {
-        dataFrameRef
-        datedVehicleJourneyRef
-      }
-    }
-  }
-}`;
+    `;
 
     const variables = {
       codespace,
@@ -428,7 +463,8 @@ const getExtrajourneys =
       showCompletedTrips,
     };
 
-    return apolloFetch({ query, variables })
+    return client
+      .query({ query, variables })
       .catch((error) => error)
       .then((response) => response);
   };
@@ -436,13 +472,21 @@ const getExtrajourneys =
 const createOrUpdateExtrajourney =
   (URI, auth) => async (codespace, authority, input) => {
     const accessToken = auth.user.access_token;
-    const apolloFetch = createFetch(URI, accessToken);
+    const client = createClient(URI, accessToken);
 
-    const query = `
-    mutation CreateOrUpdateExtrajourney($codespace: String!, $authority: String!, $input: ExtrajourneyInput!) {
-      createOrUpdateExtrajourney(codespace: $codespace, authority: $authority, input: $input)
-    }
-  `;
+    const mutation = gql`
+      mutation CreateOrUpdateExtrajourney(
+        $codespace: String!
+        $authority: String!
+        $input: ExtrajourneyInput!
+      ) {
+        createOrUpdateExtrajourney(
+          codespace: $codespace
+          authority: $authority
+          input: $input
+        )
+      }
+    `;
 
     const variables = {
       codespace,
@@ -450,27 +494,29 @@ const createOrUpdateExtrajourney =
       input,
     };
 
-    return apolloFetch({ query, variables })
+    return client
+      .mutate({ mutation, variables })
       .catch((error) => error)
       .then((response) => response);
   };
 
 const getUserContext = (URI, auth) => async () => {
   const accessToken = auth.user.access_token;
-  const apolloFetch = createFetch(URI, accessToken);
+  const client = createClient(URI, accessToken);
 
-  const query = `
+  const query = gql`
     query GetUserContext {
       userContext {
         allowedCodespaces {
           id
           permissions
-         }
+        }
       }
     }
   `;
 
-  return apolloFetch({ query })
+  return client
+    .query({ query })
     .catch((error) => error)
     .then((response) => response);
 };

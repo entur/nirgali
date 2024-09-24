@@ -15,7 +15,7 @@ export const useMessages = (codespace: string, authority: string) => {
         authority,
       );
       if (response.data) {
-        setMessages(response.data.situationElements);
+        setMessages(structuredClone(response.data.situationElements));
       } else {
         console.log('Could not find any lines for this organization');
       }

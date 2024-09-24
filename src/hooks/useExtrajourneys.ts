@@ -19,7 +19,7 @@ export const useExtrajourneys = (
       showCompletedTrips,
     );
     if (response.data) {
-      setExtrajourneys(response.data.extrajourneys);
+      setExtrajourneys(structuredClone(response.data.extrajourneys));
     } else {
       console.log('Could not find any extrajourneys for this organization');
     }
