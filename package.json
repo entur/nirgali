@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@apollo/client": "3.11.8",
     "@entur/alert": "0.16.16",
     "@entur/button": "3.2.32",
     "@entur/datepicker": "9.4.13",
@@ -16,8 +17,8 @@
     "@entur/tooltip": "2.7.11",
     "@entur/typography": "1.8.45",
     "@internationalized/date": "3.5.5",
-    "apollo-fetch": "0.7.0",
     "bootstrap": "5.3.3",
+    "graphql": "16.9.0",
     "oidc-client-ts": "3.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",

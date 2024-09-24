@@ -14,7 +14,7 @@ export const useCancellations = (codespace: string, authority: string) => {
       authority,
     );
     if (response.data) {
-      setCancellations(response.data.cancellations);
+      setCancellations(structuredClone(response.data.cancellations));
     } else {
       console.log('Could not find any cancellations for this organization');
     }
