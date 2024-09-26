@@ -56,5 +56,5 @@ jobs:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEVIATION_MESSAGES_DEV }}'
-          projectId: deviation-messages-dev
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ENT_NIRGALI_DEV }}'
+          projectId: ent-nirgali-dev
