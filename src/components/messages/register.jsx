@@ -301,7 +301,7 @@ class Register extends React.Component {
       .getDepartures(line, toCalendarDate(date).toString())
       .then((response) => {
         this.setState({
-          departures: response.data.serviceJourneys,
+          departures: structuredClone(response.data.serviceJourneys),
           departureSok: true,
         });
       });

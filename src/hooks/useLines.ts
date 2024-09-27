@@ -10,7 +10,7 @@ export const useLines = (selectedOrganization: string) => {
     const getLines = async () => {
       const response = await api(config).getLines(selectedOrganization);
       if (response.data) {
-        setLines(response.data.lines.slice());
+        setLines(structuredClone(response.data.lines));
       } else {
         console.log('Could not find any lines for this organization');
       }
