@@ -90,8 +90,8 @@ jobs:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEVIATION_MESSAGES_STAGING }}'
-          projectId: deviation-messages-staging
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ENT_NIRGALI_TST }}'
+          projectId: ent-nirgali-tst
           channelId: live
   deploy_prod:
     runs-on: ubuntu-latest

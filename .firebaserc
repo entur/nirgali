@@ -1,7 +1,7 @@
 {
   "projects": {
     "dev": "ent-nirgali-dev",
-    "staging": "deviation-messages-staging",
+    "staging": "ent-nirgali-tst",
     "prod": "deviation-messages-prod"
   }
 }
