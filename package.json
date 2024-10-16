@@ -14,7 +14,7 @@
     "@entur/tab": "0.4.74",
     "@entur/table": "4.8.21",
     "@entur/tokens": "3.17.1",
-    "@entur/tooltip": "4.0.1",
+    "@entur/tooltip": "5.1.0",
     "@entur/typography": "1.8.46",
     "@internationalized/date": "3.5.6",
     "bootstrap": "5.3.3",
