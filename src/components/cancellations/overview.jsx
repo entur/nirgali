@@ -130,7 +130,7 @@ const Overview = ({ cancellations, lines }) => {
                   <Tr key={item.recordedAtTime}>
                     <Td className="Status">{returnRedOrGreenIcon(item)}</Td>
                     <Td className="#">
-                      {lines.find((l) => l.id === item.lineRef)?.publicCode} (
+                      {lines?.find((l) => l.id === item.lineRef)?.publicCode} (
                       {item.lineRef})
                     </Td>
                     <Td>
