@@ -23,13 +23,13 @@ const returnRedOrGreenIcon = (param, date) => {
 
 const getType = (param) => {
   if (param != null) {
-    if (Object.keys(param)[0] === 'networks') {
+    if (param.networks !== null) {
       return 'Linje';
     }
-    if (Object.keys(param)[0] === 'stopPoints') {
+    if (param.stopPoints !== null) {
       return 'Stopp';
     }
-    if (Object.keys(param)[0] === 'vehicleJourneys') {
+    if (param.vehicleJourneys !== null) {
       return 'Avgang';
     } else {
       return 'Error';
