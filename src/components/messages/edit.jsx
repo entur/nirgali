@@ -458,17 +458,17 @@ const Edit = ({ messages, organization, lines, api }) => {
           maxLength="160"
           required
         />
-        <input
-          type="String"
+        <textarea
           name="beskrivelse"
           className="form-control"
           defaultValue={returnValue('description')}
+          rows={4}
         />
-        <input
-          type="String"
+        <textarea
           name="forslag"
           className="form-control"
           defaultValue={returnValue('advice')}
+          rows={4}
         />
         <br></br>
         <p className="text-center text-white">

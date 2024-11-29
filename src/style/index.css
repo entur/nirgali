@@ -62,6 +62,15 @@ span {
   text-align: left;
 }
 
+.form-control {
+  margin-bottom: 1rem;
+}
+
+textarea.form-control {
+  margin-bottom: 1rem;
+  min-height: 100px;
+}
+
 .register_box {
   position: absolute;
   left: 22.5%;

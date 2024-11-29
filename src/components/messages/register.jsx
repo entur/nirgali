@@ -651,8 +651,7 @@ class Register extends React.Component {
                   this.setState({ oppsummering })
                 }
               />
-              <input
-                type="String"
+              <textarea
                 name="beskrivelse"
                 className="form-control"
                 placeholder="Eventuell utdypende detaljer om avviket (ikke påkrevd)"
@@ -660,9 +659,9 @@ class Register extends React.Component {
                 onChange={({ target: { value: beskrivelse } }) =>
                   this.setState({ beskrivelse })
                 }
+                rows={4}
               />
-              <input
-                type="String"
+              <textarea
                 name="forslag"
                 className="form-control"
                 placeholder="Beskrivelse om hva kunden skal/kan gjøre (ikke påkrevd)"
@@ -670,6 +669,7 @@ class Register extends React.Component {
                 onChange={({ target: { value: forslag } }) =>
                   this.setState({ forslag })
                 }
+                rows={4}
               />
               <br></br>
             </div>
