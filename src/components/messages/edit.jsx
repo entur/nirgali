@@ -53,6 +53,14 @@ const Edit = ({ messages, organization, lines, api }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    const calculatedTo =
+      to || parseAbsoluteToLocal(issue.validityPeriod.endTime);
+
+    if (calculatedTo.compare(now(getLocalTimeZone())) < 0) {
+      // show alert banner, to must be after now
+      return;
+    }
+
     const newIssue = Object.assign({}, issue);
 
     newIssue.progress = 'open';
@@ -307,26 +315,7 @@ const Edit = ({ messages, organization, lines, api }) => {
 
   const onToChange = useCallback(
     (to) => {
-      const calculatedFrom =
-        from || parseAbsoluteToLocal(issue.validityPeriod.startTime);
-
-      if (to.compare(now(getLocalTimeZone())) < 0) {
-        setTo(now(getLocalTimeZone()));
-      } else if (to.compare(calculatedFrom) < 0) {
-        setTo(calculatedFrom);
-      } else {
-        let copy = to.copy();
-        if (!to.hour || !to.minute) {
-          copy = toZoned(
-            toCalendarDateTime(
-              copy,
-              new Time(calculatedFrom.hour, calculatedFrom.minute),
-            ),
-            getLocalTimeZone(),
-          );
-        }
-        setTo(copy);
-      }
+      setTo(to);
     },
     [setTo, from, issue],
   );
@@ -430,7 +419,11 @@ const Edit = ({ messages, organization, lines, api }) => {
                 : undefined)
             }
             onChange={onToChange}
-            minDate={from}
+            minDate={
+              from.compare(now(getLocalTimeZone())) > 0
+                ? from
+                : now(getLocalTimeZone())
+            }
             showTime
             placeholder="Til-dato"
           />
