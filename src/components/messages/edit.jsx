@@ -407,8 +407,19 @@ const Edit = ({ messages, organization, lines, api }) => {
               from || parseAbsoluteToLocal(issue.validityPeriod.startTime)
             }
             onChange={onFromChange}
-            minDate={now(getLocalTimeZone())}
+            minDate={
+              parseAbsoluteToLocal(issue.validityPeriod.startTime).compare(
+                now(getLocalTimeZone()),
+              ) < 0
+                ? undefined
+                : now(getLocalTimeZone())
+            }
             showTime
+            disabled={
+              parseAbsoluteToLocal(issue.validityPeriod.startTime).compare(
+                now(getLocalTimeZone()),
+              ) < 0
+            }
           />
           <DatePicker
             label="Til"
