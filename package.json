@@ -25,7 +25,7 @@
     "react-oidc-context": "3.2.0",
     "react-router-dom": "6.28.1",
     "react-select": "5.9.0",
-    "react-super-responsive-table": "6.0.0",
+    "react-super-responsive-table": "6.0.1",
     "react-windowed-select": "5.2.0"
   },
   "scripts": {
