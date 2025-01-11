@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@apollo/client": "3.12.4",
+    "@apollo/client": "3.12.5",
     "@entur/alert": "0.16.22",
     "@entur/button": "3.2.36",
     "@entur/datepicker": "10.0.11",
