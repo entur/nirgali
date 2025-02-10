@@ -53,12 +53,14 @@ const Edit = ({ messages, organization, lines, api }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const calculatedTo =
-      to || parseAbsoluteToLocal(issue.validityPeriod.endTime);
+    if (issue.validityPeriod.endTime) {
+      const calculatedTo =
+        to || parseAbsoluteToLocal(issue.validityPeriod.endTime);
 
-    if (calculatedTo.compare(now(getLocalTimeZone())) < 0) {
-      // show alert banner, to must be after now
-      return;
+      if (calculatedTo.compare(now(getLocalTimeZone())) < 0) {
+        // show alert banner, to must be after now
+        return;
+      }
     }
 
     const newIssue = Object.assign({}, issue);
