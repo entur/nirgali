@@ -22,7 +22,7 @@
     "oidc-client-ts": "3.2.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-oidc-context": "3.2.0",
+    "react-oidc-context": "3.3.0",
     "react-router-dom": "6.30.0",
     "react-select": "5.10.1",
     "react-super-responsive-table": "6.0.2",
