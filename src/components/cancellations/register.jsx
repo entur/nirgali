@@ -53,7 +53,7 @@ export const Register = ({ lines, api, organization, refetch }) => {
       estimatedVehicleJourney: {
         recordedAtTime: now.toISOString(),
         lineRef: chosenLine,
-        directionRef: 0,
+        directionRef: '0',
         framedVehicleJourneyRef: {
           dataFrameRef: toCalendarDate(departureDate).toString(),
           datedVehicleJourneyRef: chosenDeparture,
