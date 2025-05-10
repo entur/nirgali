@@ -16,7 +16,7 @@
     "@entur/tokens": "3.19.0",
     "@entur/tooltip": "5.2.4",
     "@entur/typography": "1.9.4",
-    "@internationalized/date": "3.7.0",
+    "@internationalized/date": "3.8.0",
     "bootstrap": "5.3.3",
     "graphql": "16.10.0",
     "oidc-client-ts": "3.2.0",
