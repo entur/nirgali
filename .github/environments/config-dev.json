@@ -3,8 +3,8 @@
   "journey-planner-api": "https://api.dev.entur.io/journey-planner/v3/graphql",
   "stop-places-api": "https://api.dev.entur.io/stop-places/v1/read",
   "oidcConfig": {
-    "authority": "https://ror-entur-dev.eu.auth0.com",
-    "client_id": "ze7TvpcC4FbVfU1CPJf7ljb3eTeTS39J",
+    "authority": "https://partner.dev.entur.org",
+    "client_id": "JslwJ0K7HfGAabuo5VTEfUXTXLd6G1pw",
     "extraQueryParams": {
       "audience": "https://ror.api.dev.entur.io"
     }
