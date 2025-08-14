@@ -19,7 +19,9 @@ export const AppRouter = ({
 }) => {
   const selectedOrganization = useSelectedOrganization();
   const permissions = allowedCodespaces.find(
-    (codespace) => codespace.id === selectedOrganization.split(':')[0],
+    (codespace) =>
+      codespace.id === '*' ||
+      codespace.id === selectedOrganization.split(':')[0],
   ).permissions;
 
   return (
