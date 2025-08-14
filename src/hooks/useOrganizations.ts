@@ -29,8 +29,10 @@ export const useOrganizations: () => {
         auth.signoutRedirect();
       } else {
         const response = await api(config).getAuthorities();
-        const authorities = response.data.authorities.filter((authority: any) =>
-          allowedCodespaceIds.includes(authority.id.split(':')[0]),
+        const authorities = response.data.authorities.filter(
+          (authority: any) =>
+            allowedCodespaceIds.includes('*') ||
+            allowedCodespaceIds.includes(authority.id.split(':')[0]),
         );
 
         if (!(authorities.length > 0)) {
