@@ -62,7 +62,7 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "@types/node": "22.17.1",
+    "@types/node": "22.17.2",
     "@types/react": "19.1.10",
     "@types/react-dom": "19.1.7",
     "@vitejs/plugin-react-swc": "4.0.0",
