@@ -14,15 +14,22 @@ import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
 
 export const AppRouter = ({
   allowedCodespaces,
+  isAdmin,
 }: {
   allowedCodespaces: any[];
+  isAdmin: boolean;
 }) => {
   const selectedOrganization = useSelectedOrganization();
-  const permissions = allowedCodespaces.find(
-    (codespace) =>
-      codespace.id === '*' ||
-      codespace.id === selectedOrganization.split(':')[0],
-  ).permissions;
+
+  let permissions;
+
+  if (isAdmin) {
+    permissions = ['MESSAGES', 'CANCELLATIONS', 'EXTRAJOURNEYS'];
+  } else {
+    permissions = allowedCodespaces.find(
+      (codespace) => codespace.id === selectedOrganization.split(':')[0],
+    ).permissions;
+  }
 
   return (
     <Router>

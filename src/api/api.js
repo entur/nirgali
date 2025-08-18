@@ -511,6 +511,7 @@ const getUserContext = (URI, auth) => async () => {
           id
           permissions
         }
+        isAdmin
       }
     }
   `;
