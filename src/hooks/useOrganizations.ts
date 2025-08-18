@@ -11,39 +11,43 @@ type Organization = {
 export const useOrganizations: () => {
   organizations: Organization[];
   allowedCodespaces: any[];
+  isAdmin: boolean;
 } = () => {
   const auth = useAuth();
   const config = useConfig();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [allowedCodespaces, setAllowedCodespaces] = useState<any[]>([]);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchAuthorities = async () => {
       const userContextResponse = await api(config, auth).getUserContext();
-      const userContext = userContextResponse.data.userContext;
-      const allowedCodespaceIds = userContext.allowedCodespaces.map(
+      const { allowedCodespaces, isAdmin } =
+        userContextResponse.data.userContext;
+      const allowedCodespaceIds = allowedCodespaces.map(
         (codespace: any) => codespace.id,
       );
 
-      if (!(allowedCodespaceIds.length > 0)) {
+      if (!(allowedCodespaceIds.length > 0) && !isAdmin) {
         auth.signoutRedirect();
       } else {
         const response = await api(config).getAuthorities();
-        const authorities = response.data.authorities.filter((authority: any) =>
-          allowedCodespaceIds.includes(authority.id.split(':')[0]),
+        const authorities = response.data.authorities.filter(
+          (authority: any) =>
+            isAdmin || allowedCodespaceIds.includes(authority.id.split(':')[0]),
         );
 
         if (!(authorities.length > 0)) {
           auth.signoutRedirect();
         } else {
-          setAllowedCodespaces(userContext.allowedCodespaces);
-
+          setAllowedCodespaces(allowedCodespaces);
           setOrganizations(
             authorities.map(({ id, name }: any) => ({
               id,
               name,
             })),
           );
+          setIsAdmin(isAdmin);
         }
       }
     };
@@ -51,5 +55,5 @@ export const useOrganizations: () => {
     fetchAuthorities();
   }, [auth, config]);
 
-  return { organizations, allowedCodespaces };
+  return { organizations, allowedCodespaces, isAdmin };
 };

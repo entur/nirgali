@@ -8,7 +8,7 @@ import { SelectedOrganizationContext } from '../../hooks/useSelectedOrganization
 import { useAuth } from 'react-oidc-context';
 
 export const App = () => {
-  const { organizations, allowedCodespaces } = useOrganizations();
+  const { organizations, allowedCodespaces, isAdmin } = useOrganizations();
   const [selectedOrganization, setSelectedOrganization] = useState<
     string | undefined
   >();
@@ -35,7 +35,7 @@ export const App = () => {
       />
       {selectedOrganization && (
         <SelectedOrganizationContext.Provider value={selectedOrganization}>
-          <AppRouter allowedCodespaces={allowedCodespaces} />
+          <AppRouter allowedCodespaces={allowedCodespaces} isAdmin={isAdmin} />
         </SelectedOrganizationContext.Provider>
       )}
     </>
