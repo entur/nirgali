@@ -17,7 +17,7 @@
     "@entur/tooltip": "5.2.12",
     "@entur/typography": "1.9.12",
     "@internationalized/date": "3.9.0",
-    "bootstrap": "5.3.7",
+    "bootstrap": "5.3.8",
     "graphql": "16.11.0",
     "oidc-client-ts": "3.3.0",
     "react": "19.1.1",
