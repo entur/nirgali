@@ -72,7 +72,7 @@
     "lint-staged": "15.5.2",
     "npm-run-all2": "6.2.6",
     "prettier": "3.6.2",
-    "sass": "1.93.1",
+    "sass": "1.93.2",
     "typescript": "5.9.2",
     "vite": "7.1.7",
     "vite-plugin-svgr": "4.5.0",
