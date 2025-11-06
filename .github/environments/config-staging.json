@@ -3,8 +3,8 @@
   "journey-planner-api": "https://api.staging.entur.io/journey-planner/v3/graphql",
   "stop-places-api": "https://api.staging.entur.io/stop-places/v1/read",
   "oidcConfig": {
-    "authority": "https://ror-entur-staging.eu.auth0.com",
-    "client_id": "0g13z7Ah2mMxfvwSLKrkV8W2WNthuqLU",
+    "authority": "https://partner.staging.entur.org",
+    "client_id": "sumvCXEMztdghOeAADoSgXUkjxMGkddj",
     "extraQueryParams": {
       "audience": "https://ror.api.staging.entur.io"
     }
