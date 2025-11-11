@@ -52,7 +52,7 @@ jobs:
         env:
           REACT_APP_VERSION: ${{ github.sha }}
       - name: Archive production artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build
           path: |
@@ -64,7 +64,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
       - name: Copy favicon
         run: cp .github/environments/avv-d.ico build/favicon.ico
       - name: Copy config
@@ -82,7 +82,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
       - name: Copy favicon
         run: cp .github/environments/avv-s.ico build/favicon.ico
       - name: Copy config
@@ -100,7 +100,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
       - name: Copy favicon
         run: cp .github/environments/avv-p.ico build/favicon.ico
       - name: Copy config
