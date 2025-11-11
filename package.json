@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@apollo/client": "3.14.0",
+    "@apollo/client": "4.0.9",
     "@entur/alert": "0.17.18",
     "@entur/button": "3.3.18",
     "@entur/datepicker": "11.4.3",
@@ -26,7 +26,8 @@
     "react-router-dom": "7.9.5",
     "react-select": "5.10.2",
     "react-super-responsive-table": "6.0.2",
-    "react-windowed-select": "5.2.0"
+    "react-windowed-select": "5.2.0",
+    "rxjs": "7.8.2"
   },
   "scripts": {
     "copy:config": "cp .github/environments/config-dev.json public/config.json",
