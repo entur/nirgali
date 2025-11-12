@@ -1,4 +1,4 @@
-import { ApolloClient, gql, InMemoryCache } from '@apollo/client';
+import { ApolloClient, gql, InMemoryCache, HttpLink } from '@apollo/client';
 
 const createClient = (uri, accessToken) => {
   const headers = {
@@ -10,11 +10,13 @@ const createClient = (uri, accessToken) => {
   }
 
   const client = new ApolloClient({
-    uri,
+    link: new HttpLink({
+      uri,
+      headers,
+    }),
     cache: new InMemoryCache({
       addTypename: false,
     }),
-    headers,
   });
 
   return client;
