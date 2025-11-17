@@ -1,4 +1,11 @@
-import { ApolloClient, gql, InMemoryCache, HttpLink } from '@apollo/client';
+import {
+  ApolloClient,
+  ApolloLink,
+  gql,
+  InMemoryCache,
+  HttpLink,
+} from '@apollo/client';
+import { RemoveTypenameFromVariablesLink } from '@apollo/client/link/remove-typename';
 
 const createClient = (uri, accessToken) => {
   const headers = {
@@ -9,11 +16,14 @@ const createClient = (uri, accessToken) => {
     headers['Authorization'] = `Bearer ${accessToken}`;
   }
 
+  const removeTypenameLink = new RemoveTypenameFromVariablesLink();
+  const httpLink = new HttpLink({
+    uri,
+    headers,
+  });
+
   const client = new ApolloClient({
-    link: new HttpLink({
-      uri,
-      headers,
-    }),
+    link: ApolloLink.from([removeTypenameLink, httpLink]),
     cache: new InMemoryCache({
       addTypename: false,
     }),
