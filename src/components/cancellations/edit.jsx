@@ -90,9 +90,10 @@ const Edit = ({ cancellations, organization, lines, api, refetch }) => {
           }
 
           if (call.arrivalBoardingActivity) {
-            call.arrivalBoardingActivity = serviceJourney.passingTimes.find(
-              ({ quay }) => quay.id === call.stopPointRef,
-            )?.forAlighting
+            const passingTime = serviceJourney?.passingTimes?.find(
+              (pt) => pt.quay?.id === call.stopPointRef,
+            );
+            call.arrivalBoardingActivity = passingTime?.forAlighting
               ? 'alighting'
               : 'noAlighting';
           }
@@ -102,9 +103,10 @@ const Edit = ({ cancellations, organization, lines, api, refetch }) => {
           }
 
           if (call.departureBoardingActivity) {
-            call.departureBoardingActivity = serviceJourney.passingTimes.find(
-              ({ quay }) => quay.id === call.stopPointRef,
-            )?.forBoarding
+            const passingTime = serviceJourney?.passingTimes?.find(
+              (pt) => pt.quay?.id === call.stopPointRef,
+            );
+            call.departureBoardingActivity = passingTime?.forBoarding
               ? 'boarding'
               : 'noBoarding';
           }
@@ -130,7 +132,13 @@ const Edit = ({ cancellations, organization, lines, api, refetch }) => {
   }, [navigate]);
 
   const getLineDepartureOption = () => {
-    const estimatedCall = serviceJourney.estimatedCalls[0];
+    const estimatedCall = serviceJourney?.estimatedCalls?.[0];
+    if (!estimatedCall?.quay) {
+      return {
+        value: serviceJourney?.id || '',
+        label: `Avgangsinformasjon utilgjengelig (${serviceJourney?.id || 'ukjent'})`,
+      };
+    }
     const quayName = estimatedCall.quay.name;
     const aimedDepartureTime = estimatedCall.aimedDepartureTime
       .split('T')
@@ -144,12 +152,14 @@ const Edit = ({ cancellations, organization, lines, api, refetch }) => {
   };
 
   const getQuayOptions = () => {
+    if (!serviceJourney?.estimatedCalls?.length) return [];
+
     return cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall
       .filter((call) => call.Cancellation)
       .map((call) => call.stopPointRef)
       .map(
         (ref) =>
-          serviceJourney.estimatedCalls.find((call) => call.quay.id === ref)
+          serviceJourney.estimatedCalls.find((call) => call.quay?.id === ref)
             ?.quay,
       )
       .filter((v) => v !== undefined)
@@ -263,7 +273,7 @@ const Edit = ({ cancellations, organization, lines, api, refetch }) => {
                     isMulti
                     api={api}
                     stops={
-                      serviceJourney?.estimatedCalls.map(({ quay }) => quay) ||
+                      serviceJourney?.estimatedCalls?.map(({ quay }) => quay) ||
                       []
                     }
                     onChange={onDepartureStopsChange}
