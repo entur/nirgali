@@ -6,7 +6,7 @@
     "authority": "https://partner.entur.org",
     "client_id": "rZnF6hNEcxWRJNa5A0arvy2bVV6Qsz29",
     "extraQueryParams": {
-      "audience": "https://ror.api.entur.io"
+      "audience": "https://api.entur.io"
     }
   }
 }
