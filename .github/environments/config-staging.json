@@ -6,7 +6,7 @@
     "authority": "https://partner.staging.entur.org",
     "client_id": "sumvCXEMztdghOeAADoSgXUkjxMGkddj",
     "extraQueryParams": {
-      "audience": "https://ror.api.staging.entur.io"
+      "audience": "https://api.staging.entur.io"
     }
   }
 }
