@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@apollo/client": "4.0.11",
+    "@apollo/client": "4.1.0",
     "@entur/alert": "0.18.1",
     "@entur/button": "3.4.1",
     "@entur/datepicker": "11.5.1",
@@ -63,7 +63,7 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "@types/node": "24.10.7",
+    "@types/node": "24.10.9",
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react-swc": "4.2.2",
@@ -72,7 +72,7 @@
     "jsdom": "27.4.0",
     "lint-staged": "16.2.7",
     "npm-run-all2": "8.0.4",
-    "prettier": "3.7.4",
+    "prettier": "3.8.0",
     "sass": "1.97.2",
     "typescript": "5.9.3",
     "vite": "7.3.1",
