@@ -67,7 +67,7 @@
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react-swc": "4.2.2",
-    "@vitest/coverage-v8": "4.0.17",
+    "@vitest/coverage-v8": "4.0.18",
     "husky": "9.1.7",
     "jsdom": "27.4.0",
     "lint-staged": "16.2.7",
@@ -77,8 +77,8 @@
     "typescript": "5.9.3",
     "vite": "7.3.1",
     "vite-plugin-svgr": "4.5.0",
-    "vite-tsconfig-paths": "6.0.4",
-    "vitest": "4.0.17",
+    "vite-tsconfig-paths": "6.0.5",
+    "vitest": "4.0.18",
     "vitest-sonar-reporter": "3.0.0"
   }
 }
