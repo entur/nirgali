@@ -5,7 +5,7 @@
   "dependencies": {
     "@apollo/client": "4.1.2",
     "@entur/alert": "0.18.3",
-    "@entur/button": "3.4.1",
+    "@entur/button": "4.0.2",
     "@entur/datepicker": "11.5.3",
     "@entur/dropdown": "8.0.5",
     "@entur/form": "9.2.3",
