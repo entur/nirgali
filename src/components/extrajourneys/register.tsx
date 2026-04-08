@@ -12,8 +12,7 @@ import { PrimaryButton } from '@entur/button';
 import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
 import { Operator, useOperators } from '../../hooks/useOperators';
 import { useLinesForAuthority } from '../../hooks/useLinesForAuthority';
-import { useJourneyPatterns } from '../../hooks/useJourneyPatterns';
-import { Call, JourneyPattern, Line, VehicleMode } from './types';
+import { Call, Line, VehicleMode } from './types';
 import { useNavigate } from 'react-router-dom';
 import { TypedDropDown } from './TypedDropdown';
 import { RegisterEstimatedCallRow } from './register-estimated-call-row';
@@ -22,13 +21,6 @@ import { CallValidationResult, useExtrajourneyValidation } from './validate';
 import api from '../../api/api';
 import { useConfig } from '../../config/ConfigContext';
 import { useAuth } from 'react-oidc-context';
-
-const journeyPatternLabel = (jp: JourneyPattern): string => {
-  const first = jp.quays[0];
-  const last = jp.quays[jp.quays.length - 1];
-  const stopNames = `${first?.stopPlace?.name ?? first?.name} → ${last?.stopPlace?.name ?? last?.name}`;
-  return jp.name ? `${jp.name} (${stopNames})` : stopNames;
-};
 
 export const Register = () => {
   const selectedOrganization = useSelectedOrganization();
@@ -42,14 +34,10 @@ export const Register = () => {
     Operator | undefined
   >();
   const [selectedLine, setSelectedLine] = useState<Line | undefined>();
-  const [selectedJourneyPattern, setSelectedJourneyPattern] = useState<
-    JourneyPattern | undefined
-  >();
   const allLines = useLinesForAuthority(selectedOrganization);
   const visibleLines = selectedOperator
     ? allLines.filter((line) => line.operator?.id === selectedOperator.id)
     : allLines;
-  const journeyPatterns = useJourneyPatterns(selectedLine?.id);
 
   useEffect(() => {
     if (!selectedOperator && operators.length === 1) {
@@ -69,29 +57,16 @@ export const Register = () => {
     }
   }, [visibleLines, selectedLine, selectedOperator]);
 
-  useEffect(() => {
-    if (!selectedJourneyPattern && journeyPatterns.length === 1) {
-      setSelectedJourneyPattern(journeyPatterns[0]);
-    }
-  }, [journeyPatterns, selectedJourneyPattern]);
-
-  const callsFromPattern = (pattern: JourneyPattern): Call[] =>
-    pattern.quays.map((quay, i) => ({
-      quay: { id: quay.id, publicCode: quay.publicCode },
-      stopPlaceName: quay.stopPlace?.name ?? quay.name,
-      boarding: i < pattern.quays.length - 1,
-      alighting: i > 0,
-    }));
-
-  const [calls, setCalls] = useState<Call[]>([]);
-
-  useEffect(() => {
-    if (selectedJourneyPattern) {
-      setCalls(callsFromPattern(selectedJourneyPattern));
-    } else {
-      setCalls([]);
-    }
-  }, [selectedJourneyPattern]);
+  const [calls, setCalls] = useState<Call[]>([
+    {
+      boarding: true,
+      alighting: false,
+    },
+    {
+      boarding: false,
+      alighting: true,
+    },
+  ]);
 
   const navigate = useNavigate();
 
@@ -101,7 +76,6 @@ export const Register = () => {
     destinationDisplay,
     operator: selectedOperator,
     line: selectedLine,
-    journeyPattern: selectedJourneyPattern,
     calls,
   });
 
@@ -207,7 +181,6 @@ export const Register = () => {
               (selectedLine && selectedLine.operator?.id !== operator.id)
             ) {
               setSelectedLine(undefined);
-              setSelectedJourneyPattern(undefined);
             }
           }}
         />
@@ -234,7 +207,6 @@ export const Register = () => {
           }
           onChange={(line) => {
             setSelectedLine(line);
-            setSelectedJourneyPattern(undefined);
             if (line?.operator) {
               setSelectedOperator({
                 id: line.operator.id,
@@ -246,78 +218,54 @@ export const Register = () => {
       </Contrast>
       <br />
 
-      {selectedLine && (
-        <>
-          <Contrast>
-            <TypedDropDown
-              {...result.journeyPattern}
-              label="Rutemønster"
-              items={() =>
-                journeyPatterns.map((jp) => ({
-                  value: jp,
-                  label: journeyPatternLabel(jp),
-                }))
-              }
-              selectedItem={
-                selectedJourneyPattern
-                  ? {
-                      value: selectedJourneyPattern,
-                      label: journeyPatternLabel(selectedJourneyPattern),
-                    }
-                  : null
-              }
-              onChange={(jp) => setSelectedJourneyPattern(jp)}
-            />
-          </Contrast>
-          <br />
-        </>
-      )}
+      <Contrast>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <HeaderCell>Platform (NSR-id)</HeaderCell>
+              <HeaderCell>Av-/påstigning</HeaderCell>
+              <HeaderCell>Ankomst</HeaderCell>
+              <HeaderCell>Avgang</HeaderCell>
+              <HeaderCell>{''}</HeaderCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {calls.map((call, i) => (
+              <RegisterEstimatedCallRow
+                validationResult={
+                  result.calls
+                    ? (result.calls as CallValidationResult[])[i]
+                    : undefined
+                }
+                key={i}
+                call={call}
+                isFirst={i === 0}
+                isLast={i === calls.length - 1}
+                onChange={(call: Call) => {
+                  setCalls([...calls.slice(0, i), call, ...calls.slice(i + 1)]);
+                }}
+                onAdd={() =>
+                  setCalls([
+                    ...calls.slice(0, i + 1),
+                    {
+                      boarding: true,
+                      alighting: true,
+                    },
+                    ...calls.slice(i + 1),
+                  ])
+                }
+                mode={selectedMode}
+              />
+            ))}
+          </TableBody>
+        </Table>
 
-      {selectedJourneyPattern && (
-        <Contrast>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <HeaderCell>Stopp</HeaderCell>
-                <HeaderCell>Av-/påstigning</HeaderCell>
-                <HeaderCell>Ankomst</HeaderCell>
-                <HeaderCell>Avgang</HeaderCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {calls.map((call, i) => (
-                <RegisterEstimatedCallRow
-                  validationResult={
-                    result.calls
-                      ? (result.calls as CallValidationResult[])[i]
-                      : undefined
-                  }
-                  key={call.quay?.id ?? i}
-                  call={call}
-                  isFirst={i === 0}
-                  isLast={i === calls.length - 1}
-                  onChange={(call: Call) => {
-                    setCalls([
-                      ...calls.slice(0, i),
-                      call,
-                      ...calls.slice(i + 1),
-                    ]);
-                  }}
-                  onAdd={() => {}}
-                  mode={selectedMode}
-                  readOnly
-                />
-              ))}
-            </TableBody>
-          </Table>
+        <br />
 
-          <br />
-
-          <PrimaryButton onClick={() => submit()}>
-            Opprett ekstraavgang
-          </PrimaryButton>
-        </Contrast>
-      )}
+        <PrimaryButton onClick={() => submit()}>
+          Opprett ekstraavgang
+        </PrimaryButton>
+      </Contrast>
     </>
   );
 };

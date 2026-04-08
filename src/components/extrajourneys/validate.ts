@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { VariantType } from '@entur/form';
-import { Call, JourneyPattern, Line, VehicleMode } from './types';
+import { Call, Line, VehicleMode } from './types';
 import { Operator } from '../../hooks/useOperators';
 import { getLocalTimeZone, now } from '@internationalized/date';
 
@@ -10,7 +10,6 @@ type ValidationInput = {
   destinationDisplay?: string;
   operator?: Operator;
   line?: Line;
-  journeyPattern?: JourneyPattern;
   calls: Call[];
 };
 
@@ -71,13 +70,6 @@ export const useExtrajourneyValidation = (input: ValidationInput) => {
     if (!input.line) {
       tmpResult.line = {
         feedback: 'Ekstraavgangen må ha en gyldig linje',
-        variant: 'error',
-      };
-    }
-
-    if (!input.journeyPattern) {
-      tmpResult.journeyPattern = {
-        feedback: 'Ekstraavgangen må ha et rutemønster',
         variant: 'error',
       };
     }
