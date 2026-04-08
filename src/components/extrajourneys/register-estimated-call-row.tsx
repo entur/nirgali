@@ -17,6 +17,7 @@ export const RegisterEstimatedCallRow = ({
   onAdd,
   mode,
   validationResult,
+  readOnly,
 }: {
   call: Call;
   onChange: (call: Call) => void;
@@ -25,6 +26,7 @@ export const RegisterEstimatedCallRow = ({
   onAdd: () => void;
   mode?: VehicleMode;
   validationResult?: CallValidationResult;
+  readOnly?: boolean;
 }) => {
   const onFieldChange = <T extends Call, K extends keyof T>(
     key: K,
@@ -55,19 +57,27 @@ export const RegisterEstimatedCallRow = ({
   return (
     <TableRow hover>
       <EditableCell>
-        <>
-          <StopPlaceAutocomplete
-            mode={mode}
-            value={selectedStopPlace}
-            onChange={setSelectedStopPlace}
-          />
-          <QuaySelect
-            validationResult={validationResult?.quay}
-            selectedStopPlace={selectedStopPlace}
-            value={call.quay}
-            onChange={(quay) => onFieldChange('quay', quay)}
-          />
-        </>
+        {readOnly ? (
+          <span>
+            {call.stopPlaceName}
+            {call.quay?.publicCode ? ` ${call.quay.publicCode}` : ''}{' '}
+            <small>({call.quay?.id})</small>
+          </span>
+        ) : (
+          <>
+            <StopPlaceAutocomplete
+              mode={mode}
+              value={selectedStopPlace}
+              onChange={setSelectedStopPlace}
+            />
+            <QuaySelect
+              validationResult={validationResult?.quay}
+              selectedStopPlace={selectedStopPlace}
+              value={call.quay}
+              onChange={(quay) => onFieldChange('quay', quay)}
+            />
+          </>
+        )}
       </EditableCell>
       <EditableCell>
         <Fieldset {...validationResult?.alighting}>
@@ -123,9 +133,13 @@ export const RegisterEstimatedCallRow = ({
           <></>
         )}
       </EditableCell>
-      <DataCell>
-        {!isLast && <SecondaryButton onClick={onAdd}>Legg til</SecondaryButton>}
-      </DataCell>
+      {!readOnly && (
+        <DataCell>
+          {!isLast && (
+            <SecondaryButton onClick={onAdd}>Legg til</SecondaryButton>
+          )}
+        </DataCell>
+      )}
     </TableRow>
   );
 };

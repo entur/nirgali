@@ -79,3 +79,20 @@ export type Line = {
     name: string;
   };
 };
+
+export type JourneyPatternQuay = {
+  id: string;
+  name: string;
+  publicCode: string;
+  stopPlace: {
+    id: string;
+    name: string;
+  };
+};
+
+export type JourneyPattern = {
+  id: string;
+  name: string;
+  directionType: string;
+  quays: JourneyPatternQuay[];
+};

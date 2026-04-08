@@ -97,6 +97,35 @@ const getLinesForAuthority = (URI) => async (authority) => {
     .then((response) => response);
 };
 
+const getJourneyPatternsForLine = (URI) => async (lineId) => {
+  const client = createClient(URI);
+
+  const query = gql`
+      {
+        line(id: "${lineId}") {
+          journeyPatterns {
+            id
+            name
+            directionType
+            quays {
+              id
+              name
+              publicCode
+              stopPlace {
+                id
+                name
+              }
+            }
+          }
+        }
+      } `;
+
+  return client
+    .query({ query })
+    .catch((error) => error)
+    .then((response) => response);
+};
+
 const getDepartures = (URI) => async (line, date) => {
   const client = createClient(URI);
 
@@ -567,6 +596,9 @@ const api = (config, auth) => ({
   getAuthorities: getAuthorities(config['journey-planner-api']),
   getLines: getLines(config['journey-planner-api']),
   getLinesForAuthority: getLinesForAuthority(config['journey-planner-api']),
+  getJourneyPatternsForLine: getJourneyPatternsForLine(
+    config['journey-planner-api'],
+  ),
   getDepartures: getDepartures(config['journey-planner-api']),
   getServiceJourney: getServiceJourney(config['journey-planner-api']),
   getOperators: getOperators(config['journey-planner-api']),
