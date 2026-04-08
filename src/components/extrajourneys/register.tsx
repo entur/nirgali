@@ -202,7 +202,10 @@ export const Register = () => {
           }
           onChange={(operator) => {
             setSelectedOperator(operator);
-            if (!operator || (selectedLine && selectedLine.operator?.id !== operator.id)) {
+            if (
+              !operator ||
+              (selectedLine && selectedLine.operator?.id !== operator.id)
+            ) {
               setSelectedLine(undefined);
               setSelectedJourneyPattern(undefined);
             }

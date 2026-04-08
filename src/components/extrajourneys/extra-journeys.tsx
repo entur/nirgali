@@ -8,10 +8,7 @@ export const ExtraJourneys = () => {
   return (
     <Routes>
       <Route path="/" element={<Overview />} />
-      <Route
-        path="/ny"
-        element={<Register key={selectedOrganization} />}
-      />
+      <Route path="/ny" element={<Register key={selectedOrganization} />} />
     </Routes>
   );
 };
