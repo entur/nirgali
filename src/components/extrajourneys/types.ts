@@ -69,3 +69,13 @@ export type Quay = {
   id: string;
   publicCode: string;
 };
+
+export type Line = {
+  id: string;
+  name: string;
+  publicCode: string;
+  operator: {
+    id: string;
+    name: string;
+  };
+};

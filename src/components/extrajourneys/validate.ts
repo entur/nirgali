@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { VariantType } from '@entur/form';
-import { Call, VehicleMode } from './types';
+import { Call, Line, VehicleMode } from './types';
 import { Operator } from '../../hooks/useOperators';
 import { getLocalTimeZone, now } from '@internationalized/date';
 
@@ -9,6 +9,7 @@ type ValidationInput = {
   mode?: VehicleMode;
   destinationDisplay?: string;
   operator?: Operator;
+  line?: Line;
   calls: Call[];
 };
 
@@ -62,6 +63,13 @@ export const useExtrajourneyValidation = (input: ValidationInput) => {
     if (!input.operator) {
       tmpResult.operator = {
         feedback: 'Ekstraavgangen må ha en gyldig operatør',
+        variant: 'error',
+      };
+    }
+
+    if (!input.line) {
+      tmpResult.line = {
+        feedback: 'Ekstraavgangen må ha en gyldig linje',
         variant: 'error',
       };
     }
