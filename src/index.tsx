@@ -1,15 +1,18 @@
 import { createRoot } from 'react-dom/client';
-import { App } from './components/app/app';
-import { Config, ConfigContext } from './config/ConfigContext';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { Provider } from 'react-redux';
 import { AuthProvider, hasAuthParams, useAuth } from 'react-oidc-context';
-
-import 'bootstrap/dist/css/bootstrap.css';
-import './style/index.css';
-import './style/base/base.scss';
 import { useEffect } from 'react';
+import theme from './theme/theme';
+import { store } from './store/store';
+import { App } from './components/app/App';
+import { Config, ConfigContext } from './config/ConfigContext';
 
 const AuthenticatedApp = () => {
-  const { isAuthenticated, activeNavigator, isLoading, signinRedirect, user } =
+  const { isAuthenticated, activeNavigator, isLoading, signinRedirect } =
     useAuth();
 
   useEffect(() => {
@@ -19,7 +22,7 @@ const AuthenticatedApp = () => {
       !activeNavigator &&
       !isLoading
     ) {
-      signinRedirect().catch((err: any) => {
+      signinRedirect().catch((err: unknown) => {
         throw err;
       });
     }
@@ -27,9 +30,9 @@ const AuthenticatedApp = () => {
 
   if (!isAuthenticated) {
     return null;
-  } else {
-    return <App />;
   }
+
+  return <App />;
 };
 
 const renderApp = (config: Config) => {
@@ -37,28 +40,34 @@ const renderApp = (config: Config) => {
   const root = createRoot(rootElement!);
 
   root.render(
-    <AuthProvider
-      {...config.oidcConfig}
-      onSigninCallback={() => {
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname,
-        );
-      }}
-      redirect_uri={window.location.origin}
-    >
-      <ConfigContext.Provider value={config}>
-        <AuthenticatedApp />
-      </ConfigContext.Provider>
-    </AuthProvider>,
+    <ConfigContext.Provider value={config}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Provider store={store}>
+            <AuthProvider
+              {...config.oidcConfig}
+              onSigninCallback={() => {
+                window.history.replaceState(
+                  {},
+                  document.title,
+                  window.location.pathname,
+                );
+              }}
+              redirect_uri={window.location.origin}
+            >
+              <AuthenticatedApp />
+            </AuthProvider>
+          </Provider>
+        </LocalizationProvider>
+      </ThemeProvider>
+    </ConfigContext.Provider>,
   );
 };
 
 const init = async () => {
   const configResponse = await fetch('/config.json');
   const config = await configResponse.json();
-
   renderApp(config);
 };
 

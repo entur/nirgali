@@ -1,75 +1,66 @@
-import React from 'react';
 import {
   BrowserRouter as Router,
   Navigate,
   Route,
   Routes,
 } from 'react-router-dom';
-import { TabPanel, TabPanels } from '@entur/tab';
-import { TabsContainer } from './tabs-container';
-import { Messages } from '../messages/messages';
-import { Cancellations } from '../cancellations/cancellations';
-import { ExtraJourneys } from '../extrajourneys/extra-journeys';
-import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
+import { TabsContainer } from './TabsContainer';
+import { Messages } from '../messages/Messages';
+import { Cancellations } from '../cancellations/Cancellations';
+import { ExtraJourneys } from '../extrajourneys/ExtraJourneys';
+import { Codespace } from '../../reducers/organizationsSlice';
+
+interface AppRouterProps {
+  allowedCodespaces: Codespace[];
+  isAdmin: boolean;
+  selectedOrganization: string;
+}
 
 export const AppRouter = ({
   allowedCodespaces,
   isAdmin,
-}: {
-  allowedCodespaces: any[];
-  isAdmin: boolean;
-}) => {
-  const selectedOrganization = useSelectedOrganization();
-
-  let permissions;
+  selectedOrganization,
+}: AppRouterProps) => {
+  let permissions: string[];
 
   if (isAdmin) {
     permissions = ['MESSAGES', 'CANCELLATIONS', 'EXTRAJOURNEYS'];
   } else {
-    permissions = allowedCodespaces.find(
-      (codespace) => codespace.id === selectedOrganization.split(':')[0],
-    ).permissions;
+    const codespace = allowedCodespaces.find(
+      (cs) => cs.id === selectedOrganization.split(':')[0],
+    );
+    permissions = codespace?.permissions ?? [];
   }
 
   return (
     <Router>
-      <div>
-        <div className="register_box">
-          <Routes>
-            <Route path="/" element={<Navigate to="/meldinger" />} />
-            <Route
-              path="/:tab/*"
-              element={
-                <TabsContainer permissions={permissions}>
-                  {(selectedTab: number) => (
-                    <TabPanels>
-                      <TabPanel>
-                        {selectedTab === 0 && (
-                          <Messages
-                            selectedOrganization={selectedOrganization}
-                          />
-                        )}
-                      </TabPanel>
-
-                      <TabPanel>
-                        {selectedTab === 1 && (
-                          <Cancellations
-                            selectedOrganization={selectedOrganization}
-                          />
-                        )}
-                      </TabPanel>
-
-                      <TabPanel>
-                        {selectedTab === 2 && <ExtraJourneys />}
-                      </TabPanel>
-                    </TabPanels>
+      <Routes>
+        <Route path="/" element={<Navigate to="/meldinger" />} />
+        <Route
+          path="/:tab/*"
+          element={
+            <TabsContainer permissions={permissions}>
+              {(selectedTab: number) => (
+                <>
+                  {selectedTab === 0 && (
+                    <Messages selectedOrganization={selectedOrganization} />
                   )}
-                </TabsContainer>
-              }
-            />
-          </Routes>
-        </div>
-      </div>
+                  {selectedTab === 1 && (
+                    <Cancellations
+                      selectedOrganization={selectedOrganization}
+                    />
+                  )}
+                  {selectedTab === 2 && (
+                    <ExtraJourneys
+                      selectedOrganization={selectedOrganization}
+                    />
+                  )}
+                </>
+              )}
+            </TabsContainer>
+          }
+        />
+      </Routes>
     </Router>
   );
 };

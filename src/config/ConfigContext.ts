@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { createContext, useContext } from 'react';
 import { OidcClientSettings } from 'oidc-client-ts';
 
 export interface Config {
@@ -8,7 +8,7 @@ export interface Config {
   oidcConfig?: OidcClientSettings;
 }
 
-export const ConfigContext = React.createContext<Config>({});
+export const ConfigContext = createContext<Config>({});
 
 export const useConfig = () => {
   return useContext(ConfigContext);
