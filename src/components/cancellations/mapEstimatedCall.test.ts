@@ -78,9 +78,7 @@ describe('mapEstimatedCall', () => {
   it('keeps stop cancelled when in departureStops list', () => {
     const departureData = makeDepartureData(3);
     const call = makeEstimatedCall(1);
-    const result = mapEstimatedCall(call, departureData, [
-      'NSR:StopPlace:1',
-    ]);
+    const result = mapEstimatedCall(call, departureData, ['NSR:StopPlace:1']);
 
     expect(result.cancellation).toBe(true);
     expect(result.arrivalStatus).toBe('cancelled');

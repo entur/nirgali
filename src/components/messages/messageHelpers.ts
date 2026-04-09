@@ -199,9 +199,7 @@ export const getAffectType = (
   affects: any,
 ): 'line' | 'departure' | 'stop' | '' => {
   if (affects?.networks?.affectedNetwork?.affectedLine?.lineRef) return 'line';
-  if (
-    affects?.vehicleJourneys?.affectedVehicleJourney?.framedVehicleJourneyRef
-  )
+  if (affects?.vehicleJourneys?.affectedVehicleJourney?.framedVehicleJourneyRef)
     return 'departure';
   if (affects?.stopPoints) return 'stop';
   return '';
@@ -232,9 +230,7 @@ export const getStopQuayLabels = (affects: any, lines: any[]): string[] => {
   );
   return stopPoints
     .map((sp: any) => {
-      const quay = quays?.find(
-        (q: any) => q.stopPlace?.id === sp.stopPointRef,
-      );
+      const quay = quays?.find((q: any) => q.stopPlace?.id === sp.stopPointRef);
       return quay ? `${quay.name} - ${quay.stopPlace.id}` : null;
     })
     .filter(Boolean) as string[];

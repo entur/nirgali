@@ -142,8 +142,12 @@ const Edit = ({ messages, organization, lines, api }: EditProps) => {
   const messageType = getAffectType(issue?.affects);
   const lineQuayLabels = getLineQuayLabels(issue?.affects, lines);
   const stopQuayLabels = getStopQuayLabels(issue?.affects, lines);
-  const lineOption = issue?.affects?.networks?.affectedNetwork?.affectedLine?.lineRef
-    ? getLineOption(lines, issue.affects.networks.affectedNetwork.affectedLine.lineRef)
+  const lineOption = issue?.affects?.networks?.affectedNetwork?.affectedLine
+    ?.lineRef
+    ? getLineOption(
+        lines,
+        issue.affects.networks.affectedNetwork.affectedLine.lineRef,
+      )
     : null;
   const departureLabel = serviceJourney
     ? formatDepartureOption(serviceJourney)

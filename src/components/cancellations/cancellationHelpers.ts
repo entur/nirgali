@@ -28,17 +28,15 @@ export const buildNewCancellation = ({
     cancellation: !isDepartureStops && departureStops.length === 0,
     dataSource: organization.split(':')[0],
     estimatedCalls: {
-      estimatedCall: departureData.estimatedCalls.map(
-        (estimatedCall: any) =>
-          mapEstimatedCall(estimatedCall, departureData, departureStops),
+      estimatedCall: departureData.estimatedCalls.map((estimatedCall: any) =>
+        mapEstimatedCall(estimatedCall, departureData, departureStops),
       ),
     },
     isCompleteStopSequence: true,
     expiresAtEpochMs:
       Date.parse(
-        departureData.estimatedCalls[
-          departureData.estimatedCalls.length - 1
-        ].aimedArrivalTime,
+        departureData.estimatedCalls[departureData.estimatedCalls.length - 1]
+          .aimedArrivalTime,
       ) +
       600 * 1000,
   },
@@ -109,9 +107,8 @@ export const getQuayLabels = (
     .map((call: any) => call.stopPointRef)
     .map(
       (ref: string) =>
-        serviceJourney.estimatedCalls.find(
-          (call: any) => call.quay?.id === ref,
-        )?.quay,
+        serviceJourney.estimatedCalls.find((call: any) => call.quay?.id === ref)
+          ?.quay,
     )
     .filter((v: any) => v !== undefined)
     .map((quay: any) => `${quay.name} - ${quay.id}`);

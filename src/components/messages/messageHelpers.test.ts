@@ -209,7 +209,10 @@ describe('messageHelpers', () => {
     });
 
     it('returns stop affects', () => {
-      const stops = [{ value: 'NSR:StopPlace:1' }, { value: 'NSR:StopPlace:2' }];
+      const stops = [
+        { value: 'NSR:StopPlace:1' },
+        { value: 'NSR:StopPlace:2' },
+      ];
       const result: any = buildAffects(
         'stop',
         undefined,
@@ -232,9 +235,7 @@ describe('messageHelpers', () => {
         { year: 2024, month: 1, day: 15 },
         'NSB:ServiceJourney:1',
       );
-      expect(
-        result.vehicleJourneys.affectedVehicleJourney.route,
-      ).toBeNull();
+      expect(result.vehicleJourneys.affectedVehicleJourney.route).toBeNull();
     });
 
     it('returns departure affects with stops', () => {
@@ -357,9 +358,7 @@ describe('messageHelpers', () => {
           },
         },
       };
-      expect(getLineQuayLabels(affects, lines)).toEqual([
-        'Oslo S - SP:1',
-      ]);
+      expect(getLineQuayLabels(affects, lines)).toEqual(['Oslo S - SP:1']);
     });
 
     it('returns empty array when no stopPoints', () => {

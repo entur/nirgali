@@ -106,9 +106,9 @@ describe('mapExtraJourney', () => {
       mapExtraJourney({ ...validInput, selectedMode: undefined }),
     ).toThrow('Invalid data');
 
-    expect(() =>
-      mapExtraJourney({ ...validInput, name: undefined }),
-    ).toThrow('Invalid data');
+    expect(() => mapExtraJourney({ ...validInput, name: undefined })).toThrow(
+      'Invalid data',
+    );
 
     expect(() =>
       mapExtraJourney({ ...validInput, selectedOperator: undefined }),

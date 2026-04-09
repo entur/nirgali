@@ -161,9 +161,7 @@ const Edit = ({
             />
           </Box>
 
-          {departureLabel && (
-            <Chip label={departureLabel} sx={{ mb: 1 }} />
-          )}
+          {departureLabel && <Chip label={departureLabel} sx={{ mb: 1 }} />}
         </Box>
       )}
 
