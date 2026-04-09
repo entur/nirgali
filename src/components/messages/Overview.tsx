@@ -67,7 +67,7 @@ const Overview = ({ messages }: OverviewProps) => {
             !message.validityPeriod.endTime ||
             Date.parse(message.validityPeriod.endTime) > now,
         );
-    return filtered.sort(sortBySituationNumber);
+    return [...filtered].sort(sortBySituationNumber);
   }, [messages, showExpiredMessages, now]);
 
   return (

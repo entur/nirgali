@@ -62,7 +62,7 @@ const Overview = ({ cancellations, lines }: OverviewProps) => {
           (c) =>
             c.estimatedVehicleJourney.expiresAtEpochMs > Date.now() + 600000,
         );
-    return filtered.sort(sortCancellationByExpiry);
+    return [...filtered].sort(sortCancellationByExpiry);
   }, [showExpired, cancellations]);
 
   return (
