@@ -112,4 +112,146 @@ describe('useExtrajourneyValidation', () => {
     expect(isValid).toBe(false);
     expect(result.current.result.calls).toBeDefined();
   });
+
+  it('returns false when line is missing', () => {
+    const { result } = renderHook(() =>
+      useExtrajourneyValidation({ ...validInput, line: undefined }),
+    );
+
+    let isValid = false;
+    act(() => {
+      isValid = result.current.validate();
+    });
+
+    expect(isValid).toBe(false);
+    expect(result.current.result.line).toBeDefined();
+  });
+
+  it('returns false when destinationDisplay is empty', () => {
+    const { result } = renderHook(() =>
+      useExtrajourneyValidation({ ...validInput, destinationDisplay: '' }),
+    );
+
+    let isValid = false;
+    act(() => {
+      isValid = result.current.validate();
+    });
+
+    expect(isValid).toBe(false);
+    expect(result.current.result.destinationDisplay).toBeDefined();
+  });
+
+  it('validates calls need both boarding and alighting', () => {
+    const { result } = renderHook(() =>
+      useExtrajourneyValidation({
+        ...validInput,
+        calls: [
+          {
+            quay: { id: 'Q:1', publicCode: '1' },
+            boarding: false,
+            alighting: false,
+            departure: new Date(Date.now() + 3600000).toISOString(),
+          },
+          {
+            quay: { id: 'Q:2', publicCode: '2' },
+            boarding: false,
+            alighting: false,
+            arrival: new Date(Date.now() + 7200000).toISOString(),
+          },
+        ],
+      }),
+    );
+
+    let isValid = false;
+    act(() => {
+      isValid = result.current.validate();
+    });
+
+    expect(isValid).toBe(false);
+  });
+
+  it('validates arrival must be after previous departure', () => {
+    const { result } = renderHook(() =>
+      useExtrajourneyValidation({
+        ...validInput,
+        calls: [
+          {
+            quay: { id: 'Q:1', publicCode: '1' },
+            boarding: true,
+            alighting: false,
+            departure: '2024-01-01T12:00:00Z',
+          },
+          {
+            quay: { id: 'Q:2', publicCode: '2' },
+            boarding: false,
+            alighting: true,
+            arrival: '2024-01-01T11:00:00Z',
+          },
+        ],
+      }),
+    );
+
+    let isValid = false;
+    act(() => {
+      isValid = result.current.validate();
+    });
+
+    expect(isValid).toBe(false);
+  });
+
+  it('validates non-first calls need arrival time', () => {
+    const { result } = renderHook(() =>
+      useExtrajourneyValidation({
+        ...validInput,
+        calls: [
+          {
+            quay: { id: 'Q:1', publicCode: '1' },
+            boarding: true,
+            alighting: false,
+            departure: new Date(Date.now() + 3600000).toISOString(),
+          },
+          {
+            quay: { id: 'Q:2', publicCode: '2' },
+            boarding: false,
+            alighting: true,
+          },
+        ],
+      }),
+    );
+
+    let isValid = false;
+    act(() => {
+      isValid = result.current.validate();
+    });
+
+    expect(isValid).toBe(false);
+  });
+
+  it('validates non-last calls need departure time', () => {
+    const { result } = renderHook(() =>
+      useExtrajourneyValidation({
+        ...validInput,
+        calls: [
+          {
+            quay: { id: 'Q:1', publicCode: '1' },
+            boarding: true,
+            alighting: false,
+          },
+          {
+            quay: { id: 'Q:2', publicCode: '2' },
+            boarding: false,
+            alighting: true,
+            arrival: new Date(Date.now() + 7200000).toISOString(),
+          },
+        ],
+      }),
+    );
+
+    let isValid = false;
+    act(() => {
+      isValid = result.current.validate();
+    });
+
+    expect(isValid).toBe(false);
+  });
 });
