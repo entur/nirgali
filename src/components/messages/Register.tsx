@@ -1,0 +1,427 @@
+import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { DatePicker as MuiDatePicker } from '@mui/x-date-pickers/DatePicker';
+import { getLocalTimeZone, now, toCalendarDate } from '@internationalized/date';
+import LinePicker from '../common/LinePicker';
+import StopPicker from '../common/StopPicker';
+import { sortServiceJourneyByDepartureTime } from '../../util/sort';
+import {
+  createNewIssue,
+  buildAffects,
+  buildValidityPeriod,
+  addInfoLink,
+} from './messageHelpers';
+import { AffectType } from './types';
+import Autocomplete from '@mui/material/Autocomplete';
+
+interface RegisterProps {
+  api: any;
+  lines: any[];
+  organization: string;
+}
+
+const Register = ({ api, lines, organization }: RegisterProps) => {
+  const navigate = useNavigate();
+
+  const [type, setType] = useState<AffectType | undefined>();
+  const [chosenLine, setChosenLine] = useState<string | undefined>();
+  const [datedVehicleJourney, setDatedVehicleJourney] = useState<
+    string | undefined
+  >();
+  const [departureDate, setDepartureDate] = useState<Date>(new Date());
+  const [departures, setDepartures] = useState<any[]>([]);
+  const [showDepartureSearch, setShowDepartureSearch] = useState(false);
+  const [specifyStopsLine, setSpecifyStopsLine] = useState(false);
+  const [specifyStopsDeparture, setSpecifyStopsDeparture] = useState(false);
+  const [multipleStops, setMultipleStops] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [reportType, setReportType] = useState('incident');
+  const [oppsummering, setOppsummering] = useState('');
+  const [beskrivelse, setBeskrivelse] = useState('');
+  const [forslag, setForslag] = useState('');
+  const [infoLinkUri, setInfoLinkUri] = useState('');
+  const [infoLinkLabel, setInfoLinkLabel] = useState('');
+  const [from, setFrom] = useState<Date>(new Date());
+  const [to, setTo] = useState<Date | null>(null);
+
+  const showDateFromTo =
+    (type === 'line' && chosenLine) ||
+    (type === 'stop' && multipleStops.length > 0);
+  const showMessage =
+    showDateFromTo || (type === 'departure' && datedVehicleJourney);
+  const showSubmit = showMessage;
+
+  const handleChangeType = useCallback((value: AffectType) => {
+    setType(value);
+    setChosenLine(undefined);
+    setSpecifyStopsLine(false);
+    setSpecifyStopsDeparture(false);
+    setShowDepartureSearch(false);
+    setDepartures([]);
+    setDatedVehicleJourney(undefined);
+    setMultipleStops([]);
+  }, []);
+
+  const handleChangeLine = useCallback(
+    (option: { value: string } | null) => {
+      if (!option) return;
+      setChosenLine(option.value);
+      if (type === 'departure') {
+        setShowDepartureSearch(false);
+        setDepartures([]);
+        setDatedVehicleJourney(undefined);
+      }
+    },
+    [type],
+  );
+
+  const callApiDeparture = useCallback(async () => {
+    if (!chosenLine || !departureDate) return;
+    const dateStr = departureDate.toISOString().split('T')[0];
+    const response = await api.getDepartures(chosenLine, dateStr);
+    setDepartures(structuredClone(response.data.serviceJourneys));
+    setShowDepartureSearch(true);
+  }, [chosenLine, departureDate, api]);
+
+  const handleSubmit = useCallback(async () => {
+    const dateNow = now(getLocalTimeZone());
+    const issue = createNewIssue(
+      organization,
+      dateNow,
+      reportType,
+      oppsummering,
+      beskrivelse,
+      forslag,
+    );
+
+    issue.affects = buildAffects(
+      type,
+      chosenLine,
+      specifyStopsLine,
+      specifyStopsDeparture,
+      multipleStops,
+      departureDate,
+      datedVehicleJourney,
+    );
+
+    issue.validityPeriod = buildValidityPeriod(
+      type,
+      departureDate,
+      { toAbsoluteString: () => from.toISOString() },
+      to ? { toAbsoluteString: () => to.toISOString() } : undefined,
+    );
+
+    addInfoLink(
+      issue,
+      infoLinkUri
+        ? { uri: infoLinkUri, label: infoLinkLabel || undefined }
+        : undefined,
+    );
+
+    const codespace = organization.split(':')[0];
+    await api.createOrUpdateMessage(codespace, organization, issue);
+    navigate('/');
+  }, [
+    organization,
+    reportType,
+    oppsummering,
+    beskrivelse,
+    forslag,
+    type,
+    chosenLine,
+    specifyStopsLine,
+    specifyStopsDeparture,
+    multipleStops,
+    departureDate,
+    datedVehicleJourney,
+    from,
+    to,
+    infoLinkUri,
+    infoLinkLabel,
+    api,
+    navigate,
+  ]);
+
+  const stops =
+    lines?.reduce((acc: any[], line: any) => [...acc, ...line.quays], []) ?? [];
+
+  const serviceJourneyOptions = departures
+    .sort(sortServiceJourneyByDepartureTime)
+    .map((item: any) => ({
+      label:
+        item.estimatedCalls[0].aimedDepartureTime
+          .split('T')
+          .pop()
+          .split(':00+')[0] +
+        ' fra ' +
+        item.estimatedCalls[0].quay.name +
+        ' (' +
+        item.id +
+        ')',
+      value: item.id,
+    }));
+
+  const selectedLineQuays = chosenLine
+    ? (lines?.find((l: any) => l.id === chosenLine)?.quays ?? [])
+    : [];
+
+  const selectedDepartureQuays =
+    datedVehicleJourney && departures
+      ? (departures
+          .find((d: any) => d.id === datedVehicleJourney)
+          ?.estimatedCalls.map((ec: any) => ec.quay) ?? [])
+      : [];
+
+  return (
+    <Box>
+      <Typography variant="h4" sx={{ mb: 2 }}>
+        Registrer ny melding
+      </Typography>
+
+      <FormControl fullWidth sx={{ mb: 2 }} size="small">
+        <InputLabel>Velg linje, stopp eller avgang</InputLabel>
+        <Select
+          value={type ?? ''}
+          label="Velg linje, stopp eller avgang"
+          onChange={(e) => handleChangeType(e.target.value as AffectType)}
+        >
+          <MenuItem value="line">Linje</MenuItem>
+          <MenuItem value="stop">Stopp</MenuItem>
+          <MenuItem value="departure">Avgang</MenuItem>
+        </Select>
+      </FormControl>
+
+      {lines && (type === 'line' || type === 'departure') && (
+        <Box sx={{ mb: 2 }}>
+          <LinePicker lines={lines} onChange={handleChangeLine} />
+        </Box>
+      )}
+
+      {type === 'line' && chosenLine && (
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={specifyStopsLine}
+              onChange={(e) => setSpecifyStopsLine(e.target.checked)}
+            />
+          }
+          label="Gjelder avviket for spesifikke stopp?"
+          sx={{ mb: 2 }}
+        />
+      )}
+
+      {type === 'line' && chosenLine && specifyStopsLine && (
+        <Box sx={{ mb: 2 }}>
+          <StopPicker
+            sort
+            isMulti
+            api={api}
+            stops={selectedLineQuays}
+            onChange={(options) =>
+              setMultipleStops(Array.isArray(options) ? options : [])
+            }
+          />
+        </Box>
+      )}
+
+      {type === 'stop' && stops.length > 0 && (
+        <Box sx={{ mb: 2 }}>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            Du er i ferd med å lage en avviksmelding som treffer all rutegående
+            trafikk som passerer de(n) valgte holdeplassen(e) på tvers av
+            operatører. Hvis du ønsker å lage en avviksmelding som kun treffer
+            enkelte linjer (og stopp), velg &quot;Linje&quot; i stedet.
+          </Alert>
+          <StopPicker
+            sort
+            isMulti
+            api={api}
+            stops={stops}
+            onChange={(options) =>
+              setMultipleStops(Array.isArray(options) ? options : [])
+            }
+          />
+        </Box>
+      )}
+
+      {type === 'departure' && chosenLine && (
+        <Box sx={{ mb: 2 }}>
+          <MuiDatePicker
+            label="Dato"
+            value={departureDate}
+            onChange={(d) => d && setDepartureDate(d)}
+            minDate={new Date()}
+            slotProps={{ textField: { size: 'small', fullWidth: true } }}
+            sx={{ mb: 1 }}
+          />
+          <Button variant="contained" fullWidth onClick={callApiDeparture}>
+            Søk avganger
+          </Button>
+        </Box>
+      )}
+
+      {showDepartureSearch && departures.length > 0 && (
+        <Box sx={{ mb: 2 }}>
+          <Autocomplete
+            options={serviceJourneyOptions}
+            getOptionLabel={(o: any) => o.label}
+            isOptionEqualToValue={(o: any, v: any) => o.value === v.value}
+            onChange={(_, newValue: any) =>
+              setDatedVehicleJourney(newValue?.value)
+            }
+            renderInput={(params) => (
+              <TextField {...params} label="Velg avgang" size="small" />
+            )}
+          />
+        </Box>
+      )}
+
+      {type === 'departure' && datedVehicleJourney && (
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={specifyStopsDeparture}
+              onChange={(e) => setSpecifyStopsDeparture(e.target.checked)}
+            />
+          }
+          label="Gjelder avviket for spesifikke stopp?"
+          sx={{ mb: 2 }}
+        />
+      )}
+
+      {type === 'departure' && specifyStopsDeparture && (
+        <Box sx={{ mb: 2 }}>
+          <StopPicker
+            isMulti
+            api={api}
+            stops={selectedDepartureQuays}
+            onChange={(options) =>
+              setMultipleStops(Array.isArray(options) ? options : [])
+            }
+          />
+        </Box>
+      )}
+
+      {showDateFromTo && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ mb: 1 }}>
+            Gyldighetsperiode
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            <DateTimePicker
+              label="Fra"
+              value={from}
+              onChange={(d) => d && setFrom(d)}
+              minDate={new Date()}
+              slotProps={{ textField: { size: 'small', fullWidth: true } }}
+            />
+            <DateTimePicker
+              label="Til"
+              value={to}
+              onChange={(d) => setTo(d)}
+              minDate={from}
+              slotProps={{ textField: { size: 'small', fullWidth: true } }}
+            />
+          </Stack>
+        </Box>
+      )}
+
+      {showMessage && (
+        <Box sx={{ mb: 2 }}>
+          <FormControl fullWidth sx={{ mb: 2 }} size="small">
+            <InputLabel>Avvikstype</InputLabel>
+            <Select
+              value={reportType}
+              label="Avvikstype"
+              onChange={(e) => setReportType(e.target.value)}
+            >
+              <MenuItem value="incident">Incident</MenuItem>
+              <MenuItem value="general">General</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Typography variant="subtitle1" sx={{ mb: 1 }}>
+            Melding
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            label="Kort, beskrivende avvikstekst"
+            value={oppsummering}
+            onChange={(e) => setOppsummering(e.target.value)}
+            inputProps={{ maxLength: 160 }}
+            required
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            size="small"
+            label="Eventuell utdypende detaljer om avviket (ikke påkrevd)"
+            value={beskrivelse}
+            onChange={(e) => setBeskrivelse(e.target.value)}
+            multiline
+            rows={4}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            size="small"
+            label="Beskrivelse om hva kunden skal/kan gjøre (ikke påkrevd)"
+            value={forslag}
+            onChange={(e) => setForslag(e.target.value)}
+            multiline
+            rows={4}
+            sx={{ mb: 2 }}
+          />
+
+          <Typography variant="subtitle1" sx={{ mb: 1 }}>
+            Lenke til nettside
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            label="Lenke"
+            value={infoLinkUri}
+            onChange={(e) => setInfoLinkUri(e.target.value)}
+            sx={{ mb: 1 }}
+          />
+          <TextField
+            fullWidth
+            size="small"
+            label="Tekst til lenken"
+            value={infoLinkLabel}
+            onChange={(e) => setInfoLinkLabel(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+        </Box>
+      )}
+
+      <Stack direction="row" spacing={2}>
+        {showSubmit && (
+          <Button variant="contained" onClick={handleSubmit}>
+            Registrer
+          </Button>
+        )}
+        <Button variant="outlined" onClick={() => navigate('/')}>
+          Tilbake
+        </Button>
+      </Stack>
+    </Box>
+  );
+};
+
+export default Register;

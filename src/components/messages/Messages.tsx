@@ -1,14 +1,18 @@
 import { Routes, Route } from 'react-router-dom';
-import Overview from './overview';
-import Register from './register';
-import Edit from './edit';
+import Overview from './Overview';
+import Register from './Register';
+import Edit from './Edit';
 import api from '../../api/api';
 import { useConfig } from '../../config/ConfigContext';
 import { useLines } from '../../hooks/useLines';
 import { useMessages } from '../../hooks/useMessages';
 import { useAuth } from 'react-oidc-context';
 
-export const Messages = ({ selectedOrganization }) => {
+interface MessagesProps {
+  selectedOrganization: string;
+}
+
+export const Messages = ({ selectedOrganization }: MessagesProps) => {
   const auth = useAuth();
   const lines = useLines(selectedOrganization);
   const config = useConfig();
@@ -21,7 +25,7 @@ export const Messages = ({ selectedOrganization }) => {
   return (
     <Routes>
       <Route path="/" element={<Overview messages={messages} />} />
-      {messages.length && (
+      {messages.length > 0 && (
         <Route
           path="/:id"
           element={
