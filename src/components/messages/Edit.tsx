@@ -12,6 +12,13 @@ import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { getLineOption } from '../../util/getLineOption';
+import { formatDepartureOption } from '../../util/formatters';
+import {
+  getAffectType,
+  getLineQuayLabels,
+  getStopQuayLabels,
+  buildUpdatedIssue,
+} from './messageHelpers';
 import { Message } from '../../reducers/messagesSlice';
 import { getLocalTimeZone, now } from '@internationalized/date';
 
@@ -72,108 +79,20 @@ const Edit = ({ messages, organization, lines, api }: EditProps) => {
     }
   }, [issueId, api, issue]);
 
-  const getType = (): string => {
-    if (issue?.affects?.networks?.affectedNetwork?.affectedLine?.lineRef)
-      return 'line';
-    if (
-      issue?.affects?.vehicleJourneys?.affectedVehicleJourney
-        ?.framedVehicleJourneyRef
-    )
-      return 'departure';
-    if (issue?.affects?.stopPoints) return 'stop';
-    return '';
-  };
-
-  const getLine = () => {
-    const lineRef =
-      issue?.affects?.networks?.affectedNetwork?.affectedLine?.lineRef;
-    return getLineOption(lines, lineRef);
-  };
-
-  const getLineDepartureOption = () => {
-    if (!serviceJourney?.estimatedCalls?.length) return null;
-    const estimatedCall = serviceJourney.estimatedCalls[0];
-    const quayName = estimatedCall.quay.name;
-    const aimedDepartureTime = estimatedCall.aimedDepartureTime
-      .split('T')
-      .pop()
-      .split(':00+')[0];
-    return `${aimedDepartureTime} fra ${quayName} (${serviceJourney.id})`;
-  };
-
-  const getLineQuayLabels = (): string[] => {
-    const affectedLine =
-      issue?.affects?.networks?.affectedNetwork?.affectedLine;
-    const stopPoints =
-      affectedLine?.routes?.affectedRoute?.stopPoints?.affectedStopPoint;
-    if (!stopPoints) return [];
-    return stopPoints
-      .map((sp: any) => {
-        const lineRef = affectedLine.lineRef;
-        const line = lines?.find((l: any) => l.id === lineRef);
-        const quay = line?.quays?.find(
-          (q: any) => q.stopPlace?.id === sp.stopPointRef,
-        );
-        return quay ? `${quay.name} - ${quay.stopPlace.id}` : null;
-      })
-      .filter(Boolean);
-  };
-
-  const getStopQuayLabels = (): string[] => {
-    const stopPoints = issue?.affects?.stopPoints?.affectedStopPoint;
-    if (!stopPoints) return [];
-    const quays = lines?.reduce(
-      (acc: any[], line: any) => [...acc, ...line.quays],
-      [],
-    );
-    return stopPoints
-      .map((sp: any) => {
-        const quay = quays?.find(
-          (q: any) => q.stopPlace?.id === sp.stopPointRef,
-        );
-        return quay ? `${quay.name} - ${quay.stopPlace.id}` : null;
-      })
-      .filter(Boolean);
-  };
-
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
 
-      const newIssue = { ...issue } as any;
-      newIssue.progress = 'open';
-      newIssue.summary = { attributes: { xmlLang: 'NO' }, text: summary };
-
-      if (description) {
-        newIssue.description = {
-          attributes: { xmlLang: 'NO' },
-          text: description,
-        };
-      } else {
-        delete newIssue.description;
-      }
-
-      if (advice) {
-        newIssue.advice = { attributes: { xmlLang: 'NO' }, text: advice };
-      } else {
-        delete newIssue.advice;
-      }
-
-      if (from) {
-        newIssue.validityPeriod.startTime = from.toISOString();
-      }
-      if (to) {
-        newIssue.validityPeriod.endTime = to.toISOString();
-      }
-      newIssue.reportType = reportType;
-
-      if (infoLinkUri) {
-        newIssue.infoLinks = {
-          infoLink: { uri: infoLinkUri, label: infoLinkLabel || undefined },
-        };
-      } else {
-        delete newIssue.infoLinks;
-      }
+      const newIssue = buildUpdatedIssue(issue, {
+        summary,
+        description,
+        advice,
+        from,
+        to,
+        reportType,
+        infoLinkUri,
+        infoLinkLabel,
+      });
 
       await api.createOrUpdateMessage(
         organization.split(':')[0],
@@ -220,7 +139,15 @@ const Edit = ({ messages, organization, lines, api }: EditProps) => {
     return null;
   }
 
-  const messageType = getType();
+  const messageType = getAffectType(issue?.affects);
+  const lineQuayLabels = getLineQuayLabels(issue?.affects, lines);
+  const stopQuayLabels = getStopQuayLabels(issue?.affects, lines);
+  const lineOption = issue?.affects?.networks?.affectedNetwork?.affectedLine?.lineRef
+    ? getLineOption(lines, issue.affects.networks.affectedNetwork.affectedLine.lineRef)
+    : null;
+  const departureLabel = serviceJourney
+    ? formatDepartureOption(serviceJourney)
+    : null;
   const fromDisabled =
     new Date(issue.validityPeriod.startTime).getTime() < Date.now();
 
@@ -235,14 +162,14 @@ const Edit = ({ messages, organization, lines, api }: EditProps) => {
           <Typography variant="subtitle1" sx={{ mb: 1 }}>
             Linje
           </Typography>
-          <Chip label={getLine()?.label} sx={{ mb: 1 }} />
-          {getLineQuayLabels().length > 0 && (
+          <Chip label={lineOption?.label} sx={{ mb: 1 }} />
+          {lineQuayLabels.length > 0 && (
             <Stack
               direction="row"
               spacing={1}
               sx={{ flexWrap: 'wrap', gap: 1 }}
             >
-              {getLineQuayLabels().map((label) => (
+              {lineQuayLabels.map((label) => (
                 <Chip
                   key={label}
                   label={label}
@@ -266,8 +193,8 @@ const Edit = ({ messages, organization, lines, api }: EditProps) => {
                 label={getLineOption(lines, serviceJourney.line.id)?.label}
                 sx={{ mb: 1 }}
               />
-              {getLineDepartureOption() && (
-                <Chip label={getLineDepartureOption()} sx={{ ml: 1, mb: 1 }} />
+              {departureLabel && (
+                <Chip label={departureLabel} sx={{ ml: 1, mb: 1 }} />
               )}
             </>
           )}
@@ -280,7 +207,7 @@ const Edit = ({ messages, organization, lines, api }: EditProps) => {
             Stopp
           </Typography>
           <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-            {getStopQuayLabels().map((label) => (
+            {stopQuayLabels.map((label) => (
               <Chip key={label} label={label} size="small" variant="outlined" />
             ))}
           </Stack>

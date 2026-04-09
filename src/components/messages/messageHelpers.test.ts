@@ -9,6 +9,10 @@ import {
   buildAffects,
   buildValidityPeriod,
   getMessageType,
+  getAffectType,
+  getLineQuayLabels,
+  getStopQuayLabels,
+  buildUpdatedIssue,
   addInfoLink,
 } from './messageHelpers';
 
@@ -293,6 +297,168 @@ describe('messageHelpers', () => {
       expect(result).toEqual({
         startTime: '2024-01-01T08:00:00Z',
       });
+    });
+  });
+
+  describe('getAffectType', () => {
+    it('returns "line" for network affects', () => {
+      expect(
+        getAffectType({
+          networks: { affectedNetwork: { affectedLine: { lineRef: 'L:1' } } },
+        }),
+      ).toBe('line');
+    });
+
+    it('returns "departure" for vehicle journey affects', () => {
+      expect(
+        getAffectType({
+          vehicleJourneys: {
+            affectedVehicleJourney: { framedVehicleJourneyRef: {} },
+          },
+        }),
+      ).toBe('departure');
+    });
+
+    it('returns "stop" for stop point affects', () => {
+      expect(getAffectType({ stopPoints: {} })).toBe('stop');
+    });
+
+    it('returns empty string for unknown affects', () => {
+      expect(getAffectType({})).toBe('');
+      expect(getAffectType(null)).toBe('');
+    });
+  });
+
+  describe('getLineQuayLabels', () => {
+    const lines = [
+      {
+        id: 'L:1',
+        quays: [
+          { name: 'Oslo S', stopPlace: { id: 'SP:1' } },
+          { name: 'Bergen', stopPlace: { id: 'SP:2' } },
+        ],
+      },
+    ];
+
+    it('returns labels for affected stop points', () => {
+      const affects = {
+        networks: {
+          affectedNetwork: {
+            affectedLine: {
+              lineRef: 'L:1',
+              routes: {
+                affectedRoute: {
+                  stopPoints: {
+                    affectedStopPoint: [{ stopPointRef: 'SP:1' }],
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+      expect(getLineQuayLabels(affects, lines)).toEqual([
+        'Oslo S - SP:1',
+      ]);
+    });
+
+    it('returns empty array when no stopPoints', () => {
+      expect(getLineQuayLabels({}, lines)).toEqual([]);
+    });
+  });
+
+  describe('getStopQuayLabels', () => {
+    const lines = [
+      {
+        id: 'L:1',
+        quays: [
+          { name: 'Oslo S', stopPlace: { id: 'SP:1' } },
+          { name: 'Bergen', stopPlace: { id: 'SP:2' } },
+        ],
+      },
+    ];
+
+    it('returns labels for affected stops', () => {
+      const affects = {
+        stopPoints: {
+          affectedStopPoint: [
+            { stopPointRef: 'SP:1' },
+            { stopPointRef: 'SP:2' },
+          ],
+        },
+      };
+      expect(getStopQuayLabels(affects, lines)).toEqual([
+        'Oslo S - SP:1',
+        'Bergen - SP:2',
+      ]);
+    });
+
+    it('returns empty array when no stopPoints', () => {
+      expect(getStopQuayLabels({}, lines)).toEqual([]);
+    });
+  });
+
+  describe('buildUpdatedIssue', () => {
+    const baseIssue = {
+      id: '1',
+      validityPeriod: { startTime: '2024-01-01T00:00:00Z' },
+      reportType: 'general',
+    };
+
+    it('builds updated issue with all fields', () => {
+      const result = buildUpdatedIssue(baseIssue, {
+        summary: 'New summary',
+        description: 'New desc',
+        advice: 'New advice',
+        from: new Date('2024-01-01T08:00:00Z'),
+        to: new Date('2024-01-01T18:00:00Z'),
+        reportType: 'incident',
+        infoLinkUri: 'https://example.com',
+        infoLinkLabel: 'More info',
+      });
+
+      expect(result.summary.text).toBe('New summary');
+      expect(result.description.text).toBe('New desc');
+      expect(result.advice.text).toBe('New advice');
+      expect(result.reportType).toBe('incident');
+      expect(result.infoLinks.infoLink.uri).toBe('https://example.com');
+      expect(result.progress).toBe('open');
+    });
+
+    it('removes description and advice when empty', () => {
+      const issueWithDesc = {
+        ...baseIssue,
+        description: { text: 'old' },
+        advice: { text: 'old' },
+      };
+      const result = buildUpdatedIssue(issueWithDesc, {
+        summary: 'Summary',
+        description: '',
+        advice: '',
+        from: null,
+        to: null,
+        reportType: 'general',
+        infoLinkUri: '',
+        infoLinkLabel: '',
+      });
+
+      expect(result.description).toBeUndefined();
+      expect(result.advice).toBeUndefined();
+      expect(result.infoLinks).toBeUndefined();
+    });
+
+    it('does not mutate the original issue', () => {
+      buildUpdatedIssue(baseIssue, {
+        summary: 'Changed',
+        description: '',
+        advice: '',
+        from: null,
+        to: null,
+        reportType: 'incident',
+        infoLinkUri: '',
+        infoLinkLabel: '',
+      });
+      expect(baseIssue.reportType).toBe('general');
     });
   });
 });

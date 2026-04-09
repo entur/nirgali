@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useRef, useState } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
+import { chunk } from '../../util/chunk';
 
 interface StopOption {
   label: string;
@@ -19,11 +20,6 @@ interface ApiClient {
   getStopPlaces: (ids: string[]) => Promise<any[]>;
   getTopographicPlaces: (ids: string[]) => Promise<any[]>;
 }
-
-const chunk = <T,>(arr: T[], size: number): T[][] =>
-  Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
-    arr.slice(i * size, i * size + size),
-  );
 
 const useTopographicPlaces = (stops: Stop[], api: ApiClient) => {
   const stopPlaceTopographicPlaceIndex = useRef<Record<string, string>>({});

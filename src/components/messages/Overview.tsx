@@ -13,8 +13,8 @@ import Chip from '@mui/material/Chip';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Box from '@mui/material/Box';
-import { DateFormatter } from '@internationalized/date';
 import { sortBySituationNumber } from '../../util/sort';
+import { isMessageExpired, formatDate } from '../../util/formatters';
 import { getMessageType } from './messageHelpers';
 import { Message } from '../../reducers/messagesSlice';
 
@@ -23,24 +23,18 @@ interface OverviewProps {
 }
 
 const StatusChip = ({ message, now }: { message: Message; now: number }) => {
-  const isExpired =
-    (message.validityPeriod.endTime &&
-      Date.parse(message.validityPeriod.endTime) < now) ||
-    message.progress === 'closed';
-
+  const expired = isMessageExpired(
+    message.validityPeriod.endTime,
+    message.progress,
+    now,
+  );
   return (
     <Chip
-      label={isExpired ? 'Inaktiv' : 'Aktiv'}
-      color={isExpired ? 'error' : 'success'}
+      label={expired ? 'Inaktiv' : 'Aktiv'}
+      color={expired ? 'error' : 'success'}
       size="small"
     />
   );
-};
-
-const formatDate = (dateStr: string | undefined): string => {
-  if (!dateStr) return 'Ikke oppgitt';
-  const formatter = new DateFormatter('nb-NO');
-  return formatter.format(new Date(dateStr));
 };
 
 const Overview = ({ messages }: OverviewProps) => {

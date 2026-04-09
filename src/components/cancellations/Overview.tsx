@@ -15,31 +15,20 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Box from '@mui/material/Box';
 import { getLocalTimeZone, now } from '@internationalized/date';
 import { sortCancellationByExpiry } from '../../util/sort';
+import { isJourneyActive, getCancellationLabel } from '../../util/formatters';
 
 interface OverviewProps {
   cancellations: any[];
   lines: any[];
 }
 
-const StatusChip = ({ item }: { item: any }) => {
-  const isActive =
-    item.expiresAtEpochMs >
-    now(getLocalTimeZone()).add({ minutes: 10 }).toDate().getTime();
-  return (
-    <Chip
-      label={isActive ? 'Aktiv' : 'Inaktiv'}
-      color={isActive ? 'success' : 'error'}
-      size="small"
-    />
-  );
-};
-
-const getCancellationLabel = (item: any): string => {
-  if (item.cancellation) return 'Ja';
-  if (item.estimatedCalls.estimatedCall.some((call: any) => call.cancellation))
-    return 'Delvis';
-  return 'Nei';
-};
+const StatusChip = ({ item }: { item: any }) => (
+  <Chip
+    label={isJourneyActive(item.expiresAtEpochMs) ? 'Aktiv' : 'Inaktiv'}
+    color={isJourneyActive(item.expiresAtEpochMs) ? 'success' : 'error'}
+    size="small"
+  />
+);
 
 const Overview = ({ cancellations, lines }: OverviewProps) => {
   const navigate = useNavigate();

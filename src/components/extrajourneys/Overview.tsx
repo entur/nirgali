@@ -13,18 +13,18 @@ import Chip from '@mui/material/Chip';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Box from '@mui/material/Box';
-import { getLocalTimeZone, now } from '@internationalized/date';
 import { ExtraJourney } from './types';
 import { useExtrajourneys } from '../../hooks/useExtrajourneys';
+import { isJourneyActive } from '../../util/formatters';
 
 const StatusChip = ({ extrajourney }: { extrajourney: ExtraJourney }) => {
-  const isActive =
-    extrajourney.estimatedVehicleJourney.expiresAtEpochMs >
-    now(getLocalTimeZone()).add({ minutes: 10 }).toDate().getTime();
+  const active = isJourneyActive(
+    extrajourney.estimatedVehicleJourney.expiresAtEpochMs,
+  );
   return (
     <Chip
-      label={isActive ? 'Aktiv' : 'Inaktiv'}
-      color={isActive ? 'success' : 'error'}
+      label={active ? 'Aktiv' : 'Inaktiv'}
+      color={active ? 'success' : 'error'}
       size="small"
     />
   );

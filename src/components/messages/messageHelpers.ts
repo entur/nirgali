@@ -194,3 +194,109 @@ export const getMessageType = (affects: any): string => {
     return 'Avgang';
   return 'Error';
 };
+
+export const getAffectType = (
+  affects: any,
+): 'line' | 'departure' | 'stop' | '' => {
+  if (affects?.networks?.affectedNetwork?.affectedLine?.lineRef) return 'line';
+  if (
+    affects?.vehicleJourneys?.affectedVehicleJourney?.framedVehicleJourneyRef
+  )
+    return 'departure';
+  if (affects?.stopPoints) return 'stop';
+  return '';
+};
+
+export const getLineQuayLabels = (affects: any, lines: any[]): string[] => {
+  const affectedLine = affects?.networks?.affectedNetwork?.affectedLine;
+  const stopPoints =
+    affectedLine?.routes?.affectedRoute?.stopPoints?.affectedStopPoint;
+  if (!stopPoints) return [];
+  return stopPoints
+    .map((sp: any) => {
+      const line = lines?.find((l: any) => l.id === affectedLine.lineRef);
+      const quay = line?.quays?.find(
+        (q: any) => q.stopPlace?.id === sp.stopPointRef,
+      );
+      return quay ? `${quay.name} - ${quay.stopPlace.id}` : null;
+    })
+    .filter(Boolean) as string[];
+};
+
+export const getStopQuayLabels = (affects: any, lines: any[]): string[] => {
+  const stopPoints = affects?.stopPoints?.affectedStopPoint;
+  if (!stopPoints) return [];
+  const quays = lines?.reduce(
+    (acc: any[], line: any) => [...acc, ...line.quays],
+    [],
+  );
+  return stopPoints
+    .map((sp: any) => {
+      const quay = quays?.find(
+        (q: any) => q.stopPlace?.id === sp.stopPointRef,
+      );
+      return quay ? `${quay.name} - ${quay.stopPlace.id}` : null;
+    })
+    .filter(Boolean) as string[];
+};
+
+export const buildUpdatedIssue = (
+  issue: any,
+  fields: {
+    summary: string;
+    description: string;
+    advice: string;
+    from: Date | null;
+    to: Date | null;
+    reportType: string;
+    infoLinkUri: string;
+    infoLinkLabel: string;
+  },
+): any => {
+  const newIssue = { ...issue };
+  newIssue.progress = 'open';
+  newIssue.summary = { attributes: { xmlLang: 'NO' }, text: fields.summary };
+
+  if (fields.description) {
+    newIssue.description = {
+      attributes: { xmlLang: 'NO' },
+      text: fields.description,
+    };
+  } else {
+    delete newIssue.description;
+  }
+
+  if (fields.advice) {
+    newIssue.advice = { attributes: { xmlLang: 'NO' }, text: fields.advice };
+  } else {
+    delete newIssue.advice;
+  }
+
+  if (fields.from) {
+    newIssue.validityPeriod = {
+      ...newIssue.validityPeriod,
+      startTime: fields.from.toISOString(),
+    };
+  }
+  if (fields.to) {
+    newIssue.validityPeriod = {
+      ...newIssue.validityPeriod,
+      endTime: fields.to.toISOString(),
+    };
+  }
+
+  newIssue.reportType = fields.reportType;
+
+  if (fields.infoLinkUri) {
+    newIssue.infoLinks = {
+      infoLink: {
+        uri: fields.infoLinkUri,
+        label: fields.infoLinkLabel || undefined,
+      },
+    };
+  } else {
+    delete newIssue.infoLinks;
+  }
+
+  return newIssue;
+};

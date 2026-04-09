@@ -12,6 +12,12 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import StopPicker from '../common/StopPicker';
 import { mapEstimatedCall } from './mapEstimatedCall';
 import { getLineOption } from '../../util/getLineOption';
+import { formatDepartureOption } from '../../util/formatters';
+import {
+  restoreCancellationCalls,
+  determineCancellationStatus,
+  getQuayLabels,
+} from './cancellationHelpers';
 
 interface EditProps {
   cancellations: any[];
@@ -91,37 +97,11 @@ const Edit = ({
       event.preventDefault();
 
       cancellation.estimatedVehicleJourney.cancellation = false;
-      cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall.forEach(
-        (call: any) => {
-          call.cancellation = false;
-
-          if (call.arrivalStatus) {
-            call.arrivalStatus = 'onTime';
-          }
-
-          if (call.arrivalBoardingActivity) {
-            const passingTime = serviceJourney?.passingTimes?.find(
-              (pt: any) => pt.quay?.id === call.stopPointRef,
-            );
-            call.arrivalBoardingActivity = passingTime?.forAlighting
-              ? 'alighting'
-              : 'noAlighting';
-          }
-
-          if (call.departureStatus) {
-            call.departureStatus = 'onTime';
-          }
-
-          if (call.departureBoardingActivity) {
-            const passingTime = serviceJourney?.passingTimes?.find(
-              (pt: any) => pt.quay?.id === call.stopPointRef,
-            );
-            call.departureBoardingActivity = passingTime?.forBoarding
-              ? 'boarding'
-              : 'noBoarding';
-          }
-        },
-      );
+      cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall =
+        restoreCancellationCalls(
+          cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall,
+          serviceJourney,
+        );
       cancellation.estimatedVehicleJourney.recordedAtTime =
         new Date().toISOString();
 
@@ -137,49 +117,17 @@ const Edit = ({
     [api, refetch, cancellation, navigate, organization, serviceJourney],
   );
 
-  const getLineDepartureOption = (): string | null => {
-    const estimatedCall = serviceJourney?.estimatedCalls?.[0];
-    if (!estimatedCall?.quay) {
-      return `Avgangsinformasjon utilgjengelig (${serviceJourney?.id || 'ukjent'})`;
-    }
-    const quayName = estimatedCall.quay.name;
-    const aimedDepartureTime = estimatedCall.aimedDepartureTime
-      .split('T')
-      .pop()
-      .split(':00+')[0];
-    return `${aimedDepartureTime} fra ${quayName} (${serviceJourney.id})`;
-  };
-
-  const getQuayLabels = (): string[] => {
-    if (!serviceJourney?.estimatedCalls?.length) return [];
-    return cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall
-      .filter((call: any) => call.Cancellation)
-      .map((call: any) => call.stopPointRef)
-      .map(
-        (ref: string) =>
-          serviceJourney.estimatedCalls.find(
-            (call: any) => call.quay?.id === ref,
-          )?.quay,
-      )
-      .filter((v: any) => v !== undefined)
-      .map((quay: any) => `${quay.name} - ${quay.id}`);
-  };
-
   if (!cancellation || !lines?.length) {
     return null;
   }
 
-  const isCancelled =
-    cancellation.estimatedVehicleJourney.cancellation ||
-    cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall.some(
-      (call: any) => call.Cancellation,
-    );
-
-  const isPartiallyCancelled =
-    !cancellation.estimatedVehicleJourney.cancellation &&
-    cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall.some(
-      (call: any) => call.cancellation,
-    );
+  const { isCancelled, isPartiallyCancelled } = determineCancellationStatus(
+    cancellation.estimatedVehicleJourney,
+  );
+  const departureLabel = serviceJourney
+    ? formatDepartureOption(serviceJourney)
+    : null;
+  const quayLabels = getQuayLabels(cancellation, serviceJourney);
 
   return (
     <Box component="form" onSubmit={handleSubmit} autoComplete="off">
@@ -213,8 +161,8 @@ const Edit = ({
             />
           </Box>
 
-          {getLineDepartureOption() && (
-            <Chip label={getLineDepartureOption()} sx={{ mb: 1 }} />
+          {departureLabel && (
+            <Chip label={departureLabel} sx={{ mb: 1 }} />
           )}
         </Box>
       )}
@@ -222,7 +170,7 @@ const Edit = ({
       {serviceJourney && isPartiallyCancelled && (
         <Box sx={{ mb: 2 }}>
           <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-            {getQuayLabels().map((label) => (
+            {quayLabels.map((label) => (
               <Chip key={label} label={label} size="small" variant="outlined" />
             ))}
           </Stack>
