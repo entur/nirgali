@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useConfig } from '../config/ConfigContext';
-import api from '../api/api';
 import { useAuth } from 'react-oidc-context';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { loadExtrajourneys } from '../actions/extrajourneys';
 
 export const useExtrajourneys = (
   codespace: string,
@@ -9,27 +10,28 @@ export const useExtrajourneys = (
   showCompletedTrips: boolean,
 ) => {
   const auth = useAuth();
-  const [extrajourneys, setExtrajourneys] = useState([]);
   const config = useConfig();
+  const dispatch = useAppDispatch();
+  const extrajourneys = useAppSelector((state) => state.extrajourneys);
 
-  const getExtrajourneys = useCallback(async () => {
-    const response = await api(config, auth).getExtrajourneys(
-      codespace,
-      authority,
-      showCompletedTrips,
-    );
-    if (response.data) {
-      setExtrajourneys(structuredClone(response.data.extrajourneys));
-    } else {
-      console.log('Could not find any extrajourneys for this organization');
+  const fetchExtrajourneys = useCallback(() => {
+    if (codespace && authority) {
+      return dispatch(
+        loadExtrajourneys(
+          config,
+          auth,
+          codespace,
+          authority,
+          showCompletedTrips,
+        ),
+      );
     }
-  }, [codespace, authority, config, auth, showCompletedTrips]);
+    return Promise.resolve();
+  }, [dispatch, codespace, authority, config, auth, showCompletedTrips]);
 
   useEffect(() => {
-    if (codespace && authority) {
-      getExtrajourneys();
-    }
-  }, [codespace, authority, getExtrajourneys, showCompletedTrips]);
+    fetchExtrajourneys();
+  }, [fetchExtrajourneys]);
 
-  return { extrajourneys, refetch: getExtrajourneys };
+  return { extrajourneys, refetch: fetchExtrajourneys };
 };

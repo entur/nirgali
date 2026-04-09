@@ -18,7 +18,6 @@ export const useLinesForAuthority = (selectedOrganization: string) => {
         );
         setLines(structuredClone(filtered));
       } else {
-        console.log('Could not find any lines for this authority');
         setLines([]);
       }
     };

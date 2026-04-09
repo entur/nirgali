@@ -19,6 +19,8 @@ import organizationsReducer from '../reducers/organizationsSlice';
 import messagesReducer from '../reducers/messagesSlice';
 import cancellationsReducer from '../reducers/cancellationsSlice';
 import extrajourneysReducer from '../reducers/extrajourneysSlice';
+import linesReducer from '../reducers/linesSlice';
+import operatorsReducer from '../reducers/operatorsSlice';
 
 afterEach(() => {
   cleanup();
@@ -30,6 +32,8 @@ const testReducer = combineReducers({
   messages: messagesReducer,
   cancellations: cancellationsReducer,
   extrajourneys: extrajourneysReducer,
+  lines: linesReducer,
+  operators: operatorsReducer,
 });
 
 export type TestRootState = ReturnType<typeof testReducer>;
