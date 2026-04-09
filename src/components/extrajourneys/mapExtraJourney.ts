@@ -1,4 +1,4 @@
-import { Call, ExtraJourney, VehicleMode } from './types';
+import { Call, ExtraJourney, Line, VehicleMode } from './types';
 import { getLocalTimeZone, now } from '@internationalized/date';
 import { Operator } from '../../hooks/useOperators';
 
@@ -8,6 +8,7 @@ export const mapExtraJourney = ({
   name,
   destinationDisplay,
   selectedOperator,
+  selectedLine,
   calls,
 }: {
   codespace: string;
@@ -15,12 +16,19 @@ export const mapExtraJourney = ({
   name?: string;
   destinationDisplay?: string;
   selectedOperator?: Operator;
+  selectedLine?: Line;
   calls: Call[];
 }): ExtraJourney => {
   const lineRef = `${codespace}:Line:${window.crypto.randomUUID()}`;
 
   // validation
-  if (!selectedMode || !name || !destinationDisplay || !selectedOperator) {
+  if (
+    !selectedMode ||
+    !name ||
+    !destinationDisplay ||
+    !selectedOperator ||
+    !selectedLine
+  ) {
     throw new Error('Invalid data');
   }
 
@@ -35,7 +43,7 @@ export const mapExtraJourney = ({
       routeRef: `${codespace}:Route:${window.crypto.randomUUID()}`,
       publishedLineName: name,
       groupOfLinesRef: `${codespace}:Network:${window.crypto.randomUUID()}`,
-      externalLineRef: lineRef,
+      externalLineRef: selectedLine.id,
       operatorRef: selectedOperator.id,
       monitored: true,
       dataSource: codespace,

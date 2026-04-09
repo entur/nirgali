@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TextField } from '@entur/form';
 import {
   HeaderCell,
@@ -11,7 +11,8 @@ import { Contrast } from '@entur/layout';
 import { PrimaryButton } from '@entur/button';
 import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
 import { Operator, useOperators } from '../../hooks/useOperators';
-import { Call, VehicleMode } from './types';
+import { useLinesForAuthority } from '../../hooks/useLinesForAuthority';
+import { Call, Line, VehicleMode } from './types';
 import { useNavigate } from 'react-router-dom';
 import { TypedDropDown } from './TypedDropdown';
 import { RegisterEstimatedCallRow } from './register-estimated-call-row';
@@ -23,7 +24,7 @@ import { useAuth } from 'react-oidc-context';
 
 export const Register = () => {
   const selectedOrganization = useSelectedOrganization();
-  const operators = useOperators();
+  const operators = useOperators(selectedOrganization);
   const [name, setName] = useState<string | undefined>();
   const [selectedMode, setSelectedMode] = useState<VehicleMode | undefined>();
   const [destinationDisplay, setDestinationDisplay] = useState<
@@ -32,6 +33,29 @@ export const Register = () => {
   const [selectedOperator, setSelectedOperator] = useState<
     Operator | undefined
   >();
+  const [selectedLine, setSelectedLine] = useState<Line | undefined>();
+  const allLines = useLinesForAuthority(selectedOrganization);
+  const visibleLines = selectedOperator
+    ? allLines.filter((line) => line.operator?.id === selectedOperator.id)
+    : allLines;
+
+  useEffect(() => {
+    if (!selectedOperator && operators.length === 1) {
+      setSelectedOperator(operators[0]);
+    }
+  }, [operators, selectedOperator]);
+
+  useEffect(() => {
+    if (!selectedLine && visibleLines.length === 1) {
+      setSelectedLine(visibleLines[0]);
+      if (visibleLines[0].operator && !selectedOperator) {
+        setSelectedOperator({
+          id: visibleLines[0].operator.id,
+          name: visibleLines[0].operator.name,
+        });
+      }
+    }
+  }, [visibleLines, selectedLine, selectedOperator]);
 
   const [calls, setCalls] = useState<Call[]>([
     {
@@ -51,6 +75,7 @@ export const Register = () => {
     mode: selectedMode,
     destinationDisplay,
     operator: selectedOperator,
+    line: selectedLine,
     calls,
   });
 
@@ -73,6 +98,7 @@ export const Register = () => {
       name,
       destinationDisplay,
       selectedOperator,
+      selectedLine,
       calls,
     });
 
@@ -148,7 +174,46 @@ export const Register = () => {
                 }
               : null
           }
-          onChange={(operator) => setSelectedOperator(operator)}
+          onChange={(operator) => {
+            setSelectedOperator(operator);
+            if (
+              !operator ||
+              (selectedLine && selectedLine.operator?.id !== operator.id)
+            ) {
+              setSelectedLine(undefined);
+            }
+          }}
+        />
+      </Contrast>
+      <br />
+
+      <Contrast>
+        <TypedDropDown
+          {...result.line}
+          label="Linje"
+          items={() =>
+            visibleLines.map((line) => ({
+              value: line,
+              label: `${line.publicCode} ${line.name} (${line.id})`,
+            }))
+          }
+          selectedItem={
+            selectedLine
+              ? {
+                  value: selectedLine,
+                  label: `${selectedLine.publicCode} ${selectedLine.name} (${selectedLine.id})`,
+                }
+              : null
+          }
+          onChange={(line) => {
+            setSelectedLine(line);
+            if (line?.operator) {
+              setSelectedOperator({
+                id: line.operator.id,
+                name: line.operator.name,
+              });
+            }
+          }}
         />
       </Contrast>
       <br />

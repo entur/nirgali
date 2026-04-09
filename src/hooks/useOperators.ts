@@ -7,7 +7,10 @@ export type Operator = {
   name: string;
 };
 
-export const useOperators = () => {
+const isNonFlexibleLine = (line: any) =>
+  !line.flexibleLineType || line.flexibleLineType === 'fixed';
+
+export const useOperators = (selectedOrganization: string) => {
   const [operators, setOperators] = useState<Operator[]>([]);
   const config = useConfig();
 
@@ -15,13 +18,21 @@ export const useOperators = () => {
     const getOperators = async () => {
       const response = await api(config).getOperators();
       if (response.data) {
-        setOperators(response.data.operators);
+        setOperators(
+          response.data.operators.filter((op: any) =>
+            op.lines?.some(
+              (line: any) =>
+                isNonFlexibleLine(line) &&
+                line.authority?.id === selectedOrganization,
+            ),
+          ),
+        );
       } else {
         console.log('Could not find any operators');
       }
     };
     getOperators();
-  }, [config]);
+  }, [config, selectedOrganization]);
 
   return operators;
 };
