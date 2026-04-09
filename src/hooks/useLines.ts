@@ -3,7 +3,7 @@ import { useConfig } from '../config/ConfigContext';
 import api from '../api/api';
 
 export const useLines = (selectedOrganization: string) => {
-  const [lines, setLines] = useState();
+  const [lines, setLines] = useState<any[]>([]);
   const config = useConfig();
 
   useEffect(() => {

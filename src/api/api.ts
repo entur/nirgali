@@ -7,8 +7,8 @@ import {
 } from '@apollo/client';
 import { RemoveTypenameFromVariablesLink } from '@apollo/client/link/remove-typename';
 
-const createClient = (uri, accessToken) => {
-  const headers = {
+const createClient = (uri: string, accessToken?: string) => {
+  const headers: Record<string, string> = {
     'ET-Client-Name': 'entur - deviation-messages',
   };
 
@@ -24,15 +24,13 @@ const createClient = (uri, accessToken) => {
 
   const client = new ApolloClient({
     link: ApolloLink.from([removeTypenameLink, httpLink]),
-    cache: new InMemoryCache({
-      addTypename: false,
-    }),
+    cache: new InMemoryCache(),
   });
 
   return client;
 };
 
-const getAuthorities = (URI) => async () => {
+const getAuthorities = (URI: string) => async () => {
   const client = createClient(URI);
   const query = gql`
     {
@@ -49,7 +47,7 @@ const getAuthorities = (URI) => async () => {
     .then((response) => response);
 };
 
-const getLines = (URI) => async (authorities) => {
+const getLines = (URI: string) => async (authorities: string) => {
   const client = createClient(URI);
 
   const query = gql`
@@ -74,7 +72,7 @@ const getLines = (URI) => async (authorities) => {
     .then((response) => response);
 };
 
-const getLinesForAuthority = (URI) => async (authority) => {
+const getLinesForAuthority = (URI: string) => async (authority: string) => {
   const client = createClient(URI);
 
   const query = gql`
@@ -97,7 +95,7 @@ const getLinesForAuthority = (URI) => async (authority) => {
     .then((response) => response);
 };
 
-const getDepartures = (URI) => async (line, date) => {
+const getDepartures = (URI: string) => async (line: string, date: string) => {
   const client = createClient(URI);
 
   const query = gql`
@@ -135,7 +133,7 @@ const getDepartures = (URI) => async (line, date) => {
     .then((response) => response);
 };
 
-const getServiceJourney = (URI) => async (id, date) => {
+const getServiceJourney = (URI: string) => async (id: string, date: string) => {
   const client = createClient(URI);
 
   const query = gql`
@@ -174,7 +172,7 @@ const getServiceJourney = (URI) => async (id, date) => {
     .then((response) => response);
 };
 
-const getOperators = (URI) => async () => {
+const getOperators = (URI: string) => async () => {
   const client = createClient(URI);
 
   const query = gql`
@@ -198,7 +196,7 @@ const getOperators = (URI) => async () => {
     .then((response) => response);
 };
 
-const getStopPlaces = (URI) => async (ids) => {
+const getStopPlaces = (URI: string) => async (ids: string[]) => {
   const response = await fetch(`${URI}/stop-places?ids=${ids}`, {
     headers: {
       'Et-Client-Name': 'entur - deviation-messages',
@@ -207,7 +205,7 @@ const getStopPlaces = (URI) => async (ids) => {
   return await response.json();
 };
 
-const getTopographicPlaces = (URI) => async (ids) => {
+const getTopographicPlaces = (URI: string) => async (ids: string[]) => {
   const response = await fetch(`${URI}/topographic-places?ids=${ids}`, {
     headers: {
       'Et-Client-Name': 'entur - deviation-messages',
@@ -216,106 +214,108 @@ const getTopographicPlaces = (URI) => async (ids) => {
   return await response.json();
 };
 
-const getMessages = (URI, auth) => async (codespace, authority) => {
-  const accessToken = auth.user.access_token;
-  const client = createClient(URI, accessToken);
+const getMessages =
+  (URI: string, auth: any) => async (codespace: string, authority: string) => {
+    const accessToken = auth.user.access_token;
+    const client = createClient(URI, accessToken);
 
-  const query = gql`
-    query MessagesQuery($authority: String!, $codespace: String!) {
-      situationElements(authority: $authority, codespace: $codespace) {
-        id
-        creationTime
-        participantRef
-        progress
-        reportType
-        severity
-        situationNumber
-        advice {
-          attributes {
-            xmlLang
+    const query = gql`
+      query MessagesQuery($authority: String!, $codespace: String!) {
+        situationElements(authority: $authority, codespace: $codespace) {
+          id
+          creationTime
+          participantRef
+          progress
+          reportType
+          severity
+          situationNumber
+          advice {
+            attributes {
+              xmlLang
+            }
+            text
           }
-          text
-        }
-        affects {
-          networks {
-            affectedNetwork {
-              affectedLine {
-                lineRef
-                routes {
-                  affectedRoute {
-                    stopPoints {
-                      affectedStopPoint {
-                        stopPointRef
+          affects {
+            networks {
+              affectedNetwork {
+                affectedLine {
+                  lineRef
+                  routes {
+                    affectedRoute {
+                      stopPoints {
+                        affectedStopPoint {
+                          stopPointRef
+                        }
                       }
                     }
                   }
                 }
               }
             }
-          }
-          stopPoints {
-            affectedStopPoint {
-              stopPointRef
-            }
-          }
-          vehicleJourneys {
-            affectedVehicleJourney {
-              framedVehicleJourneyRef {
-                dataFrameRef
-                datedVehicleJourneyRef
+            stopPoints {
+              affectedStopPoint {
+                stopPointRef
               }
-              route {
-                stopPoints {
-                  affectedStopPoint {
-                    stopPointRef
+            }
+            vehicleJourneys {
+              affectedVehicleJourney {
+                framedVehicleJourneyRef {
+                  dataFrameRef
+                  datedVehicleJourneyRef
+                }
+                route {
+                  stopPoints {
+                    affectedStopPoint {
+                      stopPointRef
+                    }
                   }
                 }
               }
             }
           }
-        }
-        description {
-          attributes {
-            xmlLang
+          description {
+            attributes {
+              xmlLang
+            }
+            text
           }
-          text
-        }
-        infoLinks {
-          infoLink {
-            uri
-            label
+          infoLinks {
+            infoLink {
+              uri
+              label
+            }
           }
-        }
-        source {
-          sourceType
-        }
-        summary {
-          attributes {
-            xmlLang
+          source {
+            sourceType
           }
-          text
-        }
-        validityPeriod {
-          endTime
-          startTime
+          summary {
+            attributes {
+              xmlLang
+            }
+            text
+          }
+          validityPeriod {
+            endTime
+            startTime
+          }
         }
       }
-    }
-  `;
+    `;
 
-  const variables = {
-    codespace,
-    authority,
+    const variables = {
+      codespace,
+      authority,
+    };
+
+    return client
+      .query({ query, variables })
+      .catch((error) => error)
+      .then((response) => response);
   };
 
-  return client
-    .query({ query, variables })
-    .catch((error) => error)
-    .then((response) => response);
-};
-
 const createOrUpdateMessage =
-  (URI, auth) => async (codespace, authority, input) => {
+  (URI: string, auth: any) =>
+  async (codespace: string, authority: string, input: any) => {
     const accessToken = auth.user.access_token;
     const client = createClient(URI, accessToken);
 
@@ -345,70 +345,72 @@ const createOrUpdateMessage =
       .then((response) => response);
   };
 
-const getCancellations = (URI, auth) => async (codespace, authority) => {
-  const accessToken = auth.user.access_token;
-  const client = createClient(URI, accessToken);
+const getCancellations =
+  (URI: string, auth: any) => async (codespace: string, authority: string) => {
+    const accessToken = auth.user.access_token;
+    const client = createClient(URI, accessToken);
 
-  const query = gql`
-    query CancellationsQuery($authority: String!, $codespace: String!) {
-      cancellations(authority: $authority, codespace: $codespace) {
-        id
-        estimatedVehicleJourney {
-          cancellation
-          lineRef
-          directionRef
-          dataSource
-          estimatedVehicleJourneyCode
-          expiresAtEpochMs
-          extraJourney
-          groupOfLinesRef
-          isCompleteStopSequence
-          monitored
-          operatorRef
-          publishedLineName
-          recordedAtTime
-          routeRef
-          vehicleMode
-          estimatedCalls {
-            estimatedCall {
-              aimedArrivalTime
-              aimedDepartureTime
-              arrivalBoardingActivity
-              arrivalStatus
-              cancellation
-              departureBoardingActivity
-              departureStatus
-              destinationDisplay
-              expectedArrivalTime
-              expectedDepartureTime
-              order
-              requestStop
-              stopPointName
-              stopPointRef
+    const query = gql`
+      query CancellationsQuery($authority: String!, $codespace: String!) {
+        cancellations(authority: $authority, codespace: $codespace) {
+          id
+          estimatedVehicleJourney {
+            cancellation
+            lineRef
+            directionRef
+            dataSource
+            estimatedVehicleJourneyCode
+            expiresAtEpochMs
+            extraJourney
+            groupOfLinesRef
+            isCompleteStopSequence
+            monitored
+            operatorRef
+            publishedLineName
+            recordedAtTime
+            routeRef
+            vehicleMode
+            estimatedCalls {
+              estimatedCall {
+                aimedArrivalTime
+                aimedDepartureTime
+                arrivalBoardingActivity
+                arrivalStatus
+                cancellation
+                departureBoardingActivity
+                departureStatus
+                destinationDisplay
+                expectedArrivalTime
+                expectedDepartureTime
+                order
+                requestStop
+                stopPointName
+                stopPointRef
+              }
             }
-          }
-          framedVehicleJourneyRef {
-            dataFrameRef
-            datedVehicleJourneyRef
+            framedVehicleJourneyRef {
+              dataFrameRef
+              datedVehicleJourneyRef
+            }
           }
         }
       }
-    }
-  `;
+    `;
 
-  const variables = {
-    codespace,
-    authority,
+    const variables = {
+      codespace,
+      authority,
+    };
+
+    return client
+      .query({ query, variables })
+      .catch((error) => error)
+      .then((response) => response);
   };
 
-  return client
-    .query({ query, variables })
-    .catch((error) => error)
-    .then((response) => response);
-};
-
 const createOrUpdateCancellation =
-  (URI, auth) => async (codespace, authority, input) => {
+  (URI: string, auth: any) =>
+  async (codespace: string, authority: string, input: any) => {
     const accessToken = auth.user.access_token;
     const client = createClient(URI, accessToken);
 
@@ -439,7 +441,8 @@ const createOrUpdateCancellation =
   };
 
 const getExtrajourneys =
-  (URI, auth) => async (codespace, authority, showCompletedTrips) => {
+  (URI: string, auth: any) =>
+  async (codespace: string, authority: string, showCompletedTrips: boolean) => {
     const accessToken = auth.user.access_token;
     const client = createClient(URI, accessToken);
 
@@ -511,7 +514,8 @@ const getExtrajourneys =
   };
 
 const createOrUpdateExtrajourney =
-  (URI, auth) => async (codespace, authority, input) => {
+  (URI: string, auth: any) =>
+  async (codespace: string, authority: string, input: any) => {
     const accessToken = auth.user.access_token;
     const client = createClient(URI, accessToken);
 
@@ -541,7 +545,7 @@ const createOrUpdateExtrajourney =
       .then((response) => response);
   };
 
-const getUserContext = (URI, auth) => async () => {
+const getUserContext = (URI: string, auth: any) => async () => {
   const accessToken = auth.user.access_token;
   const client = createClient(URI, accessToken);
 
@@ -563,7 +567,7 @@ const getUserContext = (URI, auth) => async () => {
     .then((response) => response);
 };
 
-const api = (config, auth) => ({
+const api = (config: any, auth?: any) => ({
   getAuthorities: getAuthorities(config['journey-planner-api']),
   getLines: getLines(config['journey-planner-api']),
   getLinesForAuthority: getLinesForAuthority(config['journey-planner-api']),

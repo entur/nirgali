@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react';
-import { VariantType } from '@entur/form';
 import { Call, Line, VehicleMode } from './types';
 import { Operator } from '../../hooks/useOperators';
 import { getLocalTimeZone, now } from '@internationalized/date';
+
+type VariantType = 'error' | 'warning' | 'success' | 'info';
 
 type ValidationInput = {
   name?: string;

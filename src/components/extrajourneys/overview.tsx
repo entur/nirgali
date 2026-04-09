@@ -1,40 +1,41 @@
-import { Contrast } from '@entur/layout';
-import { SecondaryButton } from '@entur/button';
-import { Switch } from '@entur/form';
-import { useNavigate } from 'react-router-dom';
-import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
 import { useState } from 'react';
-import {
-  DataCell,
-  HeaderCell,
-  Table,
-  TableBody,
-  TableHead,
-  TableRow,
-} from '@entur/table';
+import { useNavigate } from 'react-router-dom';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Chip from '@mui/material/Chip';
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Box from '@mui/material/Box';
 import { getLocalTimeZone, now } from '@internationalized/date';
-
 import { ExtraJourney } from './types';
-// @ts-ignore
-import green from '../../img/green.png';
-// @ts-ignore
-import red from '../../img/red.png';
 import { useExtrajourneys } from '../../hooks/useExtrajourneys';
 
-const returnRedOrGreenIcon = (param: ExtraJourney) => {
-  if (
-    param.estimatedVehicleJourney.expiresAtEpochMs >
-    now(getLocalTimeZone()).add({ minutes: 10 }).toDate().getTime()
-  ) {
-    return <img src={green} id="active" alt="" height="30" width="30" />;
-  } else {
-    return <img src={red} id="not_active" alt="" height="30" width="30" />;
-  }
+const StatusChip = ({ extrajourney }: { extrajourney: ExtraJourney }) => {
+  const isActive =
+    extrajourney.estimatedVehicleJourney.expiresAtEpochMs >
+    now(getLocalTimeZone()).add({ minutes: 10 }).toDate().getTime();
+  return (
+    <Chip
+      label={isActive ? 'Aktiv' : 'Inaktiv'}
+      color={isActive ? 'success' : 'error'}
+      size="small"
+    />
+  );
 };
 
-export const Overview = () => {
+interface OverviewProps {
+  selectedOrganization: string;
+}
+
+export const Overview = ({ selectedOrganization }: OverviewProps) => {
   const navigate = useNavigate();
-  const selectedOrganization = useSelectedOrganization();
   const [showCompletedTrips, setShowCompletedTrips] = useState(false);
 
   const { extrajourneys } = useExtrajourneys(
@@ -44,112 +45,88 @@ export const Overview = () => {
   );
 
   return (
-    <>
-      <h2 className="text-center text-white">Oversikt</h2>;<br></br>
-      <div>
-        <Contrast>
-          <SecondaryButton
-            width="fluid"
-            onClick={() => navigate('/ekstraavganger/ny')}
-          >
-            Ny ekstraavgang
-          </SecondaryButton>
-        </Contrast>
-      </div>
-      <br></br>
-      <Contrast>
-        <div style={{ padding: '0 .5em' }}>
+    <Box>
+      <Typography variant="h4" sx={{ mb: 2 }}>
+        Oversikt
+      </Typography>
+
+      <Button
+        variant="outlined"
+        fullWidth
+        onClick={() => navigate('/ekstraavganger/ny')}
+        sx={{ mb: 2 }}
+      >
+        Ny ekstraavgang
+      </Button>
+
+      <FormControlLabel
+        control={
           <Switch
             checked={showCompletedTrips}
             onChange={(e) => setShowCompletedTrips(e.target.checked)}
-          >
-            Vis passerte ekstraavganger
-          </Switch>
-        </div>
-      </Contrast>
-      <br></br>
-      <Contrast>
+          />
+        }
+        label="Vis passerte ekstraavganger"
+        sx={{ mb: 2 }}
+      />
+
+      <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              <HeaderCell>Status</HeaderCell>
-              <HeaderCell>Linje</HeaderCell>
-              <HeaderCell>Tur</HeaderCell>
-              <HeaderCell>Fra stasjon</HeaderCell>
-              <HeaderCell>Planlagt avgang</HeaderCell>
-              <HeaderCell>Til stasjon</HeaderCell>
-              <HeaderCell>Planlagt ankomst</HeaderCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Linje</TableCell>
+              <TableCell>Tur</TableCell>
+              <TableCell>Fra stasjon</TableCell>
+              <TableCell>Planlagt avgang</TableCell>
+              <TableCell>Til stasjon</TableCell>
+              <TableCell>Planlagt ankomst</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {extrajourneys.map((extrajourney: ExtraJourney) => (
-              <TableRow
-                key={
-                  extrajourney.estimatedVehicleJourney
-                    .estimatedVehicleJourneyCode
-                }
-              >
-                <DataCell>{returnRedOrGreenIcon(extrajourney)}</DataCell>
-                <DataCell>
-                  {extrajourney.estimatedVehicleJourney.publishedLineName}
-                </DataCell>
-                <DataCell>
-                  {
-                    extrajourney.estimatedVehicleJourney
-                      .estimatedVehicleJourneyCode
-                  }
-                </DataCell>
-                <DataCell>
-                  {
-                    extrajourney.estimatedVehicleJourney.estimatedCalls
-                      .estimatedCall[0].stopPointName
-                  }
-                </DataCell>
-                <DataCell>
-                  {new Date(
-                    Date.parse(
-                      extrajourney.estimatedVehicleJourney.estimatedCalls
-                        .estimatedCall[0].aimedDepartureTime!,
-                    ),
-                  ).toLocaleString(navigator.language, {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </DataCell>
-                <DataCell>
-                  {
-                    extrajourney.estimatedVehicleJourney.estimatedCalls
-                      .estimatedCall[
-                      extrajourney.estimatedVehicleJourney.estimatedCalls
-                        .estimatedCall.length - 1
-                    ].stopPointName
-                  }
-                </DataCell>
-                <DataCell>
-                  {new Date(
-                    Date.parse(
-                      extrajourney.estimatedVehicleJourney.estimatedCalls
-                        .estimatedCall[
-                        extrajourney.estimatedVehicleJourney.estimatedCalls
-                          .estimatedCall.length - 1
-                      ].aimedArrivalTime!,
-                    ),
-                  ).toLocaleString(navigator.language, {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </DataCell>
-              </TableRow>
-            ))}
+            {extrajourneys.map((extrajourney: ExtraJourney) => {
+              const evj = extrajourney.estimatedVehicleJourney;
+              const calls = evj.estimatedCalls.estimatedCall;
+              const firstCall = calls[0];
+              const lastCall = calls[calls.length - 1];
+
+              return (
+                <TableRow key={evj.estimatedVehicleJourneyCode} hover>
+                  <TableCell>
+                    <StatusChip extrajourney={extrajourney} />
+                  </TableCell>
+                  <TableCell>{evj.publishedLineName}</TableCell>
+                  <TableCell>{evj.estimatedVehicleJourneyCode}</TableCell>
+                  <TableCell>{firstCall.stopPointName}</TableCell>
+                  <TableCell>
+                    {new Date(
+                      Date.parse(firstCall.aimedDepartureTime!),
+                    ).toLocaleString(navigator.language, {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </TableCell>
+                  <TableCell>{lastCall.stopPointName}</TableCell>
+                  <TableCell>
+                    {new Date(
+                      Date.parse(lastCall.aimedArrivalTime!),
+                    ).toLocaleString(navigator.language, {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
-      </Contrast>
-    </>
+      </TableContainer>
+    </Box>
   );
 };

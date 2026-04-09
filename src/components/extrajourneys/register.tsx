@@ -1,29 +1,40 @@
-import React, { useEffect, useState } from 'react';
-import { TextField } from '@entur/form';
-import {
-  HeaderCell,
-  Table,
-  TableBody,
-  TableHead,
-  TableRow,
-} from '@entur/table';
-import { Contrast } from '@entur/layout';
-import { PrimaryButton } from '@entur/button';
-import { useSelectedOrganization } from '../../hooks/useSelectedOrganization';
-import { Operator, useOperators } from '../../hooks/useOperators';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Box from '@mui/material/Box';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Autocomplete from '@mui/material/Autocomplete';
+import { useOperators, Operator } from '../../hooks/useOperators';
 import { useLinesForAuthority } from '../../hooks/useLinesForAuthority';
 import { Call, Line, VehicleMode } from './types';
-import { useNavigate } from 'react-router-dom';
-import { TypedDropDown } from './TypedDropdown';
-import { RegisterEstimatedCallRow } from './register-estimated-call-row';
+import { RegisterEstimatedCallRow } from './RegisterEstimatedCallRow';
 import { mapExtraJourney } from './mapExtraJourney';
-import { CallValidationResult, useExtrajourneyValidation } from './validate';
+import {
+  CallValidationResult,
+  ValidationFeedback,
+  useExtrajourneyValidation,
+} from './validate';
 import api from '../../api/api';
 import { useConfig } from '../../config/ConfigContext';
 import { useAuth } from 'react-oidc-context';
 
-export const Register = () => {
-  const selectedOrganization = useSelectedOrganization();
+interface RegisterProps {
+  selectedOrganization: string;
+}
+
+export const Register = ({ selectedOrganization }: RegisterProps) => {
   const operators = useOperators(selectedOrganization);
   const [name, setName] = useState<string | undefined>();
   const [selectedMode, setSelectedMode] = useState<VehicleMode | undefined>();
@@ -58,14 +69,8 @@ export const Register = () => {
   }, [visibleLines, selectedLine, selectedOperator]);
 
   const [calls, setCalls] = useState<Call[]>([
-    {
-      boarding: true,
-      alighting: false,
-    },
-    {
-      boarding: false,
-      alighting: true,
-    },
+    { boarding: true, alighting: false },
+    { boarding: false, alighting: true },
   ]);
 
   const navigate = useNavigate();
@@ -81,17 +86,11 @@ export const Register = () => {
 
   const config = useConfig();
   const auth = useAuth();
-
   const { createOrUpdateExtrajourney } = api(config, auth);
-
   const codespace = selectedOrganization.split(':')[0];
 
   const submit = async () => {
-    if (!validate()) {
-      console.log('Did not validate correctly');
-      console.log({ result });
-      return;
-    }
+    if (!validate()) return;
     const extraJourney = mapExtraJourney({
       codespace,
       selectedMode,
@@ -101,156 +100,175 @@ export const Register = () => {
       selectedLine,
       calls,
     });
-
     await createOrUpdateExtrajourney(
       codespace,
       selectedOrganization,
       extraJourney,
     );
-
     navigate('/ekstraavganger');
   };
 
   return (
-    <>
-      <h2 className="text-center text-white">Registrer ny ekstraavgang</h2>
+    <Box>
+      <Typography variant="h4" sx={{ mb: 2 }}>
+        Registrer ny ekstraavgang
+      </Typography>
 
-      <Contrast>
-        <TextField
-          {...result.name}
-          label="Navn"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </Contrast>
+      <TextField
+        fullWidth
+        size="small"
+        label="Navn"
+        value={name ?? ''}
+        onChange={(e) => setName(e.target.value)}
+        error={
+          (result.name as ValidationFeedback | undefined)?.variant === 'error'
+        }
+        helperText={(result.name as ValidationFeedback | undefined)?.feedback}
+        sx={{ mb: 2 }}
+      />
 
-      <br />
-
-      <Contrast>
-        <TypedDropDown
-          {...result.mode}
+      <FormControl
+        fullWidth
+        size="small"
+        sx={{ mb: 2 }}
+        error={
+          (result.mode as ValidationFeedback | undefined)?.variant === 'error'
+        }
+      >
+        <InputLabel>Mode</InputLabel>
+        <Select
+          value={selectedMode ?? ''}
           label="Mode"
-          items={Object.values(VehicleMode).map((mode) => ({
-            value: mode,
-            label: `${mode}`,
-          }))}
-          selectedItem={
-            selectedMode
-              ? { value: selectedMode || '', label: `${selectedMode}` }
-              : null
+          onChange={(e) => setSelectedMode(e.target.value as VehicleMode)}
+        >
+          {Object.values(VehicleMode).map((mode) => (
+            <MenuItem key={mode} value={mode}>
+              {mode}
+            </MenuItem>
+          ))}
+        </Select>
+        {(result.mode as ValidationFeedback | undefined)?.feedback && (
+          <Typography variant="caption" color="error" sx={{ ml: 2, mt: 0.5 }}>
+            {(result.mode as ValidationFeedback).feedback}
+          </Typography>
+        )}
+      </FormControl>
+
+      <TextField
+        fullWidth
+        size="small"
+        label="Destinasjon"
+        value={destinationDisplay ?? ''}
+        onChange={(e) => setDestinationDisplay(e.target.value)}
+        error={
+          (result.destinationDisplay as ValidationFeedback | undefined)
+            ?.variant === 'error'
+        }
+        helperText={
+          (result.destinationDisplay as ValidationFeedback | undefined)
+            ?.feedback
+        }
+        sx={{ mb: 2 }}
+      />
+
+      <Autocomplete
+        options={operators}
+        getOptionLabel={(op) => `${op.name} (${op.id})`}
+        value={selectedOperator ?? null}
+        onChange={(_, newValue) => {
+          setSelectedOperator(newValue ?? undefined);
+          if (
+            !newValue ||
+            (selectedLine && selectedLine.operator?.id !== newValue.id)
+          ) {
+            setSelectedLine(undefined);
           }
-          onChange={(mode) => setSelectedMode(mode)}
-        />
-      </Contrast>
-
-      <br />
-
-      <Contrast>
-        <TextField
-          {...result.destinationDisplay}
-          label="Destinasjon"
-          value={destinationDisplay}
-          onChange={(e) => setDestinationDisplay(e.target.value)}
-        />
-      </Contrast>
-
-      <br />
-
-      <Contrast>
-        <TypedDropDown
-          {...result.operator}
-          label="Operator"
-          items={() =>
-            operators.map((operator) => ({
-              value: operator,
-              label: `${operator.name} (${operator.id})`,
-            }))
-          }
-          selectedItem={
-            selectedOperator
-              ? {
-                  value: selectedOperator,
-                  label: `${selectedOperator.name} (${selectedOperator.id})`,
-                }
-              : null
-          }
-          onChange={(operator) => {
-            setSelectedOperator(operator);
-            if (
-              !operator ||
-              (selectedLine && selectedLine.operator?.id !== operator.id)
-            ) {
-              setSelectedLine(undefined);
+        }}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Operator"
+            size="small"
+            error={
+              (result.operator as ValidationFeedback | undefined)?.variant ===
+              'error'
             }
-          }}
-        />
-      </Contrast>
-      <br />
-
-      <Contrast>
-        <TypedDropDown
-          {...result.line}
-          label="Linje"
-          items={() =>
-            visibleLines.map((line) => ({
-              value: line,
-              label: `${line.publicCode} ${line.name} (${line.id})`,
-            }))
-          }
-          selectedItem={
-            selectedLine
-              ? {
-                  value: selectedLine,
-                  label: `${selectedLine.publicCode} ${selectedLine.name} (${selectedLine.id})`,
-                }
-              : null
-          }
-          onChange={(line) => {
-            setSelectedLine(line);
-            if (line?.operator) {
-              setSelectedOperator({
-                id: line.operator.id,
-                name: line.operator.name,
-              });
+            helperText={
+              (result.operator as ValidationFeedback | undefined)?.feedback
             }
-          }}
-        />
-      </Contrast>
-      <br />
+          />
+        )}
+        sx={{ mb: 2 }}
+      />
 
-      <Contrast>
-        <Table>
+      <Autocomplete
+        options={visibleLines}
+        getOptionLabel={(line) =>
+          `${line.publicCode} ${line.name} (${line.id})`
+        }
+        value={selectedLine ?? null}
+        onChange={(_, newValue) => {
+          setSelectedLine(newValue ?? undefined);
+          if (newValue?.operator) {
+            setSelectedOperator({
+              id: newValue.operator.id,
+              name: newValue.operator.name,
+            });
+          }
+        }}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Linje"
+            size="small"
+            error={
+              (result.line as ValidationFeedback | undefined)?.variant ===
+              'error'
+            }
+            helperText={
+              (result.line as ValidationFeedback | undefined)?.feedback
+            }
+          />
+        )}
+        sx={{ mb: 2 }}
+      />
+
+      <TableContainer component={Paper} sx={{ mb: 2 }}>
+        <Table size="small">
           <TableHead>
             <TableRow>
-              <HeaderCell>Platform (NSR-id)</HeaderCell>
-              <HeaderCell>Av-/påstigning</HeaderCell>
-              <HeaderCell>Ankomst</HeaderCell>
-              <HeaderCell>Avgang</HeaderCell>
-              <HeaderCell>{''}</HeaderCell>
+              <TableCell>Platform (NSR-id)</TableCell>
+              <TableCell>Av-/påstigning</TableCell>
+              <TableCell>Ankomst</TableCell>
+              <TableCell>Avgang</TableCell>
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
             {calls.map((call, i) => (
               <RegisterEstimatedCallRow
+                key={i}
                 validationResult={
                   result.calls
                     ? (result.calls as CallValidationResult[])[i]
                     : undefined
                 }
-                key={i}
                 call={call}
                 isFirst={i === 0}
                 isLast={i === calls.length - 1}
-                onChange={(call: Call) => {
-                  setCalls([...calls.slice(0, i), call, ...calls.slice(i + 1)]);
+                onChange={(updatedCall: Call) => {
+                  setCalls([
+                    ...calls.slice(0, i),
+                    updatedCall,
+                    ...calls.slice(i + 1),
+                  ]);
                 }}
                 onAdd={() =>
                   setCalls([
                     ...calls.slice(0, i + 1),
-                    {
-                      boarding: true,
-                      alighting: true,
-                    },
+                    { boarding: true, alighting: true },
                     ...calls.slice(i + 1),
                   ])
                 }
@@ -259,13 +277,11 @@ export const Register = () => {
             ))}
           </TableBody>
         </Table>
+      </TableContainer>
 
-        <br />
-
-        <PrimaryButton onClick={() => submit()}>
-          Opprett ekstraavgang
-        </PrimaryButton>
-      </Contrast>
-    </>
+      <Button variant="contained" onClick={submit}>
+        Opprett ekstraavgang
+      </Button>
+    </Box>
   );
 };
