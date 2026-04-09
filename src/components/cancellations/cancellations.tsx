@@ -1,14 +1,18 @@
 import { Route, Routes } from 'react-router-dom';
-import Overview from './overview';
-import { Register } from './register';
-import Edit from './edit';
+import Overview from './Overview';
+import { Register } from './Register';
+import Edit from './Edit';
 import { useConfig } from '../../config/ConfigContext';
 import api from '../../api/api';
 import { useLines } from '../../hooks/useLines';
 import { useCancellations } from '../../hooks/useCancellations';
 import { useAuth } from 'react-oidc-context';
 
-export const Cancellations = ({ selectedOrganization }: any) => {
+interface CancellationsProps {
+  selectedOrganization: string;
+}
+
+export const Cancellations = ({ selectedOrganization }: CancellationsProps) => {
   const lines = useLines(selectedOrganization);
   const config = useConfig();
   const auth = useAuth();

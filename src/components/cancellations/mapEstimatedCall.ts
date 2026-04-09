@@ -1,11 +1,11 @@
 export const mapEstimatedCall = (
-  estimatedCall,
-  departureData,
-  departureStops,
+  estimatedCall: any,
+  departureData: any,
+  departureStops: string[],
 ) => {
   const i = estimatedCall.stopPositionInPattern;
 
-  const call = {
+  const call: any = {
     stopPointRef: estimatedCall.quay.id,
     order: estimatedCall.stopPositionInPattern + 1,
     stopPointName: estimatedCall.quay.name,
