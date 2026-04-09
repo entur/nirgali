@@ -18,7 +18,7 @@ interface EditProps {
   organization: string;
   lines: any[];
   api: any;
-  refetch: () => Promise<void>;
+  refetch: () => any;
 }
 
 const Edit = ({

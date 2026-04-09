@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { useConfig } from '../config/ConfigContext';
 import { useAuth } from 'react-oidc-context';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { loadExtrajourneys } from '../actions/extrajourneys';
+import { loadExtrajourneys } from '../reducers/extrajourneysSlice';
 
 export const useExtrajourneys = (
   codespace: string,
@@ -12,18 +12,18 @@ export const useExtrajourneys = (
   const auth = useAuth();
   const config = useConfig();
   const dispatch = useAppDispatch();
-  const extrajourneys = useAppSelector((state) => state.extrajourneys);
+  const extrajourneys = useAppSelector((state) => state.extrajourneys.data);
 
   const fetchExtrajourneys = useCallback(() => {
     if (codespace && authority) {
       return dispatch(
-        loadExtrajourneys(
+        loadExtrajourneys({
           config,
           auth,
           codespace,
           authority,
           showCompletedTrips,
-        ),
+        }),
       );
     }
     return Promise.resolve();

@@ -19,7 +19,7 @@ interface RegisterProps {
   lines: any[];
   api: any;
   organization: string;
-  refetch: () => Promise<void>;
+  refetch: () => any;
 }
 
 export const Register = ({
