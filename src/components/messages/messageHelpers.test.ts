@@ -71,7 +71,10 @@ describe('messageHelpers', () => {
 
   describe('createAffectsLineWithStops', () => {
     it('creates line affects with stops', () => {
-      const stops = [{ value: 'NSR:StopPlace:1' }, { value: 'NSR:StopPlace:2' }];
+      const stops = [
+        { value: 'NSR:StopPlace:1' },
+        { value: 'NSR:StopPlace:2' },
+      ];
       const result = createAffectsLineWithStops('NSB:Line:123', stops);
       const affectedStopPoints =
         result.networks.affectedNetwork.affectedLine.routes.affectedRoute
@@ -101,9 +104,7 @@ describe('messageHelpers', () => {
         result.vehicleJourneys.affectedVehicleJourney.framedVehicleJourneyRef
           .datedVehicleJourneyRef,
       ).toBe('NSB:ServiceJourney:123');
-      expect(
-        result.vehicleJourneys.affectedVehicleJourney.route,
-      ).toBeNull();
+      expect(result.vehicleJourneys.affectedVehicleJourney.route).toBeNull();
     });
   });
 

@@ -90,8 +90,16 @@ describe('useExtrajourneyValidation', () => {
       useExtrajourneyValidation({
         ...validInput,
         calls: [
-          { boarding: true, alighting: false, departure: new Date().toISOString() },
-          { boarding: false, alighting: true, arrival: new Date().toISOString() },
+          {
+            boarding: true,
+            alighting: false,
+            departure: new Date().toISOString(),
+          },
+          {
+            boarding: false,
+            alighting: true,
+            arrival: new Date().toISOString(),
+          },
         ],
       }),
     );
