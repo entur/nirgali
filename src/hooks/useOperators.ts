@@ -27,8 +27,6 @@ export const useOperators = (selectedOrganization: string) => {
             ),
           ),
         );
-      } else {
-        console.log('Could not find any operators');
       }
     };
     getOperators();

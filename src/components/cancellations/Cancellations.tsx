@@ -1,0 +1,56 @@
+import { Route, Routes } from 'react-router-dom';
+import Overview from './Overview';
+import { Register } from './Register';
+import Edit from './Edit';
+import { useConfig } from '../../config/ConfigContext';
+import api from '../../api/api';
+import { useLines } from '../../hooks/useLines';
+import { useCancellations } from '../../hooks/useCancellations';
+import { useAuth } from 'react-oidc-context';
+
+interface CancellationsProps {
+  selectedOrganization: string;
+}
+
+export const Cancellations = ({ selectedOrganization }: CancellationsProps) => {
+  const lines = useLines(selectedOrganization);
+  const config = useConfig();
+  const auth = useAuth();
+
+  const { cancellations, refetch } = useCancellations(
+    selectedOrganization.split(':')[0],
+    selectedOrganization,
+  );
+
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={<Overview cancellations={cancellations} lines={lines} />}
+      />
+      <Route
+        path="/:id"
+        element={
+          <Edit
+            cancellations={cancellations}
+            lines={lines}
+            api={api(config, auth)}
+            organization={selectedOrganization}
+            refetch={refetch}
+          />
+        }
+      />
+      <Route
+        path="/ny"
+        element={
+          <Register
+            lines={lines}
+            api={api(config, auth)}
+            organization={selectedOrganization}
+            refetch={refetch}
+          />
+        }
+      />
+    </Routes>
+  );
+};

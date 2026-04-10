@@ -1,30 +1,27 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useConfig } from '../config/ConfigContext';
-import api from '../api/api';
 import { useAuth } from 'react-oidc-context';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { loadCancellations } from '../reducers/cancellationsSlice';
 
 export const useCancellations = (codespace: string, authority: string) => {
   const auth = useAuth();
-  const [cancellations, setCancellations] = useState([]);
   const config = useConfig();
+  const dispatch = useAppDispatch();
+  const cancellations = useAppSelector((state) => state.cancellations.data);
 
-  const getCancellations = useCallback(async () => {
-    const response = await api(config, auth).getCancellations(
-      codespace,
-      authority,
-    );
-    if (response.data) {
-      setCancellations(structuredClone(response.data.cancellations));
-    } else {
-      console.log('Could not find any cancellations for this organization');
+  const fetchCancellations = useCallback(() => {
+    if (codespace && authority) {
+      return dispatch(
+        loadCancellations({ config, auth, codespace, authority }),
+      );
     }
-  }, [codespace, authority, config, auth]);
+    return Promise.resolve();
+  }, [dispatch, codespace, authority, config, auth]);
 
   useEffect(() => {
-    if (codespace && authority) {
-      getCancellations();
-    }
-  }, [codespace, authority, getCancellations]);
+    fetchCancellations();
+  }, [fetchCancellations]);
 
-  return { cancellations, refetch: getCancellations };
+  return { cancellations, refetch: fetchCancellations };
 };
