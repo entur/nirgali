@@ -1,12 +1,17 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Select from '@mui/material/Select';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Divider from '@mui/material/Divider';
+import Select from '@mui/material/Select';
 import { SelectChangeEvent } from '@mui/material/Select';
+import AccountCircle from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import logo from '../../img/entur_logo.jpg';
 
@@ -23,6 +28,8 @@ export const Header = ({
   onSelectOrganization,
   onLogout,
 }: HeaderProps) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
   const handleChange = useCallback(
     (event: SelectChangeEvent) => {
       onSelectOrganization(event.target.value);
@@ -30,13 +37,21 @@ export const Header = ({
     [onSelectOrganization],
   );
 
+  const selectedOrgName = organizations.find(
+    (org) => org.id === selectedOrganization,
+  )?.name;
+
   return (
     <AppBar position="fixed">
       <Toolbar sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Box
           component="a"
           href="/"
-          sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            textDecoration: 'none',
+          }}
         >
           <Box
             component="img"
@@ -77,14 +92,43 @@ export const Header = ({
           </Select>
         )}
 
-        <Button
+        <IconButton
           color="inherit"
-          onClick={onLogout}
-          startIcon={<LogoutIcon />}
-          sx={{ ml: 1 }}
+          onClick={(e) => setAnchorEl(e.currentTarget)}
+          aria-label="Brukermeny"
         >
-          <Typography variant="body2">Logg ut</Typography>
-        </Button>
+          <AccountCircle />
+        </IconButton>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          slotProps={{ paper: { sx: { minWidth: 200 } } }}
+        >
+          {selectedOrgName && (
+            <Box sx={{ px: 2, py: 1 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Organisasjon
+              </Typography>
+              <Typography variant="body2">{selectedOrgName}</Typography>
+            </Box>
+          )}
+          {selectedOrgName && <Divider />}
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null);
+              onLogout();
+            }}
+          >
+            <ListItemIcon>
+              <LogoutIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Logg ut</ListItemText>
+          </MenuItem>
+        </Menu>
       </Toolbar>
     </AppBar>
   );
