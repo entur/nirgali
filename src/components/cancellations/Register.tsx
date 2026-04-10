@@ -77,12 +77,29 @@ export const Register = ({
       }));
   }, [departures]);
 
+  const codespace = organization.split(':')[0];
+
   const callApiDeparture = useCallback(async () => {
     if (!chosenLine || !departureDate) return;
     const dateStr = departureDate.toISOString().split('T')[0];
-    const response = await api.getDepartures(chosenLine, dateStr);
-    setDepartures(response.data.serviceJourneys);
-  }, [chosenLine, departureDate, api]);
+
+    const [departureResponse, extraJourneysResponse] = await Promise.all([
+      api.getDepartures(chosenLine, dateStr),
+      api.getExtrajourneys(codespace, organization, true),
+    ]);
+
+    const extraJourneyIds = new Set(
+      (extraJourneysResponse.data?.extrajourneys ?? []).map(
+        (ej: any) => ej.estimatedVehicleJourney.estimatedVehicleJourneyCode,
+      ),
+    );
+
+    const filtered = departureResponse.data.serviceJourneys.filter(
+      (sj: any) => !extraJourneyIds.has(sj.id),
+    );
+
+    setDepartures(filtered);
+  }, [chosenLine, departureDate, api, codespace, organization]);
 
   const handleSubmit = useCallback(async () => {
     const departureData = departures.find((d: any) => d.id === chosenDeparture);
