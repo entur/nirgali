@@ -49,7 +49,8 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
   const [editedCalls, setEditedCalls] = useState<EstimatedCall[] | null>(null);
 
   // Initialize editable calls from the source data
-  const calls = editedCalls ??
+  const calls =
+    editedCalls ??
     extrajourney?.estimatedVehicleJourney.estimatedCalls.estimatedCall ??
     [];
 
@@ -77,14 +78,25 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
         selectedOrganization,
         updated,
       );
-      dispatch(showSuccessNotification('Lagret', 'Ekstraavgangen ble oppdatert'));
+      dispatch(
+        showSuccessNotification('Lagret', 'Ekstraavgangen ble oppdatert'),
+      );
       navigate('/ekstraavganger');
     } catch {
       dispatch(showErrorNotification('Feil', 'Kunne ikke lagre endringer'));
     } finally {
       setSaving(false);
     }
-  }, [extrajourney, calls, config, auth, codespace, selectedOrganization, dispatch, navigate]);
+  }, [
+    extrajourney,
+    calls,
+    config,
+    auth,
+    codespace,
+    selectedOrganization,
+    dispatch,
+    navigate,
+  ]);
 
   const handleCancelJourney = useCallback(async () => {
     if (!extrajourney) return;
@@ -97,7 +109,8 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
         (call: EstimatedCall) => {
           call.cancellation = true;
           if (call.arrivalBoardingActivity) call.arrivalStatus = 'cancelled';
-          if (call.departureBoardingActivity) call.departureStatus = 'cancelled';
+          if (call.departureBoardingActivity)
+            call.departureStatus = 'cancelled';
         },
       );
       updated.estimatedVehicleJourney.recordedAtTime = new Date().toISOString();
@@ -107,14 +120,26 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
         selectedOrganization,
         updated,
       );
-      dispatch(showSuccessNotification('Kansellert', 'Ekstraavgangen ble kansellert'));
+      dispatch(
+        showSuccessNotification('Kansellert', 'Ekstraavgangen ble kansellert'),
+      );
       navigate('/ekstraavganger');
     } catch {
-      dispatch(showErrorNotification('Feil', 'Kunne ikke kansellere ekstraavgang'));
+      dispatch(
+        showErrorNotification('Feil', 'Kunne ikke kansellere ekstraavgang'),
+      );
     } finally {
       setSaving(false);
     }
-  }, [extrajourney, config, auth, codespace, selectedOrganization, dispatch, navigate]);
+  }, [
+    extrajourney,
+    config,
+    auth,
+    codespace,
+    selectedOrganization,
+    dispatch,
+    navigate,
+  ]);
 
   if (!extrajourney) return null;
 
@@ -130,9 +155,16 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
             <Typography variant="h5" sx={{ mb: 2 }}>
               Turinformasjon
             </Typography>
-            <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{ flexWrap: 'wrap', gap: 1 }}
+            >
               <Chip label={evj.publishedLineName} />
-              <Chip label={evj.estimatedVehicleJourneyCode} variant="outlined" />
+              <Chip
+                label={evj.estimatedVehicleJourneyCode}
+                variant="outlined"
+              />
               <Chip label={evj.vehicleMode} variant="outlined" />
               <Chip
                 label={active ? 'Aktiv' : 'Inaktiv'}
@@ -197,10 +229,19 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
         message="Er du sikker på at du vil kansellere hele ekstraavgangen? Alle stopp vil bli markert som kansellert."
         onClose={() => setConfirmCancel(false)}
         buttons={[
-          <Button key="no" variant="outlined" onClick={() => setConfirmCancel(false)}>
+          <Button
+            key="no"
+            variant="outlined"
+            onClick={() => setConfirmCancel(false)}
+          >
             Avbryt
           </Button>,
-          <Button key="yes" variant="contained" color="error" onClick={handleCancelJourney}>
+          <Button
+            key="yes"
+            variant="contained"
+            color="error"
+            onClick={handleCancelJourney}
+          >
             Kanseller
           </Button>,
         ]}

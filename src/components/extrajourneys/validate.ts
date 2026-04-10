@@ -131,8 +131,7 @@ export const runValidation = (input: ValidationInput): ValidationResult => {
         )
       ) {
         callResult.arrival = {
-          feedback:
-            'Ankomst på siste stopp kan ikke være mer enn 7 dager frem',
+          feedback: 'Ankomst på siste stopp kan ikke være mer enn 7 dager frem',
           variant: 'error',
         };
       }

@@ -56,8 +56,7 @@ export function QuayEditSelect({
           },
         );
         const data = await response.json();
-        const siblingQuays: Quay[] =
-          data.data?.quay?.stopPlace?.quays ?? [];
+        const siblingQuays: Quay[] = data.data?.quay?.stopPlace?.quays ?? [];
 
         const quayOptions: QuayOption[] = siblingQuays.map((quay) => ({
           value: quay,

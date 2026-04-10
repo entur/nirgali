@@ -162,9 +162,7 @@ export const DetailEstimatedCallRow = ({
                 size="small"
               />
             }
-            label={
-              <Typography variant="body2">Kanseller</Typography>
-            }
+            label={<Typography variant="body2">Kanseller</Typography>}
           />
         </Stack>
       </TableCell>

@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useExtrajourneyValidation, runValidation, validateCallTimes, CallValidationResult } from './validate';
+import {
+  useExtrajourneyValidation,
+  runValidation,
+  validateCallTimes,
+  CallValidationResult,
+} from './validate';
 import { VehicleMode } from './types';
 
 const validInput = {
@@ -65,7 +70,11 @@ describe('runValidation (pure function)', () => {
     const result = runValidation({
       ...validInput,
       calls: [
-        { boarding: true, alighting: false, departure: new Date().toISOString() },
+        {
+          boarding: true,
+          alighting: false,
+          departure: new Date().toISOString(),
+        },
         { boarding: false, alighting: true, arrival: new Date().toISOString() },
       ],
     });
