@@ -90,7 +90,12 @@ export const Overview = ({ selectedOrganization }: OverviewProps) => {
                     const calls = evj.estimatedCalls.estimatedCall;
                     const firstCall = calls[0];
                     const lastCall = calls[calls.length - 1];
-                    const active = isJourneyActive(evj.expiresAtEpochMs);
+                    const active = isJourneyActive(
+                      evj.expiresAtEpochMs,
+                      evj.cancellation,
+                    );
+                    const expired = !isJourneyActive(evj.expiresAtEpochMs);
+                    const cancelled = evj.cancellation ?? false;
 
                     return (
                       <TableRow
@@ -105,11 +110,20 @@ export const Overview = ({ selectedOrganization }: OverviewProps) => {
                         }}
                       >
                         <TableCell>
-                          <Chip
-                            label={active ? 'Aktiv' : 'Inaktiv'}
-                            color={active ? 'success' : 'error'}
-                            size="small"
-                          />
+                          <Stack spacing={0.5} alignItems="flex-start">
+                            <Chip
+                              label={expired ? 'Utløpt' : 'Aktiv'}
+                              color={expired ? 'default' : 'success'}
+                              size="small"
+                            />
+                            {cancelled && (
+                              <Chip
+                                label="Kansellert"
+                                color="error"
+                                size="small"
+                              />
+                            )}
+                          </Stack>
                         </TableCell>
                         <TableCell>{evj.publishedLineName}</TableCell>
                         <TableCell>{evj.estimatedVehicleJourneyCode}</TableCell>

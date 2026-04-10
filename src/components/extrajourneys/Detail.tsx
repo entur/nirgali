@@ -26,6 +26,7 @@ import {
   showErrorNotification,
 } from '../../reducers/notificationSlice';
 import { isJourneyActive } from '../../util/formatters';
+import { loadExtrajourneys } from '../../reducers/extrajourneysSlice';
 import api from '../../api/api';
 import { useConfig } from '../../config/ConfigContext';
 import { useAuth } from 'react-oidc-context';
@@ -82,6 +83,15 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
         selectedOrganization,
         updated,
       );
+      await dispatch(
+        loadExtrajourneys({
+          config,
+          auth,
+          codespace,
+          authority: selectedOrganization,
+          showCompletedTrips: true,
+        }),
+      );
       dispatch(
         showSuccessNotification('Lagret', 'Ekstraavgangen ble oppdatert'),
       );
@@ -124,6 +134,15 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
         selectedOrganization,
         updated,
       );
+      await dispatch(
+        loadExtrajourneys({
+          config,
+          auth,
+          codespace,
+          authority: selectedOrganization,
+          showCompletedTrips: true,
+        }),
+      );
       dispatch(
         showSuccessNotification('Kansellert', 'Ekstraavgangen ble kansellert'),
       );
@@ -148,8 +167,9 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
   if (!extrajourney) return null;
 
   const evj = extrajourney.estimatedVehicleJourney;
-  const active = isJourneyActive(evj.expiresAtEpochMs);
-  const journeyCancelled = evj.cancellation;
+  const journeyCancelled = evj.cancellation ?? false;
+  const expired = !isJourneyActive(evj.expiresAtEpochMs);
+  const editable = !expired && !journeyCancelled;
 
   return (
     <Page backButtonTitle="Oversikt" title="Ekstraavgang">
@@ -165,8 +185,8 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
               <Typography variant="h5">Turdetaljer</Typography>
               <Stack direction="row" spacing={1}>
                 <Chip
-                  label={active ? 'Aktiv' : 'Inaktiv'}
-                  color={active ? 'success' : 'error'}
+                  label={expired ? 'Utløpt' : 'Aktiv'}
+                  color={expired ? 'default' : 'success'}
                   size="small"
                 />
                 {journeyCancelled && (
@@ -274,7 +294,7 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
             </TableContainer>
           </Paper>
 
-          {active && !journeyCancelled && (
+          {editable && (
             <Stack direction="row" spacing={2}>
               <Button variant="contained" onClick={handleSave}>
                 Lagre endringer

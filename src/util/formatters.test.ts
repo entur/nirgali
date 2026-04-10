@@ -1,10 +1,28 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
+  isJourneyActive,
   isMessageExpired,
   formatDate,
   formatDepartureOption,
   getCancellationLabel,
 } from './formatters';
+
+describe('isJourneyActive', () => {
+  it('returns false when cancelled regardless of expiry', () => {
+    const farFuture = Date.now() + 86400000 * 30;
+    expect(isJourneyActive(farFuture, true)).toBe(false);
+  });
+
+  it('returns false when expired', () => {
+    expect(isJourneyActive(0)).toBe(false);
+  });
+
+  it('returns true when not cancelled and not expired', () => {
+    const farFuture = Date.now() + 86400000 * 30;
+    expect(isJourneyActive(farFuture)).toBe(true);
+    expect(isJourneyActive(farFuture, false)).toBe(true);
+  });
+});
 
 describe('isMessageExpired', () => {
   it('returns true when endTime is in the past', () => {
