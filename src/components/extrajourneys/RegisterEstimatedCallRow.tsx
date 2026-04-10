@@ -94,6 +94,7 @@ export const RegisterEstimatedCallRow = ({
       <TableCell>
         {!isFirst && (
           <DateTimePicker
+            ampm={false}
             value={call.arrival ? new Date(call.arrival) : null}
             onChange={(d) => onFieldChange('arrival', d?.toISOString())}
             slotProps={{
@@ -110,6 +111,7 @@ export const RegisterEstimatedCallRow = ({
       <TableCell>
         {!isLast && (
           <DateTimePicker
+            ampm={false}
             value={call.departure ? new Date(call.departure) : null}
             onChange={(d) => onFieldChange('departure', d?.toISOString())}
             slotProps={{
