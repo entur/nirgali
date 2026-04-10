@@ -19,8 +19,6 @@ export const mapExtraJourney = ({
   selectedLine?: Line;
   calls: Call[];
 }): ExtraJourney => {
-  const lineRef = `${codespace}:Line:${window.crypto.randomUUID()}`;
-
   // validation
   if (
     !selectedMode ||
@@ -35,7 +33,7 @@ export const mapExtraJourney = ({
   return {
     estimatedVehicleJourney: {
       recordedAtTime: now(getLocalTimeZone()).toDate().toISOString(),
-      lineRef: lineRef,
+      lineRef: selectedLine.id,
       directionRef: '0',
       estimatedVehicleJourneyCode: `${codespace}:ServiceJourney:${window.crypto.randomUUID()}`,
       extraJourney: true,

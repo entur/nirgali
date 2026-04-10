@@ -50,6 +50,8 @@ describe('mapExtraJourney', () => {
     expect(evj.publishedLineName).toBe('Test Journey');
     expect(evj.operatorRef).toBe('OP:1');
     expect(evj.externalLineRef).toBe('NSB:Line:1');
+    expect(evj.lineRef).toBe('NSB:Line:1');
+    expect(evj.externalLineRef).toBe('NSB:Line:1');
     expect(evj.dataSource).toBe('NSB');
     expect(evj.monitored).toBe(true);
     expect(evj.isCompleteStopSequence).toBe(true);
