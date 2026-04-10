@@ -5,6 +5,7 @@ import Toolbar from '@mui/material/Toolbar';
 import { useAuth } from 'react-oidc-context';
 import { Header } from './Header';
 import { AppRouter } from './AppRouter';
+import Notification from '../common/Notification';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { useOrganizations } from '../../hooks/useOrganizations';
 import { setSelectedOrganization } from '../../reducers/organizationsSlice';
@@ -44,6 +45,7 @@ export const App = () => {
           />
         )}
       </Container>
+      <Notification />
     </Box>
   );
 };
