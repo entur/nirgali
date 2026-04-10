@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
 import Toolbar from '@mui/material/Toolbar';
 import { useAuth } from 'react-oidc-context';
 import { Header } from './Header';
@@ -36,15 +35,13 @@ export const App = () => {
         }
       />
       <Toolbar />
-      <Container maxWidth="lg" sx={{ py: 3, flex: 1 }}>
-        {selectedOrganization && (
-          <AppRouter
-            allowedCodespaces={allowedCodespaces}
-            isAdmin={isAdmin}
-            selectedOrganization={selectedOrganization}
-          />
-        )}
-      </Container>
+      {selectedOrganization && (
+        <AppRouter
+          allowedCodespaces={allowedCodespaces}
+          isAdmin={isAdmin}
+          selectedOrganization={selectedOrganization}
+        />
+      )}
       <Notification />
     </Box>
   );

@@ -1,7 +1,9 @@
 import { useCallback, ReactNode } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const tabsMap: Record<string, number> = {
@@ -34,25 +36,40 @@ export const TabsContainer = ({
   );
 
   return (
-    <Box>
-      <Tabs
-        value={currentTab}
-        onChange={handleTabChange}
+    <>
+      <Paper
+        square
+        elevation={1}
         sx={{
-          mb: 2,
-          '& .MuiTab-root': { color: 'text.secondary' },
-          '& .Mui-selected': { color: 'primary.main' },
+          position: 'sticky',
+          top: 64,
+          zIndex: (theme) => theme.zIndex.appBar - 1,
+          borderBottom: 1,
+          borderColor: 'divider',
         }}
       >
-        {permissions.includes('MESSAGES') && <Tab label="Avviksmeldinger" />}
-        {permissions.includes('CANCELLATIONS') && (
-          <Tab label="Kanselleringer" />
-        )}
-        {permissions.includes('EXTRAJOURNEYS') && (
-          <Tab label="Ekstraavganger" />
-        )}
-      </Tabs>
-      {children(currentTab)}
-    </Box>
+        <Container maxWidth="lg">
+          <Tabs
+            value={currentTab}
+            onChange={handleTabChange}
+            indicatorColor="primary"
+            textColor="primary"
+          >
+            {permissions.includes('MESSAGES') && (
+              <Tab label="Avviksmeldinger" />
+            )}
+            {permissions.includes('CANCELLATIONS') && (
+              <Tab label="Kanselleringer" />
+            )}
+            {permissions.includes('EXTRAJOURNEYS') && (
+              <Tab label="Ekstraavganger" />
+            )}
+          </Tabs>
+        </Container>
+      </Paper>
+      <Container maxWidth="lg" sx={{ py: 3 }}>
+        {children(currentTab)}
+      </Container>
+    </>
   );
 };
