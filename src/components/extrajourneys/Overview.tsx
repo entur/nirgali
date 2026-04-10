@@ -96,7 +96,13 @@ export const Overview = ({ selectedOrganization }: OverviewProps) => {
                       <TableRow
                         key={evj.estimatedVehicleJourneyCode}
                         hover
-                        sx={{ opacity: active ? 1 : 0.6 }}
+                        onClick={() =>
+                          navigate(`/ekstraavganger/${extrajourney.id}`)
+                        }
+                        sx={{
+                          opacity: active ? 1 : 0.6,
+                          cursor: 'pointer',
+                        }}
                       >
                         <TableCell>
                           <Chip

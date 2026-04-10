@@ -21,6 +21,9 @@ export type EstimatedCall = {
   expectedDepartureTime: string | null;
   departureBoardingActivity: DepartureBoardingActivity | null;
   arrivalBoardingActivity: ArrivalBoardingActivity | null;
+  cancellation?: boolean;
+  arrivalStatus?: string | null;
+  departureStatus?: string | null;
 };
 
 export enum VehicleMode {
@@ -46,6 +49,7 @@ export type EstimatedVehicleJourney = {
   operatorRef: string;
   monitored: true;
   dataSource: string;
+  cancellation?: boolean;
   estimatedCalls: {
     estimatedCall: EstimatedCall[];
   };

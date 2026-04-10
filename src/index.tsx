@@ -3,6 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { nb } from 'date-fns/locale/nb';
 import { Provider } from 'react-redux';
 import { AuthProvider, hasAuthParams, useAuth } from 'react-oidc-context';
 import { useEffect } from 'react';
@@ -43,7 +44,7 @@ const renderApp = (config: Config) => {
     <ConfigContext.Provider value={config}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={nb}>
           <Provider store={store}>
             <AuthProvider
               {...config.oidcConfig}

@@ -1,4 +1,5 @@
 import { Overview } from './Overview';
+import { Detail } from './Detail';
 import { Route, Routes } from 'react-router-dom';
 import { Register } from './Register';
 
@@ -21,6 +22,10 @@ export const ExtraJourneys = ({ selectedOrganization }: ExtraJourneysProps) => {
             selectedOrganization={selectedOrganization}
           />
         }
+      />
+      <Route
+        path="/:id"
+        element={<Detail selectedOrganization={selectedOrganization} />}
       />
     </Routes>
   );

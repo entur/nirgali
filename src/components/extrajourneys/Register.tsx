@@ -275,10 +275,8 @@ export const Register = ({ selectedOrganization }: RegisterProps) => {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>Platform (NSR-id)</TableCell>
-                  <TableCell>Av-/påstigning</TableCell>
-                  <TableCell>Ankomst</TableCell>
-                  <TableCell>Avgang</TableCell>
+                  <TableCell>Stoppested</TableCell>
+                  <TableCell>Tider og av-/påstigning</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
