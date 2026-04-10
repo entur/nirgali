@@ -51,6 +51,8 @@ export function QuaySelect({
 
   return (
     <Autocomplete
+      fullWidth
+      sx={{ minWidth: 250 }}
       options={options}
       getOptionLabel={(option) => option.label}
       value={

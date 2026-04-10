@@ -70,6 +70,8 @@ export function StopPlaceAutocomplete({
 
   return (
     <Autocomplete
+      fullWidth
+      sx={{ minWidth: 250 }}
       options={options}
       getOptionLabel={(option) => option.label}
       loading={loading}
