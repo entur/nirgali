@@ -2,14 +2,17 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import StopPicker from '../common/StopPicker';
+import Page from '../common/Page';
+import OverlayLoader from '../common/OverlayLoader';
+import ConfirmDialog from '../common/ConfirmDialog';
 import { mapEstimatedCall } from './mapEstimatedCall';
 import { getLineOption } from '../../util/getLineOption';
 import { formatDepartureOption } from '../../util/formatters';
@@ -18,6 +21,11 @@ import {
   determineCancellationStatus,
   getQuayLabels,
 } from './cancellationHelpers';
+import { useAppDispatch } from '../../store/hooks';
+import {
+  showSuccessNotification,
+  showErrorNotification,
+} from '../../reducers/notificationSlice';
 
 interface EditProps {
   cancellations: any[];
@@ -35,7 +43,12 @@ const Edit = ({
   refetch,
 }: EditProps) => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { id: cancellationId } = useParams<{ id: string }>();
+  const [saving, setSaving] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<
+    'cancel' | 'restore' | null
+  >(null);
 
   const cancellation = useMemo(
     () => cancellations.find(({ id }: any) => id === cancellationId),
@@ -52,16 +65,14 @@ const Edit = ({
         cancellation.estimatedVehicleJourney.framedVehicleJourneyRef;
       api
         .getServiceJourney(datedVehicleJourneyRef, dataFrameRef)
-        .then(({ data }: any) => {
-          setServiceJourney(data.serviceJourney);
-        });
+        .then(({ data }: any) => setServiceJourney(data.serviceJourney));
     }
   }, [cancellationId, api, cancellation]);
 
-  const handleSubmit = useCallback(
-    async (event: React.FormEvent) => {
-      event.preventDefault();
-
+  const executeCancellation = useCallback(async () => {
+    setConfirmAction(null);
+    setSaving(true);
+    try {
       cancellation.estimatedVehicleJourney.cancellation =
         !isDepartureStops && departureStops.length === 0;
       cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall =
@@ -71,31 +82,37 @@ const Edit = ({
       cancellation.estimatedVehicleJourney.recordedAtTime =
         new Date().toISOString();
 
-      const codespace = organization.split(':')[0];
       await api.createOrUpdateCancellation(
-        codespace,
+        organization.split(':')[0],
         organization,
         cancellation,
       );
       await refetch();
+      dispatch(
+        showSuccessNotification('Kansellert', 'Avgangen ble kansellert'),
+      );
       navigate('/kanselleringer');
-    },
-    [
-      api,
-      refetch,
-      cancellation,
-      departureStops,
-      isDepartureStops,
-      navigate,
-      organization,
-      serviceJourney,
-    ],
-  );
+    } catch {
+      dispatch(showErrorNotification('Feil', 'Kunne ikke kansellere avgang'));
+    } finally {
+      setSaving(false);
+    }
+  }, [
+    api,
+    refetch,
+    cancellation,
+    departureStops,
+    isDepartureStops,
+    navigate,
+    organization,
+    serviceJourney,
+    dispatch,
+  ]);
 
-  const handleRestore = useCallback(
-    async (event: React.FormEvent) => {
-      event.preventDefault();
-
+  const executeRestore = useCallback(async () => {
+    setConfirmAction(null);
+    setSaving(true);
+    try {
       cancellation.estimatedVehicleJourney.cancellation = false;
       cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall =
         restoreCancellationCalls(
@@ -105,21 +122,32 @@ const Edit = ({
       cancellation.estimatedVehicleJourney.recordedAtTime =
         new Date().toISOString();
 
-      const codespace = organization.split(':')[0];
       await api.createOrUpdateCancellation(
-        codespace,
+        organization.split(':')[0],
         organization,
         cancellation,
       );
       await refetch();
+      dispatch(
+        showSuccessNotification('Gjenopprettet', 'Avgangen ble gjenopprettet'),
+      );
       navigate('/kanselleringer');
-    },
-    [api, refetch, cancellation, navigate, organization, serviceJourney],
-  );
+    } catch {
+      dispatch(showErrorNotification('Feil', 'Kunne ikke gjenopprette avgang'));
+    } finally {
+      setSaving(false);
+    }
+  }, [
+    api,
+    refetch,
+    cancellation,
+    navigate,
+    organization,
+    serviceJourney,
+    dispatch,
+  ]);
 
-  if (!cancellation || !lines?.length) {
-    return null;
-  }
+  if (!cancellation || !lines?.length) return null;
 
   const { isCancelled, isPartiallyCancelled } = determineCancellationStatus(
     cancellation.estimatedVehicleJourney,
@@ -130,102 +158,165 @@ const Edit = ({
   const quayLabels = getQuayLabels(cancellation, serviceJourney);
 
   return (
-    <Box component="form" onSubmit={handleSubmit} autoComplete="off">
-      <Typography variant="h4" sx={{ mb: 2 }}>
-        Endre kansellering
-      </Typography>
-
-      <Typography variant="subtitle1" sx={{ mb: 1 }}>
-        Avgang
-      </Typography>
-
-      {serviceJourney && (
-        <Box sx={{ mb: 2 }}>
-          <Chip
-            label={getLineOption(lines, serviceJourney.line.id)?.label}
-            sx={{ mb: 1 }}
-          />
-
-          <Box sx={{ mb: 1 }}>
-            <Typography variant="subtitle1">Dato (driftsdøgn)</Typography>
-            <DatePicker
-              label="Dato"
-              value={
-                new Date(
-                  cancellation.estimatedVehicleJourney.framedVehicleJourneyRef
-                    .dataFrameRef,
-                )
-              }
-              disabled
-              slotProps={{ textField: { size: 'small', fullWidth: true } }}
-            />
-          </Box>
-
-          {departureLabel && <Chip label={departureLabel} sx={{ mb: 1 }} />}
-        </Box>
-      )}
-
-      {serviceJourney && isPartiallyCancelled && (
-        <Box sx={{ mb: 2 }}>
-          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-            {quayLabels.map((label) => (
-              <Chip key={label} label={label} size="small" variant="outlined" />
-            ))}
-          </Stack>
-        </Box>
-      )}
-
-      {serviceJourney &&
-        !cancellation.estimatedVehicleJourney.cancellation &&
-        !isPartiallyCancelled && (
-          <>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={isDepartureStops}
-                  onChange={(e) => setIsDepartureStops(e.target.checked)}
+    <Page backButtonTitle="Oversikt" title="Endre kansellering">
+      <OverlayLoader isLoading={saving} text="Lagrer...">
+        <>
+          <Paper sx={{ p: 3, mb: 2 }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              Avgang
+            </Typography>
+            {serviceJourney && (
+              <Stack spacing={2}>
+                <Chip
+                  label={getLineOption(lines, serviceJourney.line.id)?.label}
+                  sx={{ alignSelf: 'flex-start' }}
                 />
-              }
-              label="Gjelder kanselleringen for spesifikke stopp?"
-              sx={{ mb: 2 }}
-            />
-            {isDepartureStops && (
-              <Box sx={{ mb: 2 }}>
-                <StopPicker
-                  isMulti
-                  api={api}
-                  stops={
-                    serviceJourney?.estimatedCalls?.map((ec: any) => ec.quay) ??
-                    []
+                <DatePicker
+                  label="Dato (driftsdøgn)"
+                  value={
+                    new Date(
+                      cancellation.estimatedVehicleJourney
+                        .framedVehicleJourneyRef.dataFrameRef,
+                    )
                   }
-                  onChange={(options) => {
-                    if (Array.isArray(options)) {
-                      setDepartureStops(options.map((o: any) => o.value));
-                    } else {
-                      setDepartureStops([]);
-                    }
-                  }}
+                  disabled
+                  slotProps={{ textField: { size: 'small', fullWidth: true } }}
                 />
-              </Box>
+                {departureLabel && (
+                  <Chip
+                    label={departureLabel}
+                    sx={{ alignSelf: 'flex-start' }}
+                  />
+                )}
+              </Stack>
             )}
-          </>
-        )}
+          </Paper>
 
-      <Stack direction="row" spacing={2}>
-        {isCancelled ? (
-          <Button variant="contained" color="error" onClick={handleRestore}>
-            Gjenopprett avgang
-          </Button>
-        ) : (
-          <Button variant="contained" color="error" onClick={handleSubmit}>
-            Kanseller avgang
-          </Button>
-        )}
-        <Button variant="outlined" onClick={() => navigate('/kanselleringer')}>
-          Lukk uten å lagre
-        </Button>
-      </Stack>
-    </Box>
+          {serviceJourney && isPartiallyCancelled && (
+            <Paper sx={{ p: 3, mb: 2 }}>
+              <Typography variant="h5" sx={{ mb: 2 }}>
+                Kansellerte stopp
+              </Typography>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ flexWrap: 'wrap', gap: 1 }}
+              >
+                {quayLabels.map((label) => (
+                  <Chip
+                    key={label}
+                    label={label}
+                    size="small"
+                    variant="outlined"
+                  />
+                ))}
+              </Stack>
+            </Paper>
+          )}
+
+          {serviceJourney &&
+            !cancellation.estimatedVehicleJourney.cancellation &&
+            !isPartiallyCancelled && (
+              <Paper sx={{ p: 3, mb: 2 }}>
+                <Typography variant="h5" sx={{ mb: 2 }}>
+                  Omfang
+                </Typography>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={isDepartureStops}
+                      onChange={(e) => setIsDepartureStops(e.target.checked)}
+                    />
+                  }
+                  label="Gjelder kanselleringen for spesifikke stopp?"
+                  sx={{ mb: 2 }}
+                />
+                {isDepartureStops && (
+                  <StopPicker
+                    isMulti
+                    api={api}
+                    stops={
+                      serviceJourney?.estimatedCalls?.map(
+                        (ec: any) => ec.quay,
+                      ) ?? []
+                    }
+                    onChange={(options) => {
+                      if (Array.isArray(options)) {
+                        setDepartureStops(options.map((o: any) => o.value));
+                      } else {
+                        setDepartureStops([]);
+                      }
+                    }}
+                  />
+                )}
+              </Paper>
+            )}
+
+          <Stack direction="row" spacing={2}>
+            {isCancelled ? (
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => setConfirmAction('restore')}
+              >
+                Gjenopprett avgang
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => setConfirmAction('cancel')}
+              >
+                Kanseller avgang
+              </Button>
+            )}
+          </Stack>
+        </>
+      </OverlayLoader>
+
+      <ConfirmDialog
+        open={confirmAction === 'cancel'}
+        title="Kanseller avgang"
+        message="Er du sikker på at du vil kansellere denne avgangen?"
+        onClose={() => setConfirmAction(null)}
+        buttons={[
+          <Button
+            key="no"
+            variant="outlined"
+            onClick={() => setConfirmAction(null)}
+          >
+            Avbryt
+          </Button>,
+          <Button
+            key="yes"
+            variant="contained"
+            color="error"
+            onClick={executeCancellation}
+          >
+            Kanseller
+          </Button>,
+        ]}
+      />
+
+      <ConfirmDialog
+        open={confirmAction === 'restore'}
+        title="Gjenopprett avgang"
+        message="Er du sikker på at du vil gjenopprette denne avgangen?"
+        onClose={() => setConfirmAction(null)}
+        buttons={[
+          <Button
+            key="no"
+            variant="outlined"
+            onClick={() => setConfirmAction(null)}
+          >
+            Avbryt
+          </Button>,
+          <Button key="yes" variant="contained" onClick={executeRestore}>
+            Gjenopprett
+          </Button>,
+        ]}
+      />
+    </Page>
   );
 };
 

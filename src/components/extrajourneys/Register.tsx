@@ -29,12 +29,21 @@ import {
 import api from '../../api/api';
 import { useConfig } from '../../config/ConfigContext';
 import { useAuth } from 'react-oidc-context';
+import Page from '../common/Page';
+import OverlayLoader from '../common/OverlayLoader';
+import { useAppDispatch } from '../../store/hooks';
+import {
+  showSuccessNotification,
+  showErrorNotification,
+} from '../../reducers/notificationSlice';
 
 interface RegisterProps {
   selectedOrganization: string;
 }
 
 export const Register = ({ selectedOrganization }: RegisterProps) => {
+  const dispatch = useAppDispatch();
+  const [saving, setSaving] = useState(false);
   const operators = useOperators(selectedOrganization);
   const [name, setName] = useState<string | undefined>();
   const [selectedMode, setSelectedMode] = useState<VehicleMode | undefined>();
@@ -91,197 +100,226 @@ export const Register = ({ selectedOrganization }: RegisterProps) => {
 
   const submit = async () => {
     if (!validate()) return;
-    const extraJourney = mapExtraJourney({
-      codespace,
-      selectedMode,
-      name,
-      destinationDisplay,
-      selectedOperator,
-      selectedLine,
-      calls,
-    });
-    await createOrUpdateExtrajourney(
-      codespace,
-      selectedOrganization,
-      extraJourney,
-    );
-    navigate('/ekstraavganger');
+    setSaving(true);
+    try {
+      const extraJourney = mapExtraJourney({
+        codespace,
+        selectedMode,
+        name,
+        destinationDisplay,
+        selectedOperator,
+        selectedLine,
+        calls,
+      });
+      await createOrUpdateExtrajourney(
+        codespace,
+        selectedOrganization,
+        extraJourney,
+      );
+      dispatch(
+        showSuccessNotification(
+          'Ekstraavgang opprettet',
+          'Ekstraavgangen ble lagret',
+        ),
+      );
+      navigate('/ekstraavganger');
+    } catch {
+      dispatch(
+        showErrorNotification('Feil', 'Kunne ikke opprette ekstraavgang'),
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 2 }}>
-        Registrer ny ekstraavgang
-      </Typography>
+    <Page backButtonTitle="Oversikt" title="Registrer ny ekstraavgang">
+      <OverlayLoader isLoading={saving} text="Lagrer ekstraavgang...">
+        <>
+          <Paper sx={{ p: 3, mb: 2 }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              Turdetaljer
+            </Typography>
+            <TextField
+              fullWidth
+              size="small"
+              label="Navn"
+              value={name ?? ''}
+              onChange={(e) => setName(e.target.value)}
+              error={
+                (result.name as ValidationFeedback | undefined)?.variant ===
+                'error'
+              }
+              helperText={
+                (result.name as ValidationFeedback | undefined)?.feedback
+              }
+              sx={{ mb: 2 }}
+            />
 
-      <TextField
-        fullWidth
-        size="small"
-        label="Navn"
-        value={name ?? ''}
-        onChange={(e) => setName(e.target.value)}
-        error={
-          (result.name as ValidationFeedback | undefined)?.variant === 'error'
-        }
-        helperText={(result.name as ValidationFeedback | undefined)?.feedback}
-        sx={{ mb: 2 }}
-      />
+            <FormControl
+              fullWidth
+              size="small"
+              sx={{ mb: 2 }}
+              error={
+                (result.mode as ValidationFeedback | undefined)?.variant ===
+                'error'
+              }
+            >
+              <InputLabel>Mode</InputLabel>
+              <Select
+                value={selectedMode ?? ''}
+                label="Mode"
+                onChange={(e) => setSelectedMode(e.target.value as VehicleMode)}
+              >
+                {Object.values(VehicleMode).map((mode) => (
+                  <MenuItem key={mode} value={mode}>
+                    {mode}
+                  </MenuItem>
+                ))}
+              </Select>
+              {(result.mode as ValidationFeedback | undefined)?.feedback && (
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{ ml: 2, mt: 0.5 }}
+                >
+                  {(result.mode as ValidationFeedback).feedback}
+                </Typography>
+              )}
+            </FormControl>
 
-      <FormControl
-        fullWidth
-        size="small"
-        sx={{ mb: 2 }}
-        error={
-          (result.mode as ValidationFeedback | undefined)?.variant === 'error'
-        }
-      >
-        <InputLabel>Mode</InputLabel>
-        <Select
-          value={selectedMode ?? ''}
-          label="Mode"
-          onChange={(e) => setSelectedMode(e.target.value as VehicleMode)}
-        >
-          {Object.values(VehicleMode).map((mode) => (
-            <MenuItem key={mode} value={mode}>
-              {mode}
-            </MenuItem>
-          ))}
-        </Select>
-        {(result.mode as ValidationFeedback | undefined)?.feedback && (
-          <Typography variant="caption" color="error" sx={{ ml: 2, mt: 0.5 }}>
-            {(result.mode as ValidationFeedback).feedback}
-          </Typography>
-        )}
-      </FormControl>
+            <TextField
+              fullWidth
+              size="small"
+              label="Destinasjon"
+              value={destinationDisplay ?? ''}
+              onChange={(e) => setDestinationDisplay(e.target.value)}
+              error={
+                (result.destinationDisplay as ValidationFeedback | undefined)
+                  ?.variant === 'error'
+              }
+              helperText={
+                (result.destinationDisplay as ValidationFeedback | undefined)
+                  ?.feedback
+              }
+              sx={{ mb: 2 }}
+            />
 
-      <TextField
-        fullWidth
-        size="small"
-        label="Destinasjon"
-        value={destinationDisplay ?? ''}
-        onChange={(e) => setDestinationDisplay(e.target.value)}
-        error={
-          (result.destinationDisplay as ValidationFeedback | undefined)
-            ?.variant === 'error'
-        }
-        helperText={
-          (result.destinationDisplay as ValidationFeedback | undefined)
-            ?.feedback
-        }
-        sx={{ mb: 2 }}
-      />
-
-      <Autocomplete
-        options={operators}
-        getOptionLabel={(op) => `${op.name} (${op.id})`}
-        value={selectedOperator ?? null}
-        onChange={(_, newValue) => {
-          setSelectedOperator(newValue ?? undefined);
-          if (
-            !newValue ||
-            (selectedLine && selectedLine.operator?.id !== newValue.id)
-          ) {
-            setSelectedLine(undefined);
-          }
-        }}
-        isOptionEqualToValue={(option, value) => option.id === value.id}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Operator"
-            size="small"
-            error={
-              (result.operator as ValidationFeedback | undefined)?.variant ===
-              'error'
-            }
-            helperText={
-              (result.operator as ValidationFeedback | undefined)?.feedback
-            }
-          />
-        )}
-        sx={{ mb: 2 }}
-      />
-
-      <Autocomplete
-        options={visibleLines}
-        getOptionLabel={(line) =>
-          `${line.publicCode} ${line.name} (${line.id})`
-        }
-        value={selectedLine ?? null}
-        onChange={(_, newValue) => {
-          setSelectedLine(newValue ?? undefined);
-          if (newValue?.operator) {
-            setSelectedOperator({
-              id: newValue.operator.id,
-              name: newValue.operator.name,
-            });
-          }
-        }}
-        isOptionEqualToValue={(option, value) => option.id === value.id}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Linje"
-            size="small"
-            error={
-              (result.line as ValidationFeedback | undefined)?.variant ===
-              'error'
-            }
-            helperText={
-              (result.line as ValidationFeedback | undefined)?.feedback
-            }
-          />
-        )}
-        sx={{ mb: 2 }}
-      />
-
-      <TableContainer component={Paper} sx={{ mb: 2 }}>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Platform (NSR-id)</TableCell>
-              <TableCell>Av-/påstigning</TableCell>
-              <TableCell>Ankomst</TableCell>
-              <TableCell>Avgang</TableCell>
-              <TableCell />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {calls.map((call, i) => (
-              <RegisterEstimatedCallRow
-                key={i}
-                validationResult={
-                  result.calls
-                    ? (result.calls as CallValidationResult[])[i]
-                    : undefined
+            <Autocomplete
+              options={operators}
+              getOptionLabel={(op) => `${op.name} (${op.id})`}
+              value={selectedOperator ?? null}
+              onChange={(_, newValue) => {
+                setSelectedOperator(newValue ?? undefined);
+                if (
+                  !newValue ||
+                  (selectedLine && selectedLine.operator?.id !== newValue.id)
+                ) {
+                  setSelectedLine(undefined);
                 }
-                call={call}
-                isFirst={i === 0}
-                isLast={i === calls.length - 1}
-                onChange={(updatedCall: Call) => {
-                  setCalls([
-                    ...calls.slice(0, i),
-                    updatedCall,
-                    ...calls.slice(i + 1),
-                  ]);
-                }}
-                onAdd={() =>
-                  setCalls([
-                    ...calls.slice(0, i + 1),
-                    { boarding: true, alighting: true },
-                    ...calls.slice(i + 1),
-                  ])
-                }
-                mode={selectedMode}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              }}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Operator"
+                  size="small"
+                  error={
+                    (result.operator as ValidationFeedback | undefined)
+                      ?.variant === 'error'
+                  }
+                  helperText={
+                    (result.operator as ValidationFeedback | undefined)
+                      ?.feedback
+                  }
+                />
+              )}
+              sx={{ mb: 2 }}
+            />
 
-      <Button variant="contained" onClick={submit}>
-        Opprett ekstraavgang
-      </Button>
-    </Box>
+            <Autocomplete
+              options={visibleLines}
+              getOptionLabel={(line) =>
+                `${line.publicCode} ${line.name} (${line.id})`
+              }
+              value={selectedLine ?? null}
+              onChange={(_, newValue) => {
+                setSelectedLine(newValue ?? undefined);
+                if (newValue?.operator) {
+                  setSelectedOperator({
+                    id: newValue.operator.id,
+                    name: newValue.operator.name,
+                  });
+                }
+              }}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Linje"
+                  size="small"
+                  error={
+                    (result.line as ValidationFeedback | undefined)?.variant ===
+                    'error'
+                  }
+                  helperText={
+                    (result.line as ValidationFeedback | undefined)?.feedback
+                  }
+                />
+              )}
+              sx={{ mb: 2 }}
+            />
+          </Paper>
+
+          <TableContainer component={Paper} sx={{ mb: 2 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Platform (NSR-id)</TableCell>
+                  <TableCell>Av-/påstigning</TableCell>
+                  <TableCell>Ankomst</TableCell>
+                  <TableCell>Avgang</TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {calls.map((call, i) => (
+                  <RegisterEstimatedCallRow
+                    key={i}
+                    validationResult={
+                      result.calls
+                        ? (result.calls as CallValidationResult[])[i]
+                        : undefined
+                    }
+                    call={call}
+                    isFirst={i === 0}
+                    isLast={i === calls.length - 1}
+                    onChange={(updatedCall: Call) => {
+                      setCalls([
+                        ...calls.slice(0, i),
+                        updatedCall,
+                        ...calls.slice(i + 1),
+                      ]);
+                    }}
+                    onAdd={() =>
+                      setCalls([
+                        ...calls.slice(0, i + 1),
+                        { boarding: true, alighting: true },
+                        ...calls.slice(i + 1),
+                      ])
+                    }
+                    mode={selectedMode}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <Button variant="contained" color="success" onClick={submit}>
+            Opprett ekstraavgang
+          </Button>
+        </>
+      </OverlayLoader>
+    </Page>
   );
 };

@@ -12,11 +12,18 @@ import Checkbox from '@mui/material/Checkbox';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepButton from '@mui/material/StepButton';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { DatePicker as MuiDatePicker } from '@mui/x-date-pickers/DatePicker';
-import { getLocalTimeZone, now, toCalendarDate } from '@internationalized/date';
+import Autocomplete from '@mui/material/Autocomplete';
+import { getLocalTimeZone, now } from '@internationalized/date';
 import LinePicker from '../common/LinePicker';
 import StopPicker from '../common/StopPicker';
+import Page from '../common/Page';
+import OverlayLoader from '../common/OverlayLoader';
 import { sortServiceJourneyByDepartureTime } from '../../util/sort';
 import {
   createNewIssue,
@@ -25,7 +32,11 @@ import {
   addInfoLink,
 } from './messageHelpers';
 import { AffectType } from './types';
-import Autocomplete from '@mui/material/Autocomplete';
+import { useAppDispatch } from '../../store/hooks';
+import {
+  showSuccessNotification,
+  showErrorNotification,
+} from '../../reducers/notificationSlice';
 
 interface RegisterProps {
   api: any;
@@ -33,8 +44,13 @@ interface RegisterProps {
   organization: string;
 }
 
+const STEPS = ['Velg påvirkning', 'Gyldighetsperiode', 'Meldingsinnhold'];
+
 const Register = ({ api, lines, organization }: RegisterProps) => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const [activeStep, setActiveStep] = useState(0);
+  const [saving, setSaving] = useState(false);
 
   const [type, setType] = useState<AffectType | undefined>();
   const [chosenLine, setChosenLine] = useState<string | undefined>();
@@ -58,12 +74,13 @@ const Register = ({ api, lines, organization }: RegisterProps) => {
   const [from, setFrom] = useState<Date>(new Date());
   const [to, setTo] = useState<Date | null>(null);
 
-  const showDateFromTo =
-    (type === 'line' && chosenLine) ||
-    (type === 'stop' && multipleStops.length > 0);
-  const showMessage =
-    showDateFromTo || (type === 'departure' && datedVehicleJourney);
-  const showSubmit = showMessage;
+  const step1Complete =
+    (type === 'line' && !!chosenLine) ||
+    (type === 'stop' && multipleStops.length > 0) ||
+    (type === 'departure' && !!datedVehicleJourney);
+
+  const step2Complete = type === 'departure' || !!from;
+  const step3Complete = !!oppsummering;
 
   const handleChangeType = useCallback((value: AffectType) => {
     setType(value);
@@ -98,43 +115,56 @@ const Register = ({ api, lines, organization }: RegisterProps) => {
   }, [chosenLine, departureDate, api]);
 
   const handleSubmit = useCallback(async () => {
-    const dateNow = now(getLocalTimeZone());
-    const issue = createNewIssue(
-      organization,
-      dateNow,
-      reportType,
-      oppsummering,
-      beskrivelse,
-      forslag,
-    );
+    setSaving(true);
+    try {
+      const dateNow = now(getLocalTimeZone());
+      const issue = createNewIssue(
+        organization,
+        dateNow,
+        reportType,
+        oppsummering,
+        beskrivelse,
+        forslag,
+      );
 
-    issue.affects = buildAffects(
-      type,
-      chosenLine,
-      specifyStopsLine,
-      specifyStopsDeparture,
-      multipleStops,
-      departureDate,
-      datedVehicleJourney,
-    );
+      issue.affects = buildAffects(
+        type,
+        chosenLine,
+        specifyStopsLine,
+        specifyStopsDeparture,
+        multipleStops,
+        departureDate,
+        datedVehicleJourney,
+      );
 
-    issue.validityPeriod = buildValidityPeriod(
-      type,
-      departureDate,
-      { toAbsoluteString: () => from.toISOString() },
-      to ? { toAbsoluteString: () => to.toISOString() } : undefined,
-    );
+      issue.validityPeriod = buildValidityPeriod(
+        type,
+        departureDate,
+        { toAbsoluteString: () => from.toISOString() },
+        to ? { toAbsoluteString: () => to.toISOString() } : undefined,
+      );
 
-    addInfoLink(
-      issue,
-      infoLinkUri
-        ? { uri: infoLinkUri, label: infoLinkLabel || undefined }
-        : undefined,
-    );
+      addInfoLink(
+        issue,
+        infoLinkUri
+          ? { uri: infoLinkUri, label: infoLinkLabel || undefined }
+          : undefined,
+      );
 
-    const codespace = organization.split(':')[0];
-    await api.createOrUpdateMessage(codespace, organization, issue);
-    navigate('/');
+      const codespace = organization.split(':')[0];
+      await api.createOrUpdateMessage(codespace, organization, issue);
+      dispatch(
+        showSuccessNotification(
+          'Melding opprettet',
+          'Avviksmeldingen ble lagret',
+        ),
+      );
+      navigate('/');
+    } catch {
+      dispatch(showErrorNotification('Feil', 'Kunne ikke opprette melding'));
+    } finally {
+      setSaving(false);
+    }
   }, [
     organization,
     reportType,
@@ -154,6 +184,7 @@ const Register = ({ api, lines, organization }: RegisterProps) => {
     infoLinkLabel,
     api,
     navigate,
+    dispatch,
   ]);
 
   const stops =
@@ -187,240 +218,310 @@ const Register = ({ api, lines, organization }: RegisterProps) => {
       : [];
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 2 }}>
-        Registrer ny melding
-      </Typography>
+    <Page backButtonTitle="Oversikt" title="Registrer ny melding">
+      <OverlayLoader isLoading={saving} text="Lagrer melding...">
+        <>
+          <Stepper activeStep={activeStep} nonLinear sx={{ mb: 4 }}>
+            {STEPS.map((label, index) => (
+              <Step
+                key={label}
+                completed={
+                  index === 0
+                    ? step1Complete
+                    : index === 1
+                      ? step2Complete
+                      : step3Complete
+                }
+              >
+                <StepButton onClick={() => setActiveStep(index)}>
+                  {label}
+                </StepButton>
+              </Step>
+            ))}
+          </Stepper>
 
-      <FormControl fullWidth sx={{ mb: 2 }} size="small">
-        <InputLabel>Velg linje, stopp eller avgang</InputLabel>
-        <Select
-          value={type ?? ''}
-          label="Velg linje, stopp eller avgang"
-          onChange={(e) => handleChangeType(e.target.value as AffectType)}
-        >
-          <MenuItem value="line">Linje</MenuItem>
-          <MenuItem value="stop">Stopp</MenuItem>
-          <MenuItem value="departure">Avgang</MenuItem>
-        </Select>
-      </FormControl>
+          {activeStep === 0 && (
+            <Paper sx={{ p: 3, mb: 2 }}>
+              <Typography variant="h5" sx={{ mb: 2 }}>
+                Velg hva avviket gjelder
+              </Typography>
 
-      {lines && (type === 'line' || type === 'departure') && (
-        <Box sx={{ mb: 2 }}>
-          <LinePicker lines={lines} onChange={handleChangeLine} />
-        </Box>
-      )}
+              <FormControl fullWidth sx={{ mb: 2 }} size="small">
+                <InputLabel>Velg linje, stopp eller avgang</InputLabel>
+                <Select
+                  value={type ?? ''}
+                  label="Velg linje, stopp eller avgang"
+                  onChange={(e) =>
+                    handleChangeType(e.target.value as AffectType)
+                  }
+                >
+                  <MenuItem value="line">Linje</MenuItem>
+                  <MenuItem value="stop">Stopp</MenuItem>
+                  <MenuItem value="departure">Avgang</MenuItem>
+                </Select>
+              </FormControl>
 
-      {type === 'line' && chosenLine && (
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={specifyStopsLine}
-              onChange={(e) => setSpecifyStopsLine(e.target.checked)}
-            />
-          }
-          label="Gjelder avviket for spesifikke stopp?"
-          sx={{ mb: 2 }}
-        />
-      )}
+              {lines && (type === 'line' || type === 'departure') && (
+                <Box sx={{ mb: 2 }}>
+                  <LinePicker lines={lines} onChange={handleChangeLine} />
+                </Box>
+              )}
 
-      {type === 'line' && chosenLine && specifyStopsLine && (
-        <Box sx={{ mb: 2 }}>
-          <StopPicker
-            sort
-            isMulti
-            api={api}
-            stops={selectedLineQuays}
-            onChange={(options) =>
-              setMultipleStops(Array.isArray(options) ? options : [])
-            }
-          />
-        </Box>
-      )}
+              {type === 'line' && chosenLine && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={specifyStopsLine}
+                      onChange={(e) => setSpecifyStopsLine(e.target.checked)}
+                    />
+                  }
+                  label="Gjelder avviket for spesifikke stopp?"
+                  sx={{ mb: 2 }}
+                />
+              )}
 
-      {type === 'stop' && stops.length > 0 && (
-        <Box sx={{ mb: 2 }}>
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            Du er i ferd med å lage en avviksmelding som treffer all rutegående
-            trafikk som passerer de(n) valgte holdeplassen(e) på tvers av
-            operatører. Hvis du ønsker å lage en avviksmelding som kun treffer
-            enkelte linjer (og stopp), velg &quot;Linje&quot; i stedet.
-          </Alert>
-          <StopPicker
-            sort
-            isMulti
-            api={api}
-            stops={stops}
-            onChange={(options) =>
-              setMultipleStops(Array.isArray(options) ? options : [])
-            }
-          />
-        </Box>
-      )}
+              {type === 'line' && chosenLine && specifyStopsLine && (
+                <Box sx={{ mb: 2 }}>
+                  <StopPicker
+                    sort
+                    isMulti
+                    api={api}
+                    stops={selectedLineQuays}
+                    onChange={(options) =>
+                      setMultipleStops(Array.isArray(options) ? options : [])
+                    }
+                  />
+                </Box>
+              )}
 
-      {type === 'departure' && chosenLine && (
-        <Box sx={{ mb: 2 }}>
-          <MuiDatePicker
-            label="Dato"
-            value={departureDate}
-            onChange={(d) => d && setDepartureDate(d)}
-            minDate={new Date()}
-            slotProps={{ textField: { size: 'small', fullWidth: true } }}
-            sx={{ mb: 1 }}
-          />
-          <Button variant="contained" fullWidth onClick={callApiDeparture}>
-            Søk avganger
-          </Button>
-        </Box>
-      )}
+              {type === 'stop' && stops.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <Alert severity="warning" sx={{ mb: 2 }}>
+                    Du er i ferd med å lage en avviksmelding som treffer all
+                    rutegående trafikk som passerer de(n) valgte holdeplassen(e)
+                    på tvers av operatører.
+                  </Alert>
+                  <StopPicker
+                    sort
+                    isMulti
+                    api={api}
+                    stops={stops}
+                    onChange={(options) =>
+                      setMultipleStops(Array.isArray(options) ? options : [])
+                    }
+                  />
+                </Box>
+              )}
 
-      {showDepartureSearch && departures.length > 0 && (
-        <Box sx={{ mb: 2 }}>
-          <Autocomplete
-            options={serviceJourneyOptions}
-            getOptionLabel={(o: any) => o.label}
-            isOptionEqualToValue={(o: any, v: any) => o.value === v.value}
-            onChange={(_, newValue: any) =>
-              setDatedVehicleJourney(newValue?.value)
-            }
-            renderInput={(params) => (
-              <TextField {...params} label="Velg avgang" size="small" />
+              {type === 'departure' && chosenLine && (
+                <Box sx={{ mb: 2 }}>
+                  <MuiDatePicker
+                    label="Dato"
+                    value={departureDate}
+                    onChange={(d) => d && setDepartureDate(d)}
+                    minDate={new Date()}
+                    slotProps={{
+                      textField: { size: 'small', fullWidth: true },
+                    }}
+                    sx={{ mb: 1 }}
+                  />
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={callApiDeparture}
+                  >
+                    Søk avganger
+                  </Button>
+                </Box>
+              )}
+
+              {showDepartureSearch && departures.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <Autocomplete
+                    options={serviceJourneyOptions}
+                    getOptionLabel={(o: any) => o.label}
+                    isOptionEqualToValue={(o: any, v: any) =>
+                      o.value === v.value
+                    }
+                    onChange={(_, newValue: any) =>
+                      setDatedVehicleJourney(newValue?.value)
+                    }
+                    renderInput={(params) => (
+                      <TextField {...params} label="Velg avgang" size="small" />
+                    )}
+                  />
+                </Box>
+              )}
+
+              {type === 'departure' && datedVehicleJourney && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={specifyStopsDeparture}
+                      onChange={(e) =>
+                        setSpecifyStopsDeparture(e.target.checked)
+                      }
+                    />
+                  }
+                  label="Gjelder avviket for spesifikke stopp?"
+                  sx={{ mb: 2 }}
+                />
+              )}
+
+              {type === 'departure' && specifyStopsDeparture && (
+                <Box sx={{ mb: 2 }}>
+                  <StopPicker
+                    isMulti
+                    api={api}
+                    stops={selectedDepartureQuays}
+                    onChange={(options) =>
+                      setMultipleStops(Array.isArray(options) ? options : [])
+                    }
+                  />
+                </Box>
+              )}
+            </Paper>
+          )}
+
+          {activeStep === 1 && (
+            <Paper sx={{ p: 3, mb: 2 }}>
+              <Typography variant="h5" sx={{ mb: 2 }}>
+                Gyldighetsperiode
+              </Typography>
+              {type === 'departure' ? (
+                <Alert severity="info">
+                  Gyldighetsperioden settes automatisk til avgangsdatoen.
+                </Alert>
+              ) : (
+                <Stack direction="row" spacing={2}>
+                  <DateTimePicker
+                    label="Fra"
+                    value={from}
+                    onChange={(d) => d && setFrom(d)}
+                    minDate={new Date()}
+                    slotProps={{
+                      textField: { size: 'small', fullWidth: true },
+                    }}
+                  />
+                  <DateTimePicker
+                    label="Til"
+                    value={to}
+                    onChange={(d) => setTo(d)}
+                    minDate={from}
+                    slotProps={{
+                      textField: { size: 'small', fullWidth: true },
+                    }}
+                  />
+                </Stack>
+              )}
+            </Paper>
+          )}
+
+          {activeStep === 2 && (
+            <>
+              <Paper sx={{ p: 3, mb: 2 }}>
+                <Typography variant="h5" sx={{ mb: 2 }}>
+                  Melding
+                </Typography>
+
+                <FormControl fullWidth sx={{ mb: 2 }} size="small">
+                  <InputLabel>Avvikstype</InputLabel>
+                  <Select
+                    value={reportType}
+                    label="Avvikstype"
+                    onChange={(e) => setReportType(e.target.value)}
+                  >
+                    <MenuItem value="incident">Incident</MenuItem>
+                    <MenuItem value="general">General</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Kort, beskrivende avvikstekst"
+                  value={oppsummering}
+                  onChange={(e) => setOppsummering(e.target.value)}
+                  inputProps={{ maxLength: 160 }}
+                  required
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Utdypende detaljer (valgfritt)"
+                  value={beskrivelse}
+                  onChange={(e) => setBeskrivelse(e.target.value)}
+                  multiline
+                  rows={4}
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Forslag til reisende (valgfritt)"
+                  value={forslag}
+                  onChange={(e) => setForslag(e.target.value)}
+                  multiline
+                  rows={4}
+                />
+              </Paper>
+
+              <Paper sx={{ p: 3, mb: 2 }}>
+                <Typography variant="h5" sx={{ mb: 2 }}>
+                  Lenke til nettside
+                </Typography>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="URL"
+                  value={infoLinkUri}
+                  onChange={(e) => setInfoLinkUri(e.target.value)}
+                  sx={{ mb: 1 }}
+                />
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Lenketekst"
+                  value={infoLinkLabel}
+                  onChange={(e) => setInfoLinkLabel(e.target.value)}
+                />
+              </Paper>
+            </>
+          )}
+
+          <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
+            {activeStep > 0 && (
+              <Button
+                variant="outlined"
+                onClick={() => setActiveStep(activeStep - 1)}
+              >
+                Forrige
+              </Button>
             )}
-          />
-        </Box>
-      )}
-
-      {type === 'departure' && datedVehicleJourney && (
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={specifyStopsDeparture}
-              onChange={(e) => setSpecifyStopsDeparture(e.target.checked)}
-            />
-          }
-          label="Gjelder avviket for spesifikke stopp?"
-          sx={{ mb: 2 }}
-        />
-      )}
-
-      {type === 'departure' && specifyStopsDeparture && (
-        <Box sx={{ mb: 2 }}>
-          <StopPicker
-            isMulti
-            api={api}
-            stops={selectedDepartureQuays}
-            onChange={(options) =>
-              setMultipleStops(Array.isArray(options) ? options : [])
-            }
-          />
-        </Box>
-      )}
-
-      {showDateFromTo && (
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Gyldighetsperiode
-          </Typography>
-          <Stack direction="row" spacing={2}>
-            <DateTimePicker
-              label="Fra"
-              value={from}
-              onChange={(d) => d && setFrom(d)}
-              minDate={new Date()}
-              slotProps={{ textField: { size: 'small', fullWidth: true } }}
-            />
-            <DateTimePicker
-              label="Til"
-              value={to}
-              onChange={(d) => setTo(d)}
-              minDate={from}
-              slotProps={{ textField: { size: 'small', fullWidth: true } }}
-            />
+            {activeStep < 2 && (
+              <Button
+                variant="contained"
+                onClick={() => setActiveStep(activeStep + 1)}
+                disabled={activeStep === 0 && !step1Complete}
+              >
+                Neste
+              </Button>
+            )}
+            {activeStep === 2 && (
+              <Button
+                variant="contained"
+                color="success"
+                onClick={handleSubmit}
+                disabled={!step1Complete || !step3Complete}
+              >
+                Registrer melding
+              </Button>
+            )}
           </Stack>
-        </Box>
-      )}
-
-      {showMessage && (
-        <Box sx={{ mb: 2 }}>
-          <FormControl fullWidth sx={{ mb: 2 }} size="small">
-            <InputLabel>Avvikstype</InputLabel>
-            <Select
-              value={reportType}
-              label="Avvikstype"
-              onChange={(e) => setReportType(e.target.value)}
-            >
-              <MenuItem value="incident">Incident</MenuItem>
-              <MenuItem value="general">General</MenuItem>
-            </Select>
-          </FormControl>
-
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Melding
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            label="Kort, beskrivende avvikstekst"
-            value={oppsummering}
-            onChange={(e) => setOppsummering(e.target.value)}
-            inputProps={{ maxLength: 160 }}
-            required
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            size="small"
-            label="Eventuell utdypende detaljer om avviket (ikke påkrevd)"
-            value={beskrivelse}
-            onChange={(e) => setBeskrivelse(e.target.value)}
-            multiline
-            rows={4}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            size="small"
-            label="Beskrivelse om hva kunden skal/kan gjøre (ikke påkrevd)"
-            value={forslag}
-            onChange={(e) => setForslag(e.target.value)}
-            multiline
-            rows={4}
-            sx={{ mb: 2 }}
-          />
-
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Lenke til nettside
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            label="Lenke"
-            value={infoLinkUri}
-            onChange={(e) => setInfoLinkUri(e.target.value)}
-            sx={{ mb: 1 }}
-          />
-          <TextField
-            fullWidth
-            size="small"
-            label="Tekst til lenken"
-            value={infoLinkLabel}
-            onChange={(e) => setInfoLinkLabel(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-        </Box>
-      )}
-
-      <Stack direction="row" spacing={2}>
-        {showSubmit && (
-          <Button variant="contained" onClick={handleSubmit}>
-            Registrer
-          </Button>
-        )}
-        <Button variant="outlined" onClick={() => navigate('/')}>
-          Tilbake
-        </Button>
-      </Stack>
-    </Box>
+        </>
+      </OverlayLoader>
+    </Page>
   );
 };
 

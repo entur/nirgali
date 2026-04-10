@@ -10,6 +10,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
+import Paper from '@mui/material/Paper';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { getLineOption } from '../../util/getLineOption';
 import { formatDepartureOption } from '../../util/formatters';
@@ -21,6 +22,14 @@ import {
 } from './messageHelpers';
 import { Message } from '../../reducers/messagesSlice';
 import { getLocalTimeZone, now } from '@internationalized/date';
+import Page from '../common/Page';
+import OverlayLoader from '../common/OverlayLoader';
+import ConfirmDialog from '../common/ConfirmDialog';
+import { useAppDispatch } from '../../store/hooks';
+import {
+  showSuccessNotification,
+  showErrorNotification,
+} from '../../reducers/notificationSlice';
 
 interface EditProps {
   messages: Message[];
@@ -31,7 +40,10 @@ interface EditProps {
 
 const Edit = ({ messages, organization, lines, api }: EditProps) => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { id: issueId } = useParams<{ id: string }>();
+  const [saving, setSaving] = useState(false);
+  const [confirmDeactivate, setConfirmDeactivate] = useState(false);
 
   const issue = useMemo(
     () => messages.find(({ id }) => id === issueId),
@@ -64,42 +76,45 @@ const Edit = ({ messages, organization, lines, api }: EditProps) => {
 
   useEffect(() => {
     const affects = issue?.affects;
-    const framedVehicleJourneyRef =
+    const framedRef =
       affects?.vehicleJourneys?.affectedVehicleJourney?.framedVehicleJourneyRef;
-    const datedVehicleJourneyRef =
-      framedVehicleJourneyRef?.datedVehicleJourneyRef;
-    const dataFrameRef = framedVehicleJourneyRef?.dataFrameRef;
-
-    if (datedVehicleJourneyRef) {
+    if (framedRef?.datedVehicleJourneyRef) {
       api
-        .getServiceJourney(datedVehicleJourneyRef, dataFrameRef)
-        .then(({ data }: any) => {
-          setServiceJourney(data.serviceJourney);
-        });
+        .getServiceJourney(
+          framedRef.datedVehicleJourneyRef,
+          framedRef.dataFrameRef,
+        )
+        .then(({ data }: any) => setServiceJourney(data.serviceJourney));
     }
   }, [issueId, api, issue]);
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-
-      const newIssue = buildUpdatedIssue(issue, {
-        summary,
-        description,
-        advice,
-        from,
-        to,
-        reportType,
-        infoLinkUri,
-        infoLinkLabel,
-      });
-
-      await api.createOrUpdateMessage(
-        organization.split(':')[0],
-        organization,
-        newIssue,
-      );
-      navigate('/');
+      setSaving(true);
+      try {
+        const newIssue = buildUpdatedIssue(issue, {
+          summary,
+          description,
+          advice,
+          from,
+          to,
+          reportType,
+          infoLinkUri,
+          infoLinkLabel,
+        });
+        await api.createOrUpdateMessage(
+          organization.split(':')[0],
+          organization,
+          newIssue,
+        );
+        dispatch(showSuccessNotification('Lagret', 'Endringene ble lagret'));
+        navigate('/');
+      } catch {
+        dispatch(showErrorNotification('Feil', 'Kunne ikke lagre endringer'));
+      } finally {
+        setSaving(false);
+      }
     },
     [
       issue,
@@ -114,30 +129,39 @@ const Edit = ({ messages, organization, lines, api }: EditProps) => {
       api,
       organization,
       navigate,
+      dispatch,
     ],
   );
 
   const handleDeactivate = useCallback(async () => {
-    const update = {
-      ...issue,
-      progress: 'closed',
-      validityPeriod: {
-        startTime: issue!.validityPeriod.startTime,
-        endTime: now(getLocalTimeZone()).add({ hours: 5 }).toAbsoluteString(),
-      },
-    };
+    setConfirmDeactivate(false);
+    setSaving(true);
+    try {
+      const update = {
+        ...issue,
+        progress: 'closed',
+        validityPeriod: {
+          startTime: issue!.validityPeriod.startTime,
+          endTime: now(getLocalTimeZone()).add({ hours: 5 }).toAbsoluteString(),
+        },
+      };
+      await api.createOrUpdateMessage(
+        organization.split(':')[0],
+        organization,
+        update,
+      );
+      dispatch(
+        showSuccessNotification('Deaktivert', 'Meldingen ble deaktivert'),
+      );
+      navigate('/');
+    } catch {
+      dispatch(showErrorNotification('Feil', 'Kunne ikke deaktivere melding'));
+    } finally {
+      setSaving(false);
+    }
+  }, [issue, organization, api, navigate, dispatch]);
 
-    await api.createOrUpdateMessage(
-      organization.split(':')[0],
-      organization,
-      update,
-    );
-    navigate('/');
-  }, [issue, organization, api, navigate]);
-
-  if (!issue || !lines?.length) {
-    return null;
-  }
+  if (!issue || !lines?.length) return null;
 
   const messageType = getAffectType(issue?.affects);
   const lineQuayLabels = getLineQuayLabels(issue?.affects, lines);
@@ -156,177 +180,196 @@ const Edit = ({ messages, organization, lines, api }: EditProps) => {
     new Date(issue.validityPeriod.startTime).getTime() < Date.now();
 
   return (
-    <Box component="form" onSubmit={handleSubmit} autoComplete="off">
-      <Typography variant="h4" sx={{ mb: 2 }}>
-        Endre avvik
-      </Typography>
-
-      {messageType === 'line' && (
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Linje
-          </Typography>
-          <Chip label={lineOption?.label} sx={{ mb: 1 }} />
-          {lineQuayLabels.length > 0 && (
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{ flexWrap: 'wrap', gap: 1 }}
-            >
-              {lineQuayLabels.map((label) => (
+    <Page backButtonTitle="Oversikt" title="Endre avvik">
+      <OverlayLoader isLoading={saving} text="Lagrer...">
+        <Box component="form" onSubmit={handleSubmit} autoComplete="off">
+          <Paper sx={{ p: 3, mb: 2 }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              Påvirkning
+            </Typography>
+            {messageType === 'line' && (
+              <Box>
+                <Chip label={lineOption?.label} sx={{ mb: 1 }} />
+                {lineQuayLabels.length > 0 && (
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ flexWrap: 'wrap', gap: 1 }}
+                  >
+                    {lineQuayLabels.map((label) => (
+                      <Chip
+                        key={label}
+                        label={label}
+                        size="small"
+                        variant="outlined"
+                      />
+                    ))}
+                  </Stack>
+                )}
+              </Box>
+            )}
+            {messageType === 'departure' && serviceJourney && (
+              <Stack direction="row" spacing={1}>
                 <Chip
-                  key={label}
-                  label={label}
-                  size="small"
-                  variant="outlined"
+                  label={getLineOption(lines, serviceJourney.line.id)?.label}
                 />
-              ))}
-            </Stack>
-          )}
-        </Box>
-      )}
+                {departureLabel && <Chip label={departureLabel} />}
+              </Stack>
+            )}
+            {messageType === 'stop' && (
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ flexWrap: 'wrap', gap: 1 }}
+              >
+                {stopQuayLabels.map((label) => (
+                  <Chip
+                    key={label}
+                    label={label}
+                    size="small"
+                    variant="outlined"
+                  />
+                ))}
+              </Stack>
+            )}
+          </Paper>
 
-      {messageType === 'departure' && (
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Avgang
-          </Typography>
-          {serviceJourney && (
-            <>
-              <Chip
-                label={getLineOption(lines, serviceJourney.line.id)?.label}
-                sx={{ mb: 1 }}
+          <Paper sx={{ p: 3, mb: 2 }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              Gyldighetsperiode
+            </Typography>
+            <Stack direction="row" spacing={2}>
+              <DateTimePicker
+                label="Fra"
+                value={from}
+                onChange={(d) => d && setFrom(d)}
+                disabled={fromDisabled}
+                slotProps={{ textField: { size: 'small', fullWidth: true } }}
               />
-              {departureLabel && (
-                <Chip label={departureLabel} sx={{ ml: 1, mb: 1 }} />
-              )}
-            </>
-          )}
-        </Box>
-      )}
+              <DateTimePicker
+                label="Til"
+                value={to}
+                onChange={(d) => setTo(d)}
+                minDate={from && from > new Date() ? from : new Date()}
+                slotProps={{ textField: { size: 'small', fullWidth: true } }}
+              />
+            </Stack>
+          </Paper>
 
-      {messageType === 'stop' && (
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Stopp
-          </Typography>
-          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-            {stopQuayLabels.map((label) => (
-              <Chip key={label} label={label} size="small" variant="outlined" />
-            ))}
+          <Paper sx={{ p: 3, mb: 2 }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              Melding
+            </Typography>
+            <FormControl fullWidth sx={{ mb: 2 }} size="small">
+              <InputLabel>Avvikstype</InputLabel>
+              <Select
+                value={reportType}
+                label="Avvikstype"
+                onChange={(e) => setReportType(e.target.value)}
+              >
+                <MenuItem value="general">General</MenuItem>
+                <MenuItem value="incident">Incident</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth
+              size="small"
+              label="Oppsummering"
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              inputProps={{ maxLength: 160 }}
+              required
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Beskrivelse"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              multiline
+              rows={4}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Forslag til reisende"
+              value={advice}
+              onChange={(e) => setAdvice(e.target.value)}
+              multiline
+              rows={4}
+            />
+          </Paper>
+
+          <Paper sx={{ p: 3, mb: 2 }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              Lenke
+            </Typography>
+            <TextField
+              fullWidth
+              size="small"
+              label="URL"
+              value={infoLinkUri}
+              onChange={(e) => setInfoLinkUri(e.target.value)}
+              sx={{ mb: 1 }}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Lenketekst"
+              value={infoLinkLabel}
+              onChange={(e) => setInfoLinkLabel(e.target.value)}
+            />
+          </Paper>
+
+          <Stack direction="row" spacing={2}>
+            {issue.progress === 'open' ? (
+              <>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => setConfirmDeactivate(true)}
+                >
+                  Deaktiver
+                </Button>
+                <Button variant="contained" type="submit">
+                  Lagre endringer
+                </Button>
+              </>
+            ) : (
+              <Button variant="contained" type="submit">
+                Aktiver
+              </Button>
+            )}
           </Stack>
         </Box>
-      )}
+      </OverlayLoader>
 
-      <Typography variant="subtitle1" sx={{ mb: 1 }}>
-        Gyldighetsperiode
-      </Typography>
-      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-        <DateTimePicker
-          label="Fra"
-          value={from}
-          onChange={(d) => d && setFrom(d)}
-          disabled={fromDisabled}
-          slotProps={{ textField: { size: 'small', fullWidth: true } }}
-        />
-        <DateTimePicker
-          label="Til"
-          value={to}
-          onChange={(d) => setTo(d)}
-          minDate={from && from > new Date() ? from : new Date()}
-          slotProps={{ textField: { size: 'small', fullWidth: true } }}
-        />
-      </Stack>
-
-      <FormControl fullWidth sx={{ mb: 2 }} size="small">
-        <InputLabel>Avvikstype</InputLabel>
-        <Select
-          value={reportType}
-          label="Avvikstype"
-          onChange={(e) => setReportType(e.target.value)}
-        >
-          <MenuItem value="general">General</MenuItem>
-          <MenuItem value="incident">Incident</MenuItem>
-        </Select>
-      </FormControl>
-
-      <Typography variant="subtitle1" sx={{ mb: 1 }}>
-        Melding
-      </Typography>
-      <TextField
-        fullWidth
-        size="small"
-        value={summary}
-        onChange={(e) => setSummary(e.target.value)}
-        inputProps={{ maxLength: 160 }}
-        required
-        sx={{ mb: 2 }}
+      <ConfirmDialog
+        open={confirmDeactivate}
+        title="Deaktiver melding"
+        message="Er du sikker på at du vil deaktivere denne avviksmeldingen?"
+        onClose={() => setConfirmDeactivate(false)}
+        buttons={[
+          <Button
+            key="cancel"
+            variant="outlined"
+            onClick={() => setConfirmDeactivate(false)}
+          >
+            Avbryt
+          </Button>,
+          <Button
+            key="confirm"
+            variant="contained"
+            color="error"
+            onClick={handleDeactivate}
+          >
+            Deaktiver
+          </Button>,
+        ]}
       />
-      <TextField
-        fullWidth
-        size="small"
-        label="Beskrivelse"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        multiline
-        rows={4}
-        sx={{ mb: 2 }}
-      />
-      <TextField
-        fullWidth
-        size="small"
-        label="Forslag til reisende"
-        value={advice}
-        onChange={(e) => setAdvice(e.target.value)}
-        multiline
-        rows={4}
-        sx={{ mb: 2 }}
-      />
-
-      <Typography variant="subtitle1" sx={{ mb: 1 }}>
-        Lenke til nettside
-      </Typography>
-      <TextField
-        fullWidth
-        size="small"
-        label="Lenke"
-        value={infoLinkUri}
-        onChange={(e) => setInfoLinkUri(e.target.value)}
-        sx={{ mb: 1 }}
-      />
-      <TextField
-        fullWidth
-        size="small"
-        label="Tekst til lenken"
-        value={infoLinkLabel}
-        onChange={(e) => setInfoLinkLabel(e.target.value)}
-        sx={{ mb: 2 }}
-      />
-
-      <Stack direction="row" spacing={2}>
-        {issue.progress === 'open' ? (
-          <>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={handleDeactivate}
-            >
-              Deaktiver
-            </Button>
-            <Button variant="outlined" type="submit">
-              Lagre endringer
-            </Button>
-          </>
-        ) : (
-          <Button variant="outlined" type="submit">
-            Aktiver
-          </Button>
-        )}
-        <Button variant="text" onClick={() => navigate('/')}>
-          Lukk uten å lagre
-        </Button>
-      </Stack>
-    </Box>
+    </Page>
   );
 };
 

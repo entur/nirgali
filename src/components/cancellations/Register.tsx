@@ -7,13 +7,21 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
 import Autocomplete from '@mui/material/Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import LinePicker from '../common/LinePicker';
 import StopPicker from '../common/StopPicker';
+import Page from '../common/Page';
+import OverlayLoader from '../common/OverlayLoader';
 import { mapEstimatedCall } from './mapEstimatedCall';
 import { sortServiceJourneyByDepartureTime } from '../../util/sort';
-import { getLocalTimeZone, now, toCalendarDate } from '@internationalized/date';
+import { getLocalTimeZone, now } from '@internationalized/date';
+import { useAppDispatch } from '../../store/hooks';
+import {
+  showSuccessNotification,
+  showErrorNotification,
+} from '../../reducers/notificationSlice';
 
 interface RegisterProps {
   lines: any[];
@@ -29,6 +37,8 @@ export const Register = ({
   refetch,
 }: RegisterProps) => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const [saving, setSaving] = useState(false);
   const [chosenLine, setChosenLine] = useState<string | null>(null);
   const [departureDate, setDepartureDate] = useState<Date>(new Date());
   const [departures, setDepartures] = useState<any[]>([]);
@@ -78,41 +88,56 @@ export const Register = ({
     const departureData = departures.find((d: any) => d.id === chosenDeparture);
     if (!departureData) return;
 
-    const newCancellation = {
-      estimatedVehicleJourney: {
-        recordedAtTime: new Date().toISOString(),
-        lineRef: chosenLine,
-        directionRef: '0',
-        framedVehicleJourneyRef: {
-          dataFrameRef: departureDate.toISOString().split('T')[0],
-          datedVehicleJourneyRef: chosenDeparture,
+    setSaving(true);
+    try {
+      const newCancellation = {
+        estimatedVehicleJourney: {
+          recordedAtTime: new Date().toISOString(),
+          lineRef: chosenLine,
+          directionRef: '0',
+          framedVehicleJourneyRef: {
+            dataFrameRef: departureDate.toISOString().split('T')[0],
+            datedVehicleJourneyRef: chosenDeparture,
+          },
+          cancellation: !isDepartureStops && departureStops.length === 0,
+          dataSource: organization.split(':')[0],
+          estimatedCalls: {
+            estimatedCall: departureData.estimatedCalls.map(
+              (estimatedCall: any) =>
+                mapEstimatedCall(estimatedCall, departureData, departureStops),
+            ),
+          },
+          isCompleteStopSequence: true,
+          expiresAtEpochMs:
+            Date.parse(
+              departureData.estimatedCalls[
+                departureData.estimatedCalls.length - 1
+              ].aimedArrivalTime,
+            ) +
+            600 * 1000,
         },
-        cancellation: !isDepartureStops && departureStops.length === 0,
-        dataSource: organization.split(':')[0],
-        estimatedCalls: {
-          estimatedCall: departureData.estimatedCalls.map(
-            (estimatedCall: any) =>
-              mapEstimatedCall(estimatedCall, departureData, departureStops),
-          ),
-        },
-        isCompleteStopSequence: true,
-        expiresAtEpochMs:
-          Date.parse(
-            departureData.estimatedCalls[
-              departureData.estimatedCalls.length - 1
-            ].aimedArrivalTime,
-          ) +
-          600 * 1000,
-      },
-    };
+      };
 
-    await api.createOrUpdateCancellation(
-      organization.split(':')[0],
-      organization,
-      newCancellation,
-    );
-    await refetch();
-    navigate('/kanselleringer');
+      await api.createOrUpdateCancellation(
+        organization.split(':')[0],
+        organization,
+        newCancellation,
+      );
+      await refetch();
+      dispatch(
+        showSuccessNotification(
+          'Kansellering opprettet',
+          'Kanselleringen ble lagret',
+        ),
+      );
+      navigate('/kanselleringer');
+    } catch {
+      dispatch(
+        showErrorNotification('Feil', 'Kunne ikke opprette kansellering'),
+      );
+    } finally {
+      setSaving(false);
+    }
   }, [
     api,
     refetch,
@@ -124,101 +149,109 @@ export const Register = ({
     isDepartureStops,
     navigate,
     organization,
+    dispatch,
   ]);
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 2 }}>
-        Registrer ny kansellering
-      </Typography>
+    <Page backButtonTitle="Oversikt" title="Registrer ny kansellering">
+      <OverlayLoader isLoading={saving} text="Lagrer kansellering...">
+        <>
+          <Paper sx={{ p: 3, mb: 2 }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              Velg avgang
+            </Typography>
 
-      {lines && (
-        <Box sx={{ mb: 2 }}>
-          <LinePicker lines={lines} onChange={handleChangeLine} />
-        </Box>
-      )}
-
-      {chosenLine && (
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Dato (driftsdøgn)
-          </Typography>
-          <DatePicker
-            label="Velg dato"
-            value={departureDate}
-            onChange={(d) => d && setDepartureDate(d)}
-            minDate={new Date()}
-            slotProps={{ textField: { size: 'small', fullWidth: true } }}
-            sx={{ mb: 1 }}
-          />
-          <Button variant="contained" fullWidth onClick={callApiDeparture}>
-            Søk avganger
-          </Button>
-        </Box>
-      )}
-
-      {chosenLine && departures.length > 0 && (
-        <Box sx={{ mb: 2 }}>
-          <Autocomplete
-            options={serviceJourneyOptions}
-            getOptionLabel={(o: any) => o.label}
-            isOptionEqualToValue={(o: any, v: any) => o.value === v.value}
-            onChange={(_, newValue: any) =>
-              setChosenDeparture(newValue?.value ?? null)
-            }
-            renderInput={(params) => (
-              <TextField {...params} label="Velg avgang" size="small" />
+            {lines && (
+              <Box sx={{ mb: 2 }}>
+                <LinePicker lines={lines} onChange={handleChangeLine} />
+              </Box>
             )}
-          />
-        </Box>
-      )}
 
-      {chosenDeparture && (
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={isDepartureStops}
-              onChange={(e) => setIsDepartureStops(e.target.checked)}
-            />
-          }
-          label="Gjelder kanselleringen for spesifikke stopp?"
-          sx={{ mb: 2 }}
-        />
-      )}
+            {chosenLine && (
+              <Box sx={{ mb: 2 }}>
+                <DatePicker
+                  label="Dato (driftsdøgn)"
+                  value={departureDate}
+                  onChange={(d) => d && setDepartureDate(d)}
+                  minDate={new Date()}
+                  slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                  sx={{ mb: 1 }}
+                />
+                <Button
+                  variant="contained"
+                  fullWidth
+                  onClick={callApiDeparture}
+                >
+                  Søk avganger
+                </Button>
+              </Box>
+            )}
 
-      {chosenDeparture && isDepartureStops && (
-        <Box sx={{ mb: 2 }}>
-          <StopPicker
-            isMulti
-            api={api}
-            stops={
-              departures
-                .find(({ id }: any) => id === chosenDeparture)
-                ?.estimatedCalls.map((ec: any) => ec.quay) ?? []
-            }
-            onChange={(options) => {
-              if (Array.isArray(options)) {
-                setDepartureStops(options.map((o: any) => o.value));
-              } else {
-                setDepartureStops([]);
-              }
-            }}
-          />
-        </Box>
-      )}
+            {chosenLine && departures.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <Autocomplete
+                  options={serviceJourneyOptions}
+                  getOptionLabel={(o: any) => o.label}
+                  isOptionEqualToValue={(o: any, v: any) => o.value === v.value}
+                  onChange={(_, newValue: any) =>
+                    setChosenDeparture(newValue?.value ?? null)
+                  }
+                  renderInput={(params) => (
+                    <TextField {...params} label="Velg avgang" size="small" />
+                  )}
+                />
+              </Box>
+            )}
+          </Paper>
 
-      <Stack direction="row" spacing={2}>
-        <Button
-          variant="contained"
-          disabled={chosenDeparture === null}
-          onClick={handleSubmit}
-        >
-          Registrer
-        </Button>
-        <Button variant="outlined" onClick={() => navigate('/kanselleringer')}>
-          Tilbake
-        </Button>
-      </Stack>
-    </Box>
+          {chosenDeparture && (
+            <Paper sx={{ p: 3, mb: 2 }}>
+              <Typography variant="h5" sx={{ mb: 2 }}>
+                Omfang
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isDepartureStops}
+                    onChange={(e) => setIsDepartureStops(e.target.checked)}
+                  />
+                }
+                label="Gjelder kanselleringen for spesifikke stopp?"
+                sx={{ mb: 2 }}
+              />
+
+              {isDepartureStops && (
+                <StopPicker
+                  isMulti
+                  api={api}
+                  stops={
+                    departures
+                      .find(({ id }: any) => id === chosenDeparture)
+                      ?.estimatedCalls.map((ec: any) => ec.quay) ?? []
+                  }
+                  onChange={(options) => {
+                    if (Array.isArray(options)) {
+                      setDepartureStops(options.map((o: any) => o.value));
+                    } else {
+                      setDepartureStops([]);
+                    }
+                  }}
+                />
+              )}
+            </Paper>
+          )}
+
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="contained"
+              disabled={chosenDeparture === null}
+              onClick={handleSubmit}
+            >
+              Registrer
+            </Button>
+          </Stack>
+        </>
+      </OverlayLoader>
+    </Page>
   );
 };

@@ -13,31 +13,23 @@ import Chip from '@mui/material/Chip';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Box from '@mui/material/Box';
-import { getLocalTimeZone, now } from '@internationalized/date';
+import Stack from '@mui/material/Stack';
+import Add from '@mui/icons-material/Add';
 import { sortCancellationByExpiry } from '../../util/sort';
 import { isJourneyActive, getCancellationLabel } from '../../util/formatters';
+import { useAppSelector } from '../../store/hooks';
+import Loading from '../common/Loading';
+import EmptyState from '../common/EmptyState';
 
 interface OverviewProps {
   cancellations: any[];
   lines: any[];
 }
 
-const StatusChip = ({ item }: { item: any }) => (
-  <Chip
-    label={isJourneyActive(item.expiresAtEpochMs) ? 'Aktiv' : 'Inaktiv'}
-    color={isJourneyActive(item.expiresAtEpochMs) ? 'success' : 'error'}
-    size="small"
-  />
-);
-
 const Overview = ({ cancellations, lines }: OverviewProps) => {
   const navigate = useNavigate();
   const [showExpired, setShowExpired] = useState(false);
-
-  const handleNew = useCallback(
-    () => navigate('/kanselleringer/ny'),
-    [navigate],
-  );
+  const loading = useAppSelector((state) => state.cancellations.loading);
 
   const handleEdit = useCallback(
     (id: string) => navigate(`/kanselleringer/${id}`),
@@ -56,13 +48,21 @@ const Overview = ({ cancellations, lines }: OverviewProps) => {
 
   return (
     <Box>
-      <Typography variant="h4" sx={{ mb: 2 }}>
-        Oversikt
-      </Typography>
-
-      <Button variant="outlined" fullWidth onClick={handleNew} sx={{ mb: 2 }}>
-        Ny kansellering
-      </Button>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 2 }}
+      >
+        <Typography variant="h4">Kanselleringer</Typography>
+        <Button
+          variant="outlined"
+          startIcon={<Add />}
+          onClick={() => navigate('/kanselleringer/ny')}
+        >
+          Ny kansellering
+        </Button>
+      </Stack>
 
       <FormControlLabel
         control={
@@ -75,74 +75,84 @@ const Overview = ({ cancellations, lines }: OverviewProps) => {
         sx={{ mb: 2 }}
       />
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Status</TableCell>
-              <TableCell>Linje</TableCell>
-              <TableCell>Tur</TableCell>
-              <TableCell>Fra stasjon</TableCell>
-              <TableCell>Planlagt avgang</TableCell>
-              <TableCell>Dato</TableCell>
-              <TableCell>Kansellert</TableCell>
-              <TableCell />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {cancellationsToShow.map(
-              ({ id, estimatedVehicleJourney: item }) => (
-                <TableRow key={item.recordedAtTime} hover>
-                  <TableCell>
-                    <StatusChip item={item} />
-                  </TableCell>
-                  <TableCell>
-                    {lines?.find((l: any) => l.id === item.lineRef)
-                      ?.publicCode ?? ''}{' '}
-                    ({item.lineRef})
-                  </TableCell>
-                  <TableCell>
-                    {item.framedVehicleJourneyRef.datedVehicleJourneyRef}
-                  </TableCell>
-                  <TableCell>
-                    {item.estimatedCalls.estimatedCall[0].stopPointName}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(
-                      Date.parse(
-                        item.estimatedCalls.estimatedCall[0].aimedDepartureTime,
-                      ),
-                    ).toLocaleTimeString(navigator.language, {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </TableCell>
-                  <TableCell>
-                    {item.framedVehicleJourneyRef.dataFrameRef}
-                  </TableCell>
-                  <TableCell>{getCancellationLabel(item)}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      onClick={() => handleEdit(id)}
-                      disabled={
-                        item.expiresAtEpochMs <=
-                        now(getLocalTimeZone())
-                          .add({ minutes: 10 })
-                          .toDate()
-                          .getTime()
-                      }
-                    >
-                      Endre
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ),
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Loading isLoading={loading} text="Laster kanselleringer...">
+        <>
+          {cancellationsToShow.length === 0 ? (
+            <EmptyState message="Ingen kanselleringer funnet" />
+          ) : (
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Linje</TableCell>
+                    <TableCell>Tur</TableCell>
+                    <TableCell>Fra stasjon</TableCell>
+                    <TableCell>Planlagt avgang</TableCell>
+                    <TableCell>Dato</TableCell>
+                    <TableCell>Kansellert</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {cancellationsToShow.map(
+                    ({ id, estimatedVehicleJourney: item }) => {
+                      const active = isJourneyActive(item.expiresAtEpochMs);
+                      return (
+                        <TableRow
+                          key={item.recordedAtTime}
+                          hover
+                          onClick={() => active && handleEdit(id)}
+                          sx={{
+                            cursor: active ? 'pointer' : 'default',
+                            opacity: active ? 1 : 0.6,
+                          }}
+                        >
+                          <TableCell>
+                            <Chip
+                              label={active ? 'Aktiv' : 'Inaktiv'}
+                              color={active ? 'success' : 'error'}
+                              size="small"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {lines?.find((l: any) => l.id === item.lineRef)
+                              ?.publicCode ?? ''}{' '}
+                            ({item.lineRef})
+                          </TableCell>
+                          <TableCell>
+                            {
+                              item.framedVehicleJourneyRef
+                                .datedVehicleJourneyRef
+                            }
+                          </TableCell>
+                          <TableCell>
+                            {item.estimatedCalls.estimatedCall[0].stopPointName}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(
+                              Date.parse(
+                                item.estimatedCalls.estimatedCall[0]
+                                  .aimedDepartureTime,
+                              ),
+                            ).toLocaleTimeString(navigator.language, {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            {item.framedVehicleJourneyRef.dataFrameRef}
+                          </TableCell>
+                          <TableCell>{getCancellationLabel(item)}</TableCell>
+                        </TableRow>
+                      );
+                    },
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </>
+      </Loading>
     </Box>
   );
 };

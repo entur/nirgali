@@ -13,10 +13,15 @@ import Chip from '@mui/material/Chip';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Add from '@mui/icons-material/Add';
 import { sortBySituationNumber } from '../../util/sort';
 import { isMessageExpired, formatDate } from '../../util/formatters';
 import { getMessageType } from './messageHelpers';
 import { Message } from '../../reducers/messagesSlice';
+import { useAppSelector } from '../../store/hooks';
+import Loading from '../common/Loading';
+import EmptyState from '../common/EmptyState';
 
 interface OverviewProps {
   messages: Message[];
@@ -41,15 +46,10 @@ const Overview = ({ messages }: OverviewProps) => {
   const now = useMemo(() => Date.now(), []);
   const [showExpiredMessages, setShowExpiredMessages] = useState(false);
   const navigate = useNavigate();
-
-  const handleNewMessage = useCallback(() => {
-    navigate('/meldinger/ny');
-  }, [navigate]);
+  const loading = useAppSelector((state) => state.messages.loading);
 
   const handleEdit = useCallback(
-    (id: string) => {
-      navigate(`/meldinger/${id}`);
-    },
+    (id: string) => navigate(`/meldinger/${id}`),
     [navigate],
   );
 
@@ -66,18 +66,21 @@ const Overview = ({ messages }: OverviewProps) => {
 
   return (
     <Box>
-      <Typography variant="h4" sx={{ mb: 2 }}>
-        Oversikt
-      </Typography>
-
-      <Button
-        variant="outlined"
-        fullWidth
-        onClick={handleNewMessage}
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
         sx={{ mb: 2 }}
       >
-        Ny melding
-      </Button>
+        <Typography variant="h4">Avviksmeldinger</Typography>
+        <Button
+          variant="outlined"
+          startIcon={<Add />}
+          onClick={() => navigate('/meldinger/ny')}
+        >
+          Ny melding
+        </Button>
+      </Stack>
 
       <FormControlLabel
         control={
@@ -90,50 +93,57 @@ const Overview = ({ messages }: OverviewProps) => {
         sx={{ mb: 2 }}
       />
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Status</TableCell>
-              <TableCell>#</TableCell>
-              <TableCell>Oppsummering</TableCell>
-              <TableCell>Avvikstype</TableCell>
-              <TableCell>Fra dato</TableCell>
-              <TableCell>Til dato</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {messagesToRender.map(({ id, ...item }) => (
-              <TableRow key={item.situationNumber} hover>
-                <TableCell>
-                  <StatusChip message={{ id, ...item }} now={now} />
-                </TableCell>
-                <TableCell>{item.situationNumber.split(':').pop()}</TableCell>
-                <TableCell sx={{ maxWidth: 250 }}>
-                  {item.summary.text}
-                </TableCell>
-                <TableCell>{item.reportType}</TableCell>
-                <TableCell>
-                  {formatDate(item.validityPeriod.startTime)}
-                </TableCell>
-                <TableCell>{formatDate(item.validityPeriod.endTime)}</TableCell>
-                <TableCell>{getMessageType(item.affects)}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => handleEdit(id)}
-                  >
-                    Endre
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Loading isLoading={loading} text="Laster meldinger...">
+        <>
+          {messagesToRender.length === 0 ? (
+            <EmptyState message="Ingen meldinger funnet" />
+          ) : (
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Status</TableCell>
+                    <TableCell>#</TableCell>
+                    <TableCell>Oppsummering</TableCell>
+                    <TableCell>Avvikstype</TableCell>
+                    <TableCell>Fra dato</TableCell>
+                    <TableCell>Til dato</TableCell>
+                    <TableCell>Type</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {messagesToRender.map(({ id, ...item }) => (
+                    <TableRow
+                      key={item.situationNumber}
+                      hover
+                      onClick={() => handleEdit(id)}
+                      sx={{ cursor: 'pointer' }}
+                    >
+                      <TableCell>
+                        <StatusChip message={{ id, ...item }} now={now} />
+                      </TableCell>
+                      <TableCell>
+                        {item.situationNumber.split(':').pop()}
+                      </TableCell>
+                      <TableCell sx={{ maxWidth: 250 }}>
+                        {item.summary.text}
+                      </TableCell>
+                      <TableCell>{item.reportType}</TableCell>
+                      <TableCell>
+                        {formatDate(item.validityPeriod.startTime)}
+                      </TableCell>
+                      <TableCell>
+                        {formatDate(item.validityPeriod.endTime)}
+                      </TableCell>
+                      <TableCell>{getMessageType(item.affects)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </>
+      </Loading>
     </Box>
   );
 };
