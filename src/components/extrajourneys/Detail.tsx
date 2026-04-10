@@ -2,6 +2,10 @@ import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import ContentCopy from '@mui/icons-material/ContentCopy';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -152,29 +156,93 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
       <OverlayLoader isLoading={saving} text="Lagrer...">
         <>
           <Paper sx={{ p: 3, mb: 2 }}>
-            <Typography variant="h5" sx={{ mb: 2 }}>
-              Turinformasjon
-            </Typography>
             <Stack
               direction="row"
-              spacing={1}
-              sx={{ flexWrap: 'wrap', gap: 1 }}
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ mb: 2 }}
             >
-              <Chip label={evj.publishedLineName} />
-              <Chip
-                label={evj.estimatedVehicleJourneyCode}
-                variant="outlined"
-              />
-              <Chip label={evj.vehicleMode} variant="outlined" />
-              <Chip
-                label={active ? 'Aktiv' : 'Inaktiv'}
-                color={active ? 'success' : 'error'}
-                size="small"
-              />
-              {journeyCancelled && (
-                <Chip label="Kansellert" color="error" size="small" />
-              )}
+              <Typography variant="h5">Turdetaljer</Typography>
+              <Stack direction="row" spacing={1}>
+                <Chip
+                  label={active ? 'Aktiv' : 'Inaktiv'}
+                  color={active ? 'success' : 'error'}
+                  size="small"
+                />
+                {journeyCancelled && (
+                  <Chip label="Kansellert" color="error" size="small" />
+                )}
+              </Stack>
             </Stack>
+
+            <TextField
+              fullWidth
+              size="small"
+              label="ID"
+              value={evj.estimatedVehicleJourneyCode}
+              disabled
+              sx={{ mb: 2 }}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          navigator.clipboard.writeText(
+                            evj.estimatedVehicleJourneyCode,
+                          )
+                        }
+                        aria-label="Kopier ID"
+                      >
+                        <ContentCopy fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Navn"
+              value={evj.publishedLineName}
+              disabled
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Mode"
+              value={evj.vehicleMode}
+              disabled
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Destinasjon"
+              value={
+                evj.estimatedCalls.estimatedCall[0]?.destinationDisplay ?? ''
+              }
+              disabled
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Operatør"
+              value={evj.operatorRef}
+              disabled
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              label="Linje"
+              value={evj.lineRef}
+              disabled
+            />
           </Paper>
 
           <Paper sx={{ p: 3, mb: 2 }}>
