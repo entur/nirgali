@@ -2,9 +2,13 @@ import { DateFormatter, getLocalTimeZone, now } from '@internationalized/date';
 
 const TEN_MINUTES_MS = 10 * 60 * 1000;
 
-export const isJourneyActive = (expiresAtEpochMs: number): boolean =>
+export const isJourneyActive = (
+  expiresAtEpochMs: number,
+  cancellation?: boolean,
+): boolean =>
+  !cancellation &&
   expiresAtEpochMs >
-  now(getLocalTimeZone()).add({ minutes: 10 }).toDate().getTime();
+    now(getLocalTimeZone()).add({ minutes: 10 }).toDate().getTime();
 
 export const isMessageExpired = (
   endTime: string | undefined,
