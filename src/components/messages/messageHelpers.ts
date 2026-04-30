@@ -1,4 +1,5 @@
 import {
+  fromDate,
   getLocalTimeZone,
   now,
   Time,
@@ -74,41 +75,47 @@ export const createAffectsStop = (stops: { value: string }[]) => ({
 });
 
 export const createAffectsDeparture = (
-  departureDate: any,
+  departureDate: Date,
   datedVehicleJourney: string,
-) => ({
-  vehicleJourneys: {
-    affectedVehicleJourney: {
-      framedVehicleJourneyRef: {
-        dataFrameRef: toCalendarDate(departureDate).toString(),
-        datedVehicleJourneyRef: datedVehicleJourney,
+) => {
+  const zonedDate = fromDate(departureDate, getLocalTimeZone());
+  return {
+    vehicleJourneys: {
+      affectedVehicleJourney: {
+        framedVehicleJourneyRef: {
+          dataFrameRef: toCalendarDate(zonedDate).toString(),
+          datedVehicleJourneyRef: datedVehicleJourney,
+        },
+        route: null,
       },
-      route: null,
     },
-  },
-});
+  };
+};
 
 export const createAffectsDepartureWithStops = (
-  departureDate: any,
+  departureDate: Date,
   datedVehicleJourney: string,
   stops: { value: string }[],
-) => ({
-  vehicleJourneys: {
-    affectedVehicleJourney: {
-      framedVehicleJourneyRef: {
-        dataFrameRef: toCalendarDate(departureDate).toString(),
-        datedVehicleJourneyRef: datedVehicleJourney,
-      },
-      route: {
-        stopPoints: {
-          affectedStopPoint: stops.map((s) => ({
-            stopPointRef: s.value,
-          })),
+) => {
+  const zonedDate = fromDate(departureDate, getLocalTimeZone());
+  return {
+    vehicleJourneys: {
+      affectedVehicleJourney: {
+        framedVehicleJourneyRef: {
+          dataFrameRef: toCalendarDate(zonedDate).toString(),
+          datedVehicleJourneyRef: datedVehicleJourney,
+        },
+        route: {
+          stopPoints: {
+            affectedStopPoint: stops.map((s) => ({
+              stopPointRef: s.value,
+            })),
+          },
         },
       },
     },
-  },
-});
+  };
+};
 
 export const buildAffects = (
   type: AffectType | undefined,
@@ -146,12 +153,15 @@ export const buildValidityPeriod = (
   to: any,
 ) => {
   if (type === 'departure') {
+    const calendarDate = toCalendarDate(
+      fromDate(departureDate, getLocalTimeZone()),
+    );
     const start = toZoned(
-      toCalendarDateTime(departureDate, new Time(0, 0, 0, 0)),
+      toCalendarDateTime(calendarDate, new Time(0, 0, 0, 0)),
       getLocalTimeZone(),
     );
     const end = toZoned(
-      toCalendarDateTime(departureDate, new Time(23, 59, 59, 999)),
+      toCalendarDateTime(calendarDate, new Time(23, 59, 59, 999)),
       getLocalTimeZone(),
     );
     return {
