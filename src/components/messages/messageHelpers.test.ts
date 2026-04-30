@@ -103,7 +103,7 @@ describe('messageHelpers', () => {
   describe('createAffectsDeparture', () => {
     it('creates departure affects without stops', () => {
       const result = createAffectsDeparture(
-        { year: 2024, month: 1, day: 15 },
+        new Date(2024, 0, 15),
         'NSB:ServiceJourney:123',
       );
       expect(
@@ -118,7 +118,7 @@ describe('messageHelpers', () => {
     it('creates departure affects with stops', () => {
       const stops = [{ value: 'NSR:StopPlace:1' }];
       const result = createAffectsDepartureWithStops(
-        { year: 2024, month: 1, day: 15 },
+        new Date(2024, 0, 15),
         'NSB:ServiceJourney:123',
         stops,
       );
@@ -232,7 +232,7 @@ describe('messageHelpers', () => {
         false,
         false,
         [],
-        { year: 2024, month: 1, day: 15 },
+        new Date(2024, 0, 15),
         'NSB:ServiceJourney:1',
       );
       expect(result.vehicleJourneys.affectedVehicleJourney.route).toBeNull();
@@ -246,7 +246,7 @@ describe('messageHelpers', () => {
         false,
         true,
         stops,
-        { year: 2024, month: 1, day: 15 },
+        new Date(2024, 0, 15),
         'NSB:ServiceJourney:1',
       );
       expect(
@@ -270,9 +270,8 @@ describe('messageHelpers', () => {
   });
 
   describe('buildValidityPeriod', () => {
-    it('returns full-day period for departure type', async () => {
-      const { CalendarDate } = await import('@internationalized/date');
-      const date = new CalendarDate(2024, 6, 15);
+    it('returns full-day period for departure type', () => {
+      const date = new Date(2024, 5, 15);
       const result = buildValidityPeriod('departure', date, null, null);
       expect(result.startTime).toBeDefined();
       expect(result.endTime).toBeDefined();
