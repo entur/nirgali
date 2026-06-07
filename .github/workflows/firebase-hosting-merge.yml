@@ -14,13 +14,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v6.0.3
+      - uses: actions/setup-node@v6.4.0
         with:
           node-version: 24.15.0
       - name: Cache node modules
         id: cache-npm
-        uses: actions/cache@v5
+        uses: actions/cache@v5.0.5
         env:
           cache-name: cache-node-modules
         with:
@@ -56,7 +56,7 @@ jobs:
         env:
           REACT_APP_VERSION: ${{ github.sha }}
       - name: Archive production artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: build
           path: |
@@ -66,9 +66,9 @@ jobs:
     needs: [build]
     environment: 'dev'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.3
       - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v7.0.0
         with:
           name: build
           path: build
@@ -76,7 +76,7 @@ jobs:
         run: cp .github/environments/avv-d.ico build/favicon.ico
       - name: Copy config
         run: cp .github/environments/config-dev.json build/config.json
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - uses: FirebaseExtended/action-hosting-deploy@v0.10.0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ENT_NIRGALI_DEV }}'
@@ -87,9 +87,9 @@ jobs:
     needs: [deploy_dev]
     environment: 'staging'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.3
       - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v7.0.0
         with:
           name: build
           path: build
@@ -97,7 +97,7 @@ jobs:
         run: cp .github/environments/avv-s.ico build/favicon.ico
       - name: Copy config
         run: cp .github/environments/config-staging.json build/config.json
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - uses: FirebaseExtended/action-hosting-deploy@v0.10.0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ENT_NIRGALI_TST }}'
@@ -108,9 +108,9 @@ jobs:
     needs: [deploy_dev, deploy_staging]
     environment: 'prod'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.3
       - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v7.0.0
         with:
           name: build
           path: build
@@ -118,7 +118,7 @@ jobs:
         run: cp .github/environments/avv-p.ico build/favicon.ico
       - name: Copy config
         run: cp .github/environments/config-prod.json build/config.json
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - uses: FirebaseExtended/action-hosting-deploy@v0.10.0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ENT_NIRGALI_PRD }}'
