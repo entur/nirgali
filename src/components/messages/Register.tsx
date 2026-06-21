@@ -394,7 +394,7 @@ const Register = ({ api, lines, organization }: RegisterProps) => {
                   label="Kort, beskrivende avvikstekst"
                   value={oppsummering}
                   onChange={(e) => setOppsummering(e.target.value)}
-                  inputProps={{ maxLength: 160 }}
+                  slotProps={{ htmlInput: { maxLength: 160 } }}
                   required
                   sx={{ mb: 2 }}
                 />

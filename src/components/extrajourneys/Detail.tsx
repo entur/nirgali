@@ -178,9 +178,11 @@ export const Detail = ({ selectedOrganization }: DetailProps) => {
           <Paper sx={{ p: 3, mb: 2 }}>
             <Stack
               direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              sx={{ mb: 2 }}
+              sx={{
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 2,
+              }}
             >
               <Typography variant="h5">Turdetaljer</Typography>
               <Stack direction="row" spacing={1}>
