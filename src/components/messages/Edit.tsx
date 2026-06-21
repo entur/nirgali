@@ -277,7 +277,7 @@ const Edit = ({ messages, organization, lines, api }: EditProps) => {
               label="Oppsummering"
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              inputProps={{ maxLength: 160 }}
+              slotProps={{ htmlInput: { maxLength: 160 } }}
               required
               sx={{ mb: 2 }}
             />

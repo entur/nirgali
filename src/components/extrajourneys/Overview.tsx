@@ -41,9 +41,7 @@ export const Overview = ({ selectedOrganization }: OverviewProps) => {
     <Box>
       <Stack
         direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: 2 }}
+        sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
       >
         <Typography variant="h4">Ekstraavganger</Typography>
         <Button
@@ -110,7 +108,10 @@ export const Overview = ({ selectedOrganization }: OverviewProps) => {
                         }}
                       >
                         <TableCell>
-                          <Stack spacing={0.5} alignItems="flex-start">
+                          <Stack
+                            spacing={0.5}
+                            sx={{ alignItems: 'flex-start' }}
+                          >
                             <Chip
                               label={expired ? 'Utløpt' : 'Aktiv'}
                               color={expired ? 'default' : 'success'}

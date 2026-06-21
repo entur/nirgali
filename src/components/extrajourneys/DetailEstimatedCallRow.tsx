@@ -131,7 +131,7 @@ export const DetailEstimatedCallRow = ({
       </TableCell>
 
       <TableCell>
-        <Stack spacing={0.5} alignItems="flex-start">
+        <Stack spacing={0.5} sx={{ alignItems: 'flex-start' }}>
           {call.departureBoardingActivity && (
             <Chip
               label={
