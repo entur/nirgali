@@ -197,8 +197,7 @@ export const useExtrajourneyValidation = (input: ValidationInput) => {
     if (!hasLiveErrors) return merged;
 
     const submitCalls = (merged.calls ?? []) as (
-      | CallValidationResult
-      | undefined
+      CallValidationResult | undefined
     )[];
     const mergedCalls = input.calls.map((_, i) => {
       const combined = { ...submitCalls[i], ...liveCallErrors[i] };
