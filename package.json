@@ -69,7 +69,7 @@
     "lint-staged": "17.1.1",
     "npm-run-all2": "9.0.2",
     "prettier": "3.9.6",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "vite": "8.1.5",
     "vite-plugin-svgr": "5.2.0",
     "vite-tsconfig-paths": "6.1.1",
