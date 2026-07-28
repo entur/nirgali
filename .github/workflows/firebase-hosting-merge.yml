@@ -86,7 +86,7 @@ jobs:
       contents: read
       pull-requests: write
       id-token: write
-    uses: entur/gha-firebase/.github/workflows/firebase-hosting-deploy.yml@v1
+    uses: entur/gha-firebase/.github/workflows/firebase-hosting-deploy.yml@v1.2.7
     with:
       gcp_project_id: ent-nirgali-dev
       environment: dev
@@ -120,7 +120,7 @@ jobs:
       contents: read
       pull-requests: write
       id-token: write
-    uses: entur/gha-firebase/.github/workflows/firebase-hosting-deploy.yml@v1
+    uses: entur/gha-firebase/.github/workflows/firebase-hosting-deploy.yml@v1.2.7
     with:
       gcp_project_id: ent-nirgali-tst
       environment: tst
@@ -154,7 +154,7 @@ jobs:
       contents: read
       pull-requests: write
       id-token: write
-    uses: entur/gha-firebase/.github/workflows/firebase-hosting-deploy.yml@v1
+    uses: entur/gha-firebase/.github/workflows/firebase-hosting-deploy.yml@v1.2.7
     with:
       gcp_project_id: ent-nirgali-prd
       environment: prd
