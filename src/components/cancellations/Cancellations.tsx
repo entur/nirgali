@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Overview from './Overview';
 import { Register } from './Register';
@@ -22,6 +23,10 @@ export const Cancellations = ({ selectedOrganization }: CancellationsProps) => {
     selectedOrganization,
   );
 
+  // Constructed once per config/auth change rather than on every render, so
+  // effects keyed on the api object do not refire continuously.
+  const apiClient = useMemo(() => api(config, auth), [config, auth]);
+
   return (
     <Routes>
       <Route
@@ -34,7 +39,7 @@ export const Cancellations = ({ selectedOrganization }: CancellationsProps) => {
           <Edit
             cancellations={cancellations}
             lines={lines}
-            api={api(config, auth)}
+            api={apiClient}
             organization={selectedOrganization}
             refetch={refetch}
           />
@@ -45,7 +50,7 @@ export const Cancellations = ({ selectedOrganization }: CancellationsProps) => {
         element={
           <Register
             lines={lines}
-            api={api(config, auth)}
+            api={apiClient}
             organization={selectedOrganization}
             refetch={refetch}
           />

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Overview from './Overview';
 import Register from './Register';
@@ -22,6 +23,10 @@ export const Messages = ({ selectedOrganization }: MessagesProps) => {
     selectedOrganization,
   );
 
+  // Constructed once per config/auth change rather than on every render, so
+  // effects keyed on the api object do not refire continuously.
+  const apiClient = useMemo(() => api(config, auth), [config, auth]);
+
   return (
     <Routes>
       <Route path="/" element={<Overview messages={messages} />} />
@@ -32,7 +37,7 @@ export const Messages = ({ selectedOrganization }: MessagesProps) => {
             <Edit
               messages={messages}
               lines={lines}
-              api={api(config, auth)}
+              api={apiClient}
               organization={selectedOrganization}
             />
           }
@@ -42,7 +47,7 @@ export const Messages = ({ selectedOrganization }: MessagesProps) => {
         path="/ny"
         element={
           <Register
-            api={api(config, auth)}
+            api={apiClient}
             lines={lines}
             organization={selectedOrganization}
           />
