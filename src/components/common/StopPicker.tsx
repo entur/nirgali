@@ -1,7 +1,6 @@
-import { useMemo, useEffect, useRef, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import { chunk } from '../../util/chunk';
 
 interface StopOption {
   label: string;
@@ -16,72 +15,67 @@ interface Stop {
   };
 }
 
-interface ApiClient {
-  getStopPlaces: (ids: string[]) => Promise<any[]>;
-  getTopographicPlaces: (ids: string[]) => Promise<any[]>;
+interface StopPlaceSummary {
+  id: string;
+  transportMode?: string | null;
+  topographicPlaceName?: string | null;
 }
 
-const useTopographicPlaces = (stops: Stop[], api: ApiClient) => {
-  const stopPlaceTopographicPlaceIndex = useRef<Record<string, string>>({});
-  const [stopPlaces, setStopPlaces] = useState<Record<string, any>>({});
-  const [topographicPlaces, setTopographicPlaces] = useState<
-    Record<string, any>
-  >({});
+interface ApiClient {
+  getStopPlaceSummaries: (ids: string[]) => Promise<StopPlaceSummary[]>;
+}
+
+const useStopPlaceSummaries = (stops: Stop[], api: ApiClient) => {
+  const [summaries, setSummaries] = useState<Record<string, StopPlaceSummary>>(
+    {},
+  );
+
+  // Keyed on the joined id string rather than the array, so a new array with the
+  // same contents does not retrigger the fetch. Stop place ids are deduplicated
+  // here as well as on the backend.
+  const idsKey = useMemo(
+    () =>
+      [
+        ...new Set(
+          stops
+            .filter((stop) => stop.stopPlace)
+            .map((stop) => stop.stopPlace!.id),
+        ),
+      ].join(','),
+    [stops],
+  );
 
   useEffect(() => {
-    const populateTopographicPlaces = async (stopPlaceIds: string[]) => {
-      const stopPlacesData = await Promise.all(
-        chunk(stopPlaceIds, 200).map(async (c) => await api.getStopPlaces(c)),
-      );
+    if (!idsKey) {
+      return;
+    }
+    let cancelled = false;
 
-      setStopPlaces((prev) =>
-        stopPlacesData.flat().reduce(
-          (acc, stopPlace) => {
-            acc[stopPlace.id] = stopPlace;
+    api.getStopPlaceSummaries(idsKey.split(',')).then((data) => {
+      if (cancelled) {
+        return;
+      }
+      setSummaries((prev) =>
+        data.reduce(
+          (acc, summary) => {
+            acc[summary.id] = summary;
             return acc;
           },
           { ...prev },
         ),
       );
+    });
 
-      const topographicPlaceIds = stopPlacesData.flat().map((stopPlace) => {
-        stopPlaceTopographicPlaceIndex.current[stopPlace.id] =
-          stopPlace.topographicPlaceRef.ref;
-        return stopPlace.topographicPlaceRef.ref;
-      });
-
-      const topographicPlacesData = await Promise.all(
-        chunk(topographicPlaceIds, 200).map(
-          async (c) => await api.getTopographicPlaces(c),
-        ),
-      );
-
-      setTopographicPlaces((prev) =>
-        topographicPlacesData.flat().reduce(
-          (acc, topographicPlace) => {
-            acc[topographicPlace.id] = topographicPlace;
-            return acc;
-          },
-          { ...prev },
-        ),
-      );
+    return () => {
+      cancelled = true;
     };
+  }, [idsKey, api]);
 
-    populateTopographicPlaces(
-      stops.filter((stop) => stop.stopPlace).map((stop) => stop.stopPlace!.id),
-    );
-  }, [stops, api]);
-
-  return {
-    stopPlaceTopographicPlaceIndex: stopPlaceTopographicPlaceIndex.current,
-    topographicPlaces,
-    stopPlaces,
-  };
+  return summaries;
 };
 
 const useOptions = (stops: Stop[], api: ApiClient, sort = false) => {
-  const { stopPlaceTopographicPlaceIndex, topographicPlaces, stopPlaces } =
-    useTopographicPlaces(stops, api);
+  const summaries = useStopPlaceSummaries(stops, api);
 
   const options = useMemo(() => {
     const stopOptions = stops
@@ -96,18 +90,16 @@ const useOptions = (stops: Stop[], api: ApiClient, sort = false) => {
           ),
       )
       .map((item) => {
-        const topographicPlace =
-          topographicPlaces[stopPlaceTopographicPlaceIndex[item.stopPlace!.id]];
-        const stopPlace = stopPlaces[item.stopPlace!.id];
+        const summary = summaries[item.stopPlace!.id];
         return {
           label:
             item.name +
             ' - ' +
             item.stopPlace!.id +
-            (topographicPlace
-              ? ' (' + topographicPlace.descriptor.name.value + ')'
+            (summary?.topographicPlaceName
+              ? ' (' + summary.topographicPlaceName + ')'
               : '') +
-            (stopPlace ? ' - ' + stopPlace.transportMode : ''),
+            (summary?.transportMode ? ' - ' + summary.transportMode : ''),
           value: item.stopPlace!.id,
         };
       });
@@ -115,13 +107,7 @@ const useOptions = (stops: Stop[], api: ApiClient, sort = false) => {
     return sort
       ? stopOptions.sort((a, b) => a.label.localeCompare(b.label))
       : stopOptions;
-  }, [
-    stops,
-    stopPlaceTopographicPlaceIndex,
-    topographicPlaces,
-    stopPlaces,
-    sort,
-  ]);
+  }, [stops, summaries, sort]);
 
   return options;
 };

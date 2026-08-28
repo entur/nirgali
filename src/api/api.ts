@@ -196,23 +196,40 @@ const getOperators = (URI: string) => async () => {
     .then((response) => response);
 };
 
-const getStopPlaces = (URI: string) => async (ids: string[]) => {
-  const response = await fetch(`${URI}/stop-places?ids=${ids}`, {
-    headers: {
-      'Et-Client-Name': 'entur - deviation-messages',
-    },
-  });
-  return await response.json();
-};
+export interface StopPlaceSummary {
+  id: string;
+  transportMode?: string | null;
+  topographicPlaceName?: string | null;
+}
 
-const getTopographicPlaces = (URI: string) => async (ids: string[]) => {
-  const response = await fetch(`${URI}/topographic-places?ids=${ids}`, {
-    headers: {
-      'Et-Client-Name': 'entur - deviation-messages',
-    },
-  });
-  return await response.json();
-};
+/**
+ * Resolves the three fields the stop picker renders in a single call. The
+ * backend deduplicates the ids, projects away the (large) geometry and caches
+ * the result, replacing what used to be two chained fan-out request waves
+ * straight from the browser to the stop place API.
+ */
+const getStopPlaceSummaries =
+  (URI: string, auth: any) =>
+  async (ids: string[]): Promise<StopPlaceSummary[]> => {
+    if (ids.length === 0) {
+      return [];
+    }
+    const client = createClient(URI, auth?.user?.access_token);
+    const query = gql`
+      query StopPlacesQuery($ids: [ID!]!) {
+        stopPlaces(ids: $ids) {
+          id
+          transportMode
+          topographicPlaceName
+        }
+      }
+    `;
+    const response = await client.query<{ stopPlaces: StopPlaceSummary[] }>({
+      query,
+      variables: { ids },
+    });
+    return response.data?.stopPlaces ?? [];
+  };
 
 const getMessages =
   (URI: string, auth: any) => async (codespace: string, authority: string) => {
@@ -574,8 +591,10 @@ const api = (config: any, auth?: any) => ({
   getDepartures: getDepartures(config['journey-planner-api']),
   getServiceJourney: getServiceJourney(config['journey-planner-api']),
   getOperators: getOperators(config['journey-planner-api']),
-  getStopPlaces: getStopPlaces(config['stop-places-api']),
-  getTopographicPlaces: getTopographicPlaces(config['stop-places-api']),
+  getStopPlaceSummaries: getStopPlaceSummaries(
+    config['deviation-messages-api'],
+    auth,
+  ),
   getMessages: getMessages(config['deviation-messages-api'], auth),
   createOrUpdateMessage: createOrUpdateMessage(
     config['deviation-messages-api'],
