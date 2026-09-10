@@ -1,0 +1,62 @@
+# publiccode.yml metadata, see https://yml.publiccode.tools/
+publiccodeYmlVersion: "0.7.0"
+
+name: Nirgali
+url: https://github.com/entur/nirgali
+
+platforms:
+  - web
+
+categories:
+  - data-collection
+  - communications
+
+developmentStatus: stable
+softwareType: standalone/web
+
+organisation:
+  name: Entur AS
+  uri: https://entur.no
+
+usedBy:
+  - Norway (nationwide), Entur AS
+
+intendedAudience:
+  scope:
+    - transportation
+  countries:
+    - "NO"
+
+description:
+  en:
+    localisedName: Nirgali
+    shortDescription: Web front-end for reporting deviations, cancellations and extra journeys.
+    longDescription: >
+      Nirgali is the web front-end of a lightweight system for reporting deviations in public transport. Transport
+      operators use it to write situation messages, cancel departures and register extra journeys for the lines
+      they are responsible for, without needing a real-time system of their own. The registered data is published
+      as SIRI-SX and SIRI-ET and reaches travellers through the Norwegian national journey planner.
+      Nirgali is a React single-page app that talks to the Enlil backend over GraphQL and authenticates users with
+      OIDC. Each user only sees and edits data within their own codespace or organisation.
+    documentation: https://github.com/entur/nirgali/blob/master/README.md
+    features:
+      - Editor for situation messages and deviations
+      - Cancellation of departures and whole journeys
+      - Registration of extra journeys
+      - Per-codespace access for operators
+      - GraphQL client for the Enlil backend
+
+legal:
+  license: EUPL-1.2
+  mainCopyrightOwner: Entur AS
+
+maintenance:
+  type: internal
+  contacts:
+    - name: Entur ROR (Open Data and Journey Planning)
+      email: kollektivdata@entur.org
+
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - nb
