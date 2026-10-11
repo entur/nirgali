@@ -57,7 +57,7 @@ jobs:
       - name: Copy config
         run: cp .github/environments/config-dev.json build/config.json
       - name: Archive production artifacts
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: build
           path: |
