@@ -73,18 +73,15 @@ describe('determineCancellationStatus', () => {
     });
   });
 
-  it('returns isPartiallyCancelled true when some calls cancelled', () => {
+  it('returns isCancelled and isPartiallyCancelled true when some calls cancelled', () => {
     const evj = {
       cancellation: false,
       estimatedCalls: {
-        estimatedCall: [
-          { cancellation: true, Cancellation: false },
-          { cancellation: false, Cancellation: false },
-        ],
+        estimatedCall: [{ cancellation: true }, { cancellation: false }],
       },
     };
     expect(determineCancellationStatus(evj)).toEqual({
-      isCancelled: false,
+      isCancelled: true,
       isPartiallyCancelled: true,
     });
   });
@@ -93,7 +90,7 @@ describe('determineCancellationStatus', () => {
     const evj = {
       cancellation: false,
       estimatedCalls: {
-        estimatedCall: [{ cancellation: false, Cancellation: false }],
+        estimatedCall: [{ cancellation: false }],
       },
     };
     expect(determineCancellationStatus(evj)).toEqual({
@@ -114,8 +111,8 @@ describe('getQuayLabels', () => {
       estimatedVehicleJourney: {
         estimatedCalls: {
           estimatedCall: [
-            { Cancellation: true, stopPointRef: 'Q:1' },
-            { Cancellation: false, stopPointRef: 'Q:2' },
+            { cancellation: true, stopPointRef: 'Q:1' },
+            { cancellation: false, stopPointRef: 'Q:2' },
           ],
         },
       },
