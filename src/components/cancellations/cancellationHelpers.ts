@@ -85,7 +85,7 @@ export const determineCancellationStatus = (
   const isCancelled =
     estimatedVehicleJourney.cancellation ||
     estimatedVehicleJourney.estimatedCalls.estimatedCall.some(
-      (call: any) => call.Cancellation,
+      (call: any) => call.cancellation,
     );
 
   const isPartiallyCancelled =
@@ -103,7 +103,7 @@ export const getQuayLabels = (
 ): string[] => {
   if (!serviceJourney?.estimatedCalls?.length) return [];
   return cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall
-    .filter((call: any) => call.Cancellation)
+    .filter((call: any) => call.cancellation)
     .map((call: any) => call.stopPointRef)
     .map(
       (ref: string) =>

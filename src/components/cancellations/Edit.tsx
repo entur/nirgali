@@ -73,19 +73,20 @@ const Edit = ({
     setConfirmAction(null);
     setSaving(true);
     try {
-      cancellation.estimatedVehicleJourney.cancellation =
+      // `cancellation` comes from frozen Redux state, so edit a copy.
+      const updated = structuredClone(cancellation);
+      updated.estimatedVehicleJourney.cancellation =
         !isDepartureStops && departureStops.length === 0;
-      cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall =
+      updated.estimatedVehicleJourney.estimatedCalls.estimatedCall =
         serviceJourney.estimatedCalls.map((call: any) =>
           mapEstimatedCall(call, serviceJourney, departureStops),
         );
-      cancellation.estimatedVehicleJourney.recordedAtTime =
-        new Date().toISOString();
+      updated.estimatedVehicleJourney.recordedAtTime = new Date().toISOString();
 
       await api.createOrUpdateCancellation(
         organization.split(':')[0],
         organization,
-        cancellation,
+        updated,
       );
       await refetch();
       dispatch(
@@ -113,19 +114,20 @@ const Edit = ({
     setConfirmAction(null);
     setSaving(true);
     try {
-      cancellation.estimatedVehicleJourney.cancellation = false;
-      cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall =
+      // `cancellation` comes from frozen Redux state, so edit a copy.
+      const updated = structuredClone(cancellation);
+      updated.estimatedVehicleJourney.cancellation = false;
+      updated.estimatedVehicleJourney.estimatedCalls.estimatedCall =
         restoreCancellationCalls(
-          cancellation.estimatedVehicleJourney.estimatedCalls.estimatedCall,
+          updated.estimatedVehicleJourney.estimatedCalls.estimatedCall,
           serviceJourney,
         );
-      cancellation.estimatedVehicleJourney.recordedAtTime =
-        new Date().toISOString();
+      updated.estimatedVehicleJourney.recordedAtTime = new Date().toISOString();
 
       await api.createOrUpdateCancellation(
         organization.split(':')[0],
         organization,
-        cancellation,
+        updated,
       );
       await refetch();
       dispatch(
